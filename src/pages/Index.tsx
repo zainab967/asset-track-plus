@@ -25,8 +25,8 @@ const Index = () => {
         return <LedgerView onNavigateToExpenses={handleNavigateToExpenses} />;
       case "expense":
         return <ExpenseTracker selectedDepartment={selectedDepartment} />;
-      case "asset":
-        return <AssetManager />;
+        case "asset":
+          return <AssetManager userRole={currentUser.role as "employee" | "hr" | "admin"} currentUser={currentUser.name} />;
       default:
         return <LedgerView onNavigateToExpenses={handleNavigateToExpenses} />;
     }
