@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Wrench, AlertTriangle, CheckCircle, Package } from "lucide-react";
+import { AddAssetDialog } from "./AddAssetDialog";
 
 interface Asset {
   id: string;
@@ -127,10 +128,7 @@ export function AssetManager() {
             Track and manage company assets across departments
           </p>
         </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Add Asset
-        </Button>
+        <AddAssetDialog />
       </div>
 
       {/* Stats Cards */}

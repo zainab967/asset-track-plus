@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Filter, Plus, Clock, CheckCircle, XCircle } from "lucide-react";
+import { SubmitExpenseDialog } from "./SubmitExpenseDialog";
+import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
 
 interface Expense {
   id: string;
@@ -134,10 +136,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
             )}
           </p>
         </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Submit Expense
-        </Button>
+        <SubmitExpenseDialog />
       </div>
 
       {/* Filters */}
@@ -222,16 +221,19 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {expense.status === "pending" && (
-                      <div className="flex gap-1">
-                        <Button size="sm" variant="outline" className="h-7 px-2">
-                          Approve
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-7 px-2">
-                          Reject
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex gap-2">
+                      <ExpenseDetailsDialog expense={expense} />
+                      {expense.status === "pending" && (
+                        <>
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2">
+                            Approve
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 h-7 px-2">
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

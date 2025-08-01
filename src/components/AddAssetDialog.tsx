@@ -1,0 +1,158 @@
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+export function AddAssetDialog() {
+  const [open, setOpen] = useState(false);
+  const [requestType, setRequestType] = useState("");
+  const { toast } = useToast();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Asset Request Submitted",
+      description: "Your asset request has been submitted for processing.",
+    });
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-primary hover:bg-primary/90">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Asset
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Asset Request</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-3">
+            <Label>Request Type</Label>
+            <RadioGroup value={requestType} onValueChange={setRequestType}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="maintenance" id="maintenance" />
+                <Label htmlFor="maintenance">Asset Maintenance</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="request" id="request" />
+                <Label htmlFor="request">Asset Request</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {requestType === "maintenance" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="assignedToName">Assigned To Name</Label>
+                <Input id="assignedToName" placeholder="Enter employee name" required />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="assetName">Asset Name</Label>
+                <Input id="assetName" placeholder="Enter asset name" required />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="dept">Department</Label>
+                <Select required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="finance">Finance</SelectItem>
+                    <SelectItem value="hr">Human Resources</SelectItem>
+                    <SelectItem value="it">IT</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="operations">Operations</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="position">Employee Position</Label>
+                <Input id="position" placeholder="Enter job position" required />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="returnDate">When Asset is Needed Back</Label>
+                <Input id="returnDate" type="date" required />
+              </div>
+            </>
+          )}
+
+          {requestType === "request" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="requestAssetName">Asset Name</Label>
+                <Input id="requestAssetName" placeholder="Enter requested asset name" required />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="category">Asset Category</Label>
+                <Select required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="laptop">Laptop</SelectItem>
+                    <SelectItem value="desktop">Desktop</SelectItem>
+                    <SelectItem value="phone">Phone</SelectItem>
+                    <SelectItem value="printer">Printer</SelectItem>
+                    <SelectItem value="monitor">Monitor</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="requestDept">Department</Label>
+                <Select required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="finance">Finance</SelectItem>
+                    <SelectItem value="hr">Human Resources</SelectItem>
+                    <SelectItem value="it">IT</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="operations">Operations</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="justification">Justification</Label>
+                <Input id="justification" placeholder="Why do you need this asset?" required />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="neededBy">Needed By Date</Label>
+                <Input id="neededBy" type="date" required />
+              </div>
+            </>
+          )}
+          
+          {requestType && (
+            <div className="flex gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1">
+                Submit Request
+              </Button>
+            </div>
+          )}
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
