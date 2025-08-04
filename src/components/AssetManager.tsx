@@ -225,7 +225,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
         </div>
       </div>
 
-      {/* Stats Cards */}
+{/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4">
         {userRole === "employee" ? (
           <Card>
@@ -305,6 +305,45 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
           </div>
         )}
       </div>
+
+      {/* My Assets Box for non-employee roles */}
+      {userRole !== "employee" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              My Assets
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {assets.filter(a => a.assignedTo === currentUser).length > 0 ? (
+                assets.filter(a => a.assignedTo === currentUser).map((asset) => (
+                  <div key={asset.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {getStatusIcon(asset.status)}
+                      <div>
+                        <p className="font-medium">{asset.name}</p>
+                        <p className="text-sm text-muted-foreground">{asset.category}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-mono">${asset.value.toLocaleString()}</p>
+                      <p className={`text-xs capitalize ${getConditionColor(asset.condition)}`}>{asset.condition}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No assets assigned to you yet</p>
+                  <p className="text-sm">Check the Available tab to request assets</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filters */}
       <Card>
