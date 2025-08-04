@@ -33,6 +33,9 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
 
+  // Debug logging
+  console.log('AssetManager Debug:', { userRole, currentUser, activeTab });
+
   const assets: Asset[] = [
     {
       id: "1",
@@ -151,8 +154,28 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       roleFilter = asset.assignedTo === currentUser || asset.status === "unassigned";
     }
     
+    // Debug logging for employee assets
+    if (userRole === "employee" && activeTab === "my-assets") {
+      console.log('Employee asset filter debug:', {
+        assetName: asset.name,
+        assignedTo: asset.assignedTo,
+        currentUser,
+        matchesTab,
+        matchesSearch,
+        matchesDepartment,
+        matchesSort,
+        roleFilter
+      });
+    }
+    
     return matchesSearch && matchesDepartment && matchesTab && roleFilter && matchesSort;
   });
+
+  // More debug logging
+  console.log('Assets assigned to current user:', assets.filter(a => a.assignedTo === currentUser));
+  console.log('Filtered assets count:', filteredAssets.length);
+  console.log('Employee view - is showing My Assets card?', userRole === "employee");
+  console.log('Employee assets for card:', assets.filter(a => a.assignedTo === currentUser));
 
   const getStatusIcon = (status: string) => {
     switch (status) {
