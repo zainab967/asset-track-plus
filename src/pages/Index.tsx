@@ -24,7 +24,8 @@ const Index = () => {
       case "ledger":
         return <LedgerView onNavigateToExpenses={handleNavigateToExpenses} />;
       case "expense":
-        return <ExpenseTracker selectedDepartment={selectedDepartment} />;
+        const expenseUserRole = currentUser.role.toLowerCase() as "employee" | "hr" | "admin";
+        return <ExpenseTracker selectedDepartment={selectedDepartment} userRole={expenseUserRole} />;
       case "asset":
         const mappedRole = currentUser.role.toLowerCase() as "employee" | "hr" | "admin";
         let userName = currentUser.name;

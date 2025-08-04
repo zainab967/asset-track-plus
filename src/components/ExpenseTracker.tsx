@@ -23,9 +23,10 @@ interface Expense {
 
 interface ExpenseTrackerProps {
   selectedDepartment?: string;
+  userRole?: "employee" | "hr" | "admin";
 }
 
-export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
+export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: ExpenseTrackerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [departmentFilter, setDepartmentFilter] = useState<string>(selectedDepartment || "all");
@@ -210,7 +211,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Details</TableHead>
-                <TableHead>Action</TableHead>
+                {userRole !== "employee" && <TableHead>Action</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -235,20 +236,22 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
                   <TableCell>
                     <ExpenseDetailsDialog expense={expense} />
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {expense.status === "pending" && (
-                        <>
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2">
-                            Approve
-                          </Button>
-                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 h-7 px-2">
-                            Reject
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+                  {userRole !== "employee" && (
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {expense.status === "pending" && (
+                          <>
+                            <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2">
+                              Approve
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 h-7 px-2">
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
