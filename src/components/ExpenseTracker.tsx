@@ -209,7 +209,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
                 <TableHead>Type</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

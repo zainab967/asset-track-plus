@@ -51,7 +51,7 @@ export function ModuleToggle({ activeModule, onModuleChange, userRole }: ModuleT
               variant={isActive ? "default" : "ghost"}
               size="sm"
               onClick={() => onModuleChange(module.id)}
-              className={`flex items-center gap-2 px-6 py-3 transition-all ${
+              className={`flex items-center gap-2 px-8 py-4 transition-all ${
                 isActive 
                   ? "bg-primary text-primary-foreground shadow-sm" 
                   : "hover:bg-background/80"

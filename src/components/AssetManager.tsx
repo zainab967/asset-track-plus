@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Wrench, AlertTriangle, CheckCircle, Package } from "lucide-react";
 import { AddAssetDialog } from "./AddAssetDialog";
+import { AssetActionDialog } from "./AssetActionDialog";
 
 interface Asset {
   id: string;
@@ -29,6 +30,8 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("assigned");
+  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
+  const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
 
   const assets: Asset[] = [
     {
@@ -93,6 +96,23 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                          asset.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (asset.assignedTo && asset.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesDepartment = departmentFilter === "all" || asset.department === departmentFilter;
+    
+    // Filter based on sort criteria
+    let matchesSort = true;
+    if (sortBy !== "all") {
+      switch (sortBy) {
+        case "assigned":
+          matchesSort = asset.status === "assigned";
+          break;
+        case "unassigned":
+          matchesSort = asset.status === "unassigned";
+          break;
+        case "maintenance":
+          matchesSort = asset.status === "maintenance";
+          break;
+      }
+    }
+    
     const matchesTab = asset.status === activeTab;
     
     // Filter based on user role
@@ -101,7 +121,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       roleFilter = asset.assignedTo === currentUser || asset.status === "unassigned";
     }
     
-    return matchesSearch && matchesDepartment && matchesTab && roleFilter;
+    return matchesSearch && matchesDepartment && matchesTab && roleFilter && matchesSort;
   });
 
   const getStatusIcon = (status: string) => {
@@ -146,7 +166,10 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
             }
           </p>
         </div>
-        {(userRole === "hr" || userRole === "admin") && <AddAssetDialog />}
+        <div className="flex gap-2">
+          <AssetActionDialog userRole={userRole} />
+          {(userRole === "hr" || userRole === "admin") && <AddAssetDialog />}
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -259,6 +282,35 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                 <SelectItem value="Operations">Operations</SelectItem>
               </SelectContent>
             </Select>
+
+            <Select value={sortBy} onValueChange={(value: "all" | "assigned" | "unassigned" | "maintenance") => setSortBy(value)}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Sort by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assets</SelectItem>
+                <SelectItem value="assigned">Assigned</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                <SelectItem value="maintenance">Maintenance</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "cards" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("cards")}
+              >
+                Cards
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+              >
+                List
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -281,80 +333,142 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredAssets.map((asset) => (
-              <Card key={asset.id} className="hover:shadow-md transition-all duration-200">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{asset.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{asset.category}</p>
+          {viewMode === "cards" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredAssets.map((asset) => (
+                <Card key={asset.id} className="hover:shadow-md transition-all duration-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{asset.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{asset.category}</p>
+                      </div>
+                      {getStatusIcon(asset.status)}
                     </div>
-                    {getStatusIcon(asset.status)}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Assigned to:</span>
-                      <span className="font-medium">
-                        {asset.assignedTo || "Unassigned"}
-                      </span>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Assigned to:</span>
+                        <span className="font-medium">
+                          {asset.assignedTo || "Unassigned"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Department:</span>
+                        <span>{asset.department}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Value:</span>
+                        <span className="font-mono">${asset.value.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Condition:</span>
+                        <span className={`font-medium capitalize ${getConditionColor(asset.condition)}`}>
+                         {asset.condition}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Department:</span>
-                      <span>{asset.department}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Value:</span>
-                      <span className="font-mono">${asset.value.toLocaleString()}</span>
-                    </div>
-                    /<div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Condition:</span>
-                      <span className={`font-medium capitalize ${getConditionColor(asset.condition)}`}>
-                       {asset.condition}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2 pt-2">
-                    {userRole === "employee" ? (
-                      asset.status === "unassigned" ? (
-                        <Button size="sm" variant="outline" className="flex-1">
-                          Request Asset
-                        </Button>
-                      ) : asset.assignedTo === currentUser ? (
-                        <Button size="sm" variant="outline" className="flex-1">
-                          Report Issue
-                        </Button>
-                      ) : null
-                    ) : (
-                      <>
-                        {asset.status === "maintenance" ? (
+                    
+                    <div className="flex gap-2 pt-2">
+                      {userRole === "employee" ? (
+                        asset.status === "unassigned" ? (
                           <Button size="sm" variant="outline" className="flex-1">
-                            Mark Fixed
+                            Request Asset
                           </Button>
-                        ) : asset.status === "unassigned" ? (
+                        ) : asset.assignedTo === currentUser ? (
                           <Button size="sm" variant="outline" className="flex-1">
-                            Assign
+                            Report Issue
                           </Button>
-                        ) : (
-                          <Button size="sm" variant="outline" className="flex-1">
-                            Edit
-                          </Button>
+                        ) : null
+                      ) : (
+                        <>
+                          {asset.status === "maintenance" ? (
+                            <Button size="sm" variant="outline" className="flex-1">
+                              Mark Fixed
+                            </Button>
+                          ) : asset.status === "unassigned" ? (
+                            <Button size="sm" variant="outline" className="flex-1">
+                              Assign
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="outline" className="flex-1">
+                              Edit
+                            </Button>
+                          )}
+                          {asset.status !== "maintenance" && (
+                            <Button size="sm" variant="outline">
+                              <Wrench className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left p-4 font-medium">Asset Name</th>
+                        <th className="text-left p-4 font-medium">Category</th>
+                        <th className="text-left p-4 font-medium">Assigned To</th>
+                        <th className="text-left p-4 font-medium">Department</th>
+                        <th className="text-left p-4 font-medium">Status</th>
+                        <th className="text-left p-4 font-medium">Value</th>
+                        <th className="text-left p-4 font-medium">Condition</th>
+                        <th className="text-left p-4 font-medium">Purchase Date</th>
+                        {userRole !== "employee" && (
+                          <th className="text-left p-4 font-medium">Actions</th>
                         )}
-                        {asset.status !== "maintenance" && (
-                          <Button size="sm" variant="outline">
-                            <Wrench className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAssets.map((asset) => (
+                        <tr key={asset.id} className="border-b hover:bg-muted/30">
+                          <td className="p-4 font-medium">{asset.name}</td>
+                          <td className="p-4 text-muted-foreground">{asset.category}</td>
+                          <td className="p-4">{asset.assignedTo || "Unassigned"}</td>
+                          <td className="p-4">{asset.department}</td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              {getStatusIcon(asset.status)}
+                              <span className="capitalize">{asset.status}</span>
+                            </div>
+                          </td>
+                          <td className="p-4 font-mono">${asset.value.toLocaleString()}</td>
+                          <td className="p-4">
+                            <Badge variant="outline" className={getConditionColor(asset.condition)}>
+                              {asset.condition}
+                            </Badge>
+                          </td>
+                          <td className="p-4">{asset.purchaseDate}</td>
+                          {userRole !== "employee" && (
+                            <td className="p-4">
+                              <div className="flex gap-2">
+                                {asset.status === "maintenance" ? (
+                                  <Button size="sm" variant="outline">Mark Fixed</Button>
+                                ) : asset.status === "unassigned" ? (
+                                  <Button size="sm" variant="outline">Assign</Button>
+                                ) : (
+                                  <Button size="sm" variant="outline">Edit</Button>
+                                )}
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>

@@ -28,7 +28,7 @@ export function SubmitExpenseDialog() {
       <DialogTrigger asChild>
         <Button className="bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" />
-          Submit Expense
+          Expense Actions
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
@@ -80,15 +80,15 @@ export function SubmitExpenseDialog() {
                 <Label htmlFor="one-time">One-time</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="repeating" id="repeating" />
-                <Label htmlFor="repeating">Repeating</Label>
+                  <RadioGroupItem value="repeating" id="repeating" />
+                  <Label htmlFor="repeating">Recurring</Label>
               </div>
             </RadioGroup>
           </div>
           
-          {expenseType === "repeating" && (
-            <div className="space-y-2">
-              <Label htmlFor="duration">Repeating Duration</Label>
+              {expenseType === "repeating" && (
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Recurring Duration</Label>
               <Select required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select duration" />
@@ -104,7 +104,7 @@ export function SubmitExpenseDialog() {
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="description">Brief Description</Label>
+            <Label htmlFor="description">Description</Label>
             <Textarea 
               id="description" 
               placeholder="Provide details about the expense..."
