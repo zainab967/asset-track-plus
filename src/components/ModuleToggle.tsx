@@ -16,7 +16,7 @@ export function ModuleToggle({ activeModule, onModuleChange, userRole }: ModuleT
       name: "Ledger View",
       icon: BarChart3,
       description: "Financial overview",
-      allowedRoles: ["Admin", "Manager", "HR", "Finance"]
+      allowedRoles: ["Admin", "Manager", "HR"]
     },
     {
       id: "expense" as Module,
@@ -30,7 +30,7 @@ export function ModuleToggle({ activeModule, onModuleChange, userRole }: ModuleT
       name: "Asset Manager",
       icon: Package,
       description: "Company assets",
-      allowedRoles: ["Admin", "Manager"]
+      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
     }
   ];
 

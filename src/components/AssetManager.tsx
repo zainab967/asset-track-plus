@@ -247,10 +247,10 @@ export function AssetManager() {
                       <span className="text-muted-foreground">Value:</span>
                       <span className="font-mono">${asset.value.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
+                    /<div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Condition:</span>
                       <span className={`font-medium capitalize ${getConditionColor(asset.condition)}`}>
-                        {asset.condition}
+                       {asset.condition}
                       </span>
                     </div>
                   </div>

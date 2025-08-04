@@ -11,7 +11,7 @@ import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
 
 interface Expense {
   id: string;
-  description: string;
+  name: string;
   amount: number;
   user: string;
   department: string;
@@ -33,7 +33,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
   const expenses: Expense[] = [
     {
       id: "1",
-      description: "Office supplies and equipment",
+      name: "Office supplies and equipment",
       amount: 1250,
       user: "John Doe",
       department: "Engineering",
@@ -44,7 +44,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
     },
     {
       id: "2", 
-      description: "Monthly software licenses",
+      name: "Monthly software licenses",
       amount: 2400,
       user: "Jane Smith",
       department: "Engineering",
@@ -55,7 +55,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
     },
     {
       id: "3",
-      description: "Team building event",
+      name: "Team building event",
       amount: 800,
       user: "Mike Johnson",
       department: "HR",
@@ -66,7 +66,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
     },
     {
       id: "4",
-      description: "Marketing campaign budget",
+      name: "Marketing campaign budget",
       amount: 5000,
       user: "Sarah Williams",
       department: "Marketing",
@@ -77,7 +77,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
     },
     {
       id: "5",
-      description: "Travel expenses - client meeting",
+      name: "Travel expenses - client meeting",
       amount: 650,
       user: "Tom Brown",
       department: "Sales",
@@ -85,11 +85,22 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
       status: "rejected",
       type: "one-time",
       category: "Travel"
+    },
+    {
+      id: "6", 
+      name: "chips",
+      amount: 50,
+      user: "Zainab",
+      department: "Operations",
+      date: "2024-01-14",
+      status: "pending",
+      type: "recurring",
+      category: "Food"
     }
   ];
 
   const filteredExpenses = expenses.filter(expense => {
-    const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          expense.user.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || expense.status === statusFilter;
     const matchesDepartment = departmentFilter === "all" || expense.department === departmentFilter;
@@ -146,7 +157,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Search by description or user..."
+                placeholder="Search by name or user..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -191,20 +202,20 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Description</TableHead>
+                <TableHead>Name</TableHead>
                 <TableHead>User</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Details</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredExpenses.map((expense) => (
                 <TableRow key={expense.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">{expense.description}</TableCell>
+                  <TableCell className="font-medium">{expense.name}</TableCell>
                   <TableCell>{expense.user}</TableCell>
                   <TableCell>{expense.department}</TableCell>
                   <TableCell className="font-mono">${expense.amount.toLocaleString()}</TableCell>

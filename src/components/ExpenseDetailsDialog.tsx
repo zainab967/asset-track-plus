@@ -6,7 +6,7 @@ import { MessageSquare, Calendar, User, Building, DollarSign } from "lucide-reac
 interface ExpenseDetailsDialogProps {
   expense: {
     id: string;
-    description: string;
+    name: string;
     amount: number;
     user: string;
     department: string;
@@ -41,7 +41,7 @@ export function ExpenseDetailsDialog({ expense }: ExpenseDetailsDialogProps) {
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg">{expense.description}</h3>
+            <h3 className="font-semibold text-lg">{expense.name}</h3>
             <Badge className={getStatusBadge(expense.status)}>
               {expense.status}
             </Badge>
