@@ -2,6 +2,7 @@ import { Search, User, Bell } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface AppHeaderProps {
   currentUser: {
@@ -11,7 +12,7 @@ interface AppHeaderProps {
   pendingClaims: number;
 }
 
-export function AppHeader({ currentUser, pendingClaims }: AppHeaderProps) {
+export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
   return (
     <header className="border-b sticky top-0 z-50" style={{ backgroundColor: 'hsl(var(--header-bg))' }}>
       <div className="flex items-center justify-between px-6 py-4">
@@ -29,10 +30,12 @@ export function AppHeader({ currentUser, pendingClaims }: AppHeaderProps) {
         </div>
         
         <div className="flex items-center gap-4">
+          <ThemeToggle />
+          
           <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/10">
             <Bell className="h-5 w-5" />
             {pendingClaims > 0 && (
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground">
                 {pendingClaims}
               </Badge>
             )}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { ModuleToggle, Module } from "@/components/ModuleToggle";
 import { LedgerView } from "@/components/LedgerView";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
@@ -33,12 +33,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <AppHeader 
-        currentUser={currentUser}
-        pendingClaims={4}
-      />
-      
+    <DashboardLayout 
+      currentUser={currentUser}
+      pendingClaims={4}
+    >
       {/* Demo Role Selector */}
       <div className="p-4 bg-muted/30 border-b">
         <div className="max-w-xs">
@@ -65,7 +63,7 @@ const Index = () => {
       <main className="pb-8">
         {renderActiveModule()}
       </main>
-    </div>
+    </DashboardLayout>
   );
 };
 
