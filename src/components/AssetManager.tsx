@@ -88,6 +88,28 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       value: 899,
       purchaseDate: "2022-11-05",
       condition: "poor"
+    },
+    {
+      id: "6",
+      name: "Wireless Mouse",
+      category: "Peripheral",
+      assignedTo: "Current User",
+      department: "Engineering",
+      status: "assigned",
+      value: 89,
+      purchaseDate: "2023-12-01",
+      condition: "excellent"
+    },
+    {
+      id: "7",
+      name: "Mechanical Keyboard",
+      category: "Peripheral",
+      assignedTo: "Current User",
+      department: "Engineering",
+      status: "assigned",
+      value: 159,
+      purchaseDate: "2023-12-01",
+      condition: "good"
     }
   ];
 
@@ -181,48 +203,45 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {userRole === "employee" ? (
-          <>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">My Assets</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {assets.filter(a => a.assignedTo === currentUser).length}
-                    </p>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                My Assets
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {assets.filter(a => a.assignedTo === currentUser).length > 0 ? (
+                  assets.filter(a => a.assignedTo === currentUser).map((asset) => (
+                    <div key={asset.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {getStatusIcon(asset.status)}
+                        <div>
+                          <p className="font-medium">{asset.name}</p>
+                          <p className="text-sm text-muted-foreground">{asset.category}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-mono">${asset.value.toLocaleString()}</p>
+                        <p className={`text-xs capitalize ${getConditionColor(asset.condition)}`}>{asset.condition}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No assets assigned to you yet</p>
+                    <p className="text-sm">Check the Available tab to request assets</p>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Available to Request</p>
-                    <p className="text-2xl font-bold text-blue-600">{assetCounts.unassigned}</p>
-                  </div>
-                  <Package className="h-8 w-8 text-blue-600" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">My Pending Requests</p>
-                    <p className="text-2xl font-bold text-orange-600">2</p>
-                  </div>
-                  <AlertTriangle className="h-8 w-8 text-orange-600" />
-                </div>
-              </CardContent>
-            </Card>
-          </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <>
             <Card>
               <CardContent className="p-4">
@@ -260,6 +279,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
               </CardContent>
             </Card>
           </>
+          </div>
         )}
       </div>
 
