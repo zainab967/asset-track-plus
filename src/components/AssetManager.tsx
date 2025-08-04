@@ -20,7 +20,12 @@ interface Asset {
   condition: "excellent" | "good" | "fair" | "poor";
 }
 
-export function AssetManager() {
+interface AssetManagerProps {
+  userRole?: "employee" | "hr" | "admin";
+  currentUser?: string;
+}
+
+export function AssetManager({ userRole = "admin", currentUser = "Current User" }: AssetManagerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("assigned");
@@ -90,7 +95,13 @@ export function AssetManager() {
     const matchesDepartment = departmentFilter === "all" || asset.department === departmentFilter;
     const matchesTab = asset.status === activeTab;
     
-    return matchesSearch && matchesDepartment && matchesTab;
+    // Filter based on user role
+    let roleFilter = true;
+    if (userRole === "employee") {
+      roleFilter = asset.assignedTo === currentUser || asset.status === "unassigned";
+    }
+    
+    return matchesSearch && matchesDepartment && matchesTab && roleFilter;
   });
 
   const getStatusIcon = (status: string) => {
@@ -123,51 +134,102 @@ export function AssetManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Asset Manager</h2>
+          <h2 className="text-2xl font-bold">
+            {userRole === "employee" ? "My Assets" : userRole === "hr" ? "HR Asset Management" : "Asset Manager"}
+          </h2>
           <p className="text-muted-foreground">
-            Track and manage company assets across departments
+            {userRole === "employee" 
+              ? "View your assigned assets and request new ones"
+              : userRole === "hr"
+              ? "Manage asset requests and company inventory"
+              : "Track and manage company assets across departments"
+            }
           </p>
         </div>
-        <AddAssetDialog />
+        {(userRole === "hr" || userRole === "admin") && <AddAssetDialog />}
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Assigned Assets</p>
-                <p className="text-2xl font-bold text-green-600">{assetCounts.assigned}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Available Assets</p>
-                <p className="text-2xl font-bold text-blue-600">{assetCounts.unassigned}</p>
-              </div>
-              <Package className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Needs Maintenance</p>
-                <p className="text-2xl font-bold text-orange-600">{assetCounts.maintenance}</p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
+        {userRole === "employee" ? (
+          <>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">My Assets</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {assets.filter(a => a.assignedTo === currentUser).length}
+                    </p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Available to Request</p>
+                    <p className="text-2xl font-bold text-blue-600">{assetCounts.unassigned}</p>
+                  </div>
+                  <Package className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">My Pending Requests</p>
+                    <p className="text-2xl font-bold text-orange-600">2</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        ) : (
+          <>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Assigned Assets</p>
+                    <p className="text-2xl font-bold text-green-600">{assetCounts.assigned}</p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Available Assets</p>
+                    <p className="text-2xl font-bold text-blue-600">{assetCounts.unassigned}</p>
+                  </div>
+                  <Package className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Needs Maintenance</p>
+                    <p className="text-2xl font-bold text-orange-600">{assetCounts.maintenance}</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Filters */}
@@ -256,23 +318,37 @@ export function AssetManager() {
                   </div>
                   
                   <div className="flex gap-2 pt-2">
-                    {asset.status === "maintenance" ? (
-                      <Button size="sm" variant="outline" className="flex-1">
-                        Mark Fixed
-                      </Button>
-                    ) : asset.status === "unassigned" ? (
-                      <Button size="sm" variant="outline" className="flex-1">
-                        Assign
-                      </Button>
+                    {userRole === "employee" ? (
+                      asset.status === "unassigned" ? (
+                        <Button size="sm" variant="outline" className="flex-1">
+                          Request Asset
+                        </Button>
+                      ) : asset.assignedTo === currentUser ? (
+                        <Button size="sm" variant="outline" className="flex-1">
+                          Report Issue
+                        </Button>
+                      ) : null
                     ) : (
-                      <Button size="sm" variant="outline" className="flex-1">
-                        Edit
-                      </Button>
-                    )}
-                    {asset.status !== "maintenance" && (
-                      <Button size="sm" variant="outline">
-                        <Wrench className="h-3 w-3" />
-                      </Button>
+                      <>
+                        {asset.status === "maintenance" ? (
+                          <Button size="sm" variant="outline" className="flex-1">
+                            Mark Fixed
+                          </Button>
+                        ) : asset.status === "unassigned" ? (
+                          <Button size="sm" variant="outline" className="flex-1">
+                            Assign
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="outline" className="flex-1">
+                            Edit
+                          </Button>
+                        )}
+                        {asset.status !== "maintenance" && (
+                          <Button size="sm" variant="outline">
+                            <Wrench className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 </CardContent>
