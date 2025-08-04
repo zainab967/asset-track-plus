@@ -29,7 +29,7 @@ interface AssetManagerProps {
 export function AssetManager({ userRole = "admin", currentUser = "Current User" }: AssetManagerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState("assigned");
+  const [activeTab, setActiveTab] = useState(userRole === "employee" ? "my-assets" : "assigned");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
 
@@ -113,11 +113,19 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       }
     }
     
-    const matchesTab = asset.status === activeTab;
+    // Handle different tab filtering
+    let matchesTab = false;
+    if (activeTab === "overall") {
+      matchesTab = true; // Show all assets for overall view
+    } else if (activeTab === "my-assets" && userRole === "employee") {
+      matchesTab = asset.assignedTo === currentUser; // Show only user's assets
+    } else {
+      matchesTab = asset.status === activeTab; // Standard status filtering
+    }
     
     // Filter based on user role
     let roleFilter = true;
-    if (userRole === "employee") {
+    if (userRole === "employee" && activeTab !== "my-assets" && activeTab !== "overall") {
       roleFilter = asset.assignedTo === currentUser || asset.status === "unassigned";
     }
     
@@ -317,7 +325,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
 
       {/* Assets Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className={`grid w-full ${userRole === "employee" ? "grid-cols-5" : "grid-cols-4"}`}>
           <TabsTrigger value="assigned" className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
             Assigned ({assetCounts.assigned})
@@ -329,6 +337,16 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
           <TabsTrigger value="maintenance" className="flex items-center gap-2">
             <Wrench className="h-4 w-4" />
             Maintenance ({assetCounts.maintenance})
+          </TabsTrigger>
+          {userRole === "employee" && (
+            <TabsTrigger value="my-assets" className="flex items-center gap-2">
+              <span className="h-4 w-4" />
+              My Assets
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="overall" className="flex items-center gap-2">
+            <span className="h-4 w-4" />
+            Overall
           </TabsTrigger>
         </TabsList>
 

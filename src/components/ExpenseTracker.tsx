@@ -209,6 +209,7 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
                 <TableHead>Type</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Details</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -232,8 +233,10 @@ export function ExpenseTracker({ selectedDepartment }: ExpenseTrackerProps) {
                     </div>
                   </TableCell>
                   <TableCell>
+                    <ExpenseDetailsDialog expense={expense} />
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-2">
-                      <ExpenseDetailsDialog expense={expense} />
                       {expense.status === "pending" && (
                         <>
                           <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2">
