@@ -10,8 +10,8 @@ const Index = () => {
   const [activeModule, setActiveModule] = useState<Module>("ledger");
   const [selectedDepartment, setSelectedDepartment] = useState<string | undefined>();
   const [currentUser, setCurrentUser] = useState({
-    name: "Admin User",
-    role: "Admin"
+    name: "Current User",
+    role: "Employee"
   });
 
   const handleNavigateToExpenses = (department: string) => {
@@ -27,7 +27,11 @@ const Index = () => {
         return <ExpenseTracker selectedDepartment={selectedDepartment} />;
       case "asset":
         const mappedRole = currentUser.role.toLowerCase() as "employee" | "hr" | "admin";
-        const userName = currentUser.role === "Employee" ? "Current User" : currentUser.name;
+        let userName = currentUser.name;
+        if (currentUser.role === "Employee") {
+          userName = "Current User";
+        }
+        console.log('Index.tsx - Asset module render:', { role: currentUser.role, mappedRole, userName });
         return <AssetManager userRole={mappedRole} currentUser={userName} />;
       default:
         return <LedgerView onNavigateToExpenses={handleNavigateToExpenses} />;
@@ -42,7 +46,17 @@ const Index = () => {
       {/* Demo Role Selector */}
       <div className="p-4 bg-muted/30 border-b">
         <div className="max-w-xs">
-          <Select value={currentUser.role} onValueChange={(role) => setCurrentUser(prev => ({ ...prev, role }))}>
+          <Select value={currentUser.role} onValueChange={(role) => {
+            let name = "Admin User";
+            if (role === "Employee") {
+              name = "Current User";
+            } else if (role === "HR") {
+              name = "HR User";
+            } else if (role === "Manager") {
+              name = "Manager User";
+            }
+            setCurrentUser({ role, name });
+          }}>
             <SelectTrigger>
               <SelectValue placeholder="Select role for demo" />
             </SelectTrigger>
