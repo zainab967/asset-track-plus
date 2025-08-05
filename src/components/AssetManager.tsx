@@ -225,6 +225,13 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
         </div>
       </div>
 
+      {/* Asset Actions for Employee */}
+      {userRole === "employee" && (
+        <div className="flex justify-center">
+          <AssetActionDialog userRole={userRole} />
+        </div>
+      )}
+
 {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4">
         {userRole === "employee" ? (
