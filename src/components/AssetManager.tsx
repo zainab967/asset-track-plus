@@ -226,28 +226,24 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
         </div>
       </div>
 
-      {/* Asset Actions for Employee */}
-      {userRole === "employee" && (
-        <div className="flex justify-center">
-          <Button 
-            onClick={() => setIsAssetActionOpen(true)} 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg font-medium flex items-center gap-2"
-          >
-            <Plus className="h-5 w-5" />
-            Asset Actions
-          </Button>
-        </div>
-      )}
-
 {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4">
         {userRole === "employee" ? (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                My Assets
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  My Assets
+                </CardTitle>
+                <Button 
+                  onClick={() => setIsAssetActionOpen(true)} 
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Asset Actions
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
