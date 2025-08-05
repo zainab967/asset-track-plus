@@ -11,14 +11,19 @@ import { useToast } from "@/hooks/use-toast";
 
 interface AssetActionDialogProps {
   userRole?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function AssetActionDialog({ userRole }: AssetActionDialogProps) {
-  const [open, setOpen] = useState(false);
+export function AssetActionDialog({ userRole, isOpen, onClose }: AssetActionDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [actionType, setActionType] = useState("maintenance");
   const [assetStatus, setAssetStatus] = useState("assigned");
   const [requestType, setRequestType] = useState("permanent");
   const { toast } = useToast();
+
+  const dialogOpen = isOpen !== undefined ? isOpen : internalOpen;
+  const setDialogOpen = onClose ? (open: boolean) => !open && onClose() : setInternalOpen;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +31,7 @@ export function AssetActionDialog({ userRole }: AssetActionDialogProps) {
       title: "Request Submitted",
       description: `Your ${actionType} request has been submitted successfully.`,
     });
-    setOpen(false);
+    setDialogOpen(false);
   };
 
   const canSubmitRequest = userRole === "Employee" || userRole === "HR" || userRole === "Admin" || userRole === "Manager";
@@ -36,13 +41,15 @@ export function AssetActionDialog({ userRole }: AssetActionDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Asset Actions
-        </Button>
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {!isOpen && (
+        <DialogTrigger asChild>
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Asset Actions
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Asset Management</DialogTitle>
@@ -226,7 +233,7 @@ export function AssetActionDialog({ userRole }: AssetActionDialogProps) {
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
             <Button type="submit">

@@ -32,6 +32,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   const [activeTab, setActiveTab] = useState(userRole === "employee" ? "my-assets" : "assigned");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
+  const [isAssetActionOpen, setIsAssetActionOpen] = useState(false);
 
   // Debug logging
   console.log('AssetManager Debug:', { userRole, currentUser, activeTab });
@@ -228,7 +229,13 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       {/* Asset Actions for Employee */}
       {userRole === "employee" && (
         <div className="flex justify-center">
-          <AssetActionDialog userRole={userRole} />
+          <Button 
+            onClick={() => setIsAssetActionOpen(true)} 
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg font-medium flex items-center gap-2"
+          >
+            <Plus className="h-5 w-5" />
+            Asset Actions
+          </Button>
         </div>
       )}
 
@@ -578,6 +585,13 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Asset Action Dialog */}
+      <AssetActionDialog 
+        userRole={userRole} 
+        isOpen={isAssetActionOpen} 
+        onClose={() => setIsAssetActionOpen(false)} 
+      />
     </div>
   );
 }
