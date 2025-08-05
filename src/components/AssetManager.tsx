@@ -221,7 +221,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
         </div>
         <div className="flex gap-2">
           <AssetActionDialog userRole={userRole} />
-          {(userRole === "hr" || userRole === "admin") && <AddAssetDialog />}
+          {userRole !== "employee" && <AddAssetDialog />}
         </div>
       </div>
 
