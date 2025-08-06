@@ -499,6 +499,598 @@ GET    /api/reports/financial-summary
    - Employees see only their own data
    - Managers see department data
    - HR sees all employee data
+   - Admins have unrestricted access
+
+## 7. API Payloads
+
+### 7.1 Authentication & User Management
+
+#### POST /api/auth/login
+**Request:**
+```json
+{
+  "email": "user@company.com",
+  "password": "SecurePass123",
+  "rememberMe": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "email": "user@company.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "role": "employee",
+      "department": "IT",
+      "active": true
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expiresIn": 3600
+  }
+}
+```
+
+#### GET /api/users
+**Request Query Params:**
+```
+?page=1&limit=20&role=employee&department=IT&search=john&active=true
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "users": [
+      {
+        "id": "uuid",
+        "email": "john.doe@company.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "role": "employee",
+        "department": "IT",
+        "active": true,
+        "createdAt": "2024-01-15T10:30:00Z",
+        "updatedAt": "2024-01-15T10:30:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 150,
+      "totalPages": 8
+    }
+  }
+}
+```
+
+#### POST /api/users
+**Request:**
+```json
+{
+  "email": "newuser@company.com",
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "role": "employee",
+  "department": "HR",
+  "password": "TempPass123",
+  "sendWelcomeEmail": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "email": "newuser@company.com",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "role": "employee",
+      "department": "HR",
+      "active": true,
+      "createdAt": "2024-01-15T10:30:00Z"
+    }
+  },
+  "message": "User created successfully"
+}
+```
+
+### 7.2 Department Management
+
+#### GET /api/departments
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Information Technology",
+      "description": "Handles all IT operations and support",
+      "managerId": "uuid",
+      "managerName": "John Manager",
+      "budget": 500000.00,
+      "currentSpending": 350000.00,
+      "employeeCount": 25,
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+#### POST /api/departments
+**Request:**
+```json
+{
+  "name": "Marketing",
+  "description": "Marketing and brand management",
+  "managerId": "uuid",
+  "budget": 300000.00
+}
+```
+
+### 7.3 Expense Management
+
+#### GET /api/expenses
+**Request Query Params:**
+```
+?page=1&limit=20&status=pending&department=IT&dateFrom=2024-01-01&dateTo=2024-01-31&userId=uuid
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "expenses": [
+      {
+        "id": "uuid",
+        "name": "Office Supplies",
+        "amount": 156.75,
+        "userId": "uuid",
+        "userName": "John Doe",
+        "departmentId": "uuid",
+        "departmentName": "IT",
+        "date": "2024-01-15",
+        "status": "pending",
+        "type": "one-time",
+        "category": "Office Supplies",
+        "description": "Notebooks, pens, and paper for team",
+        "receiptUrl": "https://storage.example.com/receipts/receipt-123.pdf",
+        "createdAt": "2024-01-15T10:30:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 45,
+      "totalPages": 3
+    },
+    "summary": {
+      "totalAmount": 15675.50,
+      "pendingAmount": 5432.25,
+      "approvedAmount": 8765.75,
+      "rejectedAmount": 1477.50
+    }
+  }
+}
+```
+
+#### POST /api/expenses
+**Request:**
+```json
+{
+  "name": "Client Lunch Meeting",
+  "amount": 85.50,
+  "date": "2024-01-15",
+  "type": "one-time",
+  "category": "Business Meals",
+  "description": "Lunch meeting with potential client ABC Corp",
+  "receiptFile": "base64-encoded-file-data"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "expense": {
+      "id": "uuid",
+      "name": "Client Lunch Meeting",
+      "amount": 85.50,
+      "status": "pending",
+      "receiptUrl": "https://storage.example.com/receipts/receipt-456.pdf",
+      "createdAt": "2024-01-15T14:30:00Z"
+    }
+  },
+  "message": "Expense submitted successfully"
+}
+```
+
+#### PUT /api/expenses/:id/approve
+**Request:**
+```json
+{
+  "approvalNotes": "Approved for Q1 budget allocation"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "expense": {
+      "id": "uuid",
+      "status": "approved",
+      "approvedBy": "uuid",
+      "approvedAt": "2024-01-16T09:15:00Z"
+    }
+  },
+  "message": "Expense approved successfully"
+}
+```
+
+### 7.4 Asset Management
+
+#### GET /api/assets
+**Request Query Params:**
+```
+?page=1&limit=20&status=assigned&category=laptop&assignedTo=uuid&condition=good
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "assets": [
+      {
+        "id": "uuid",
+        "name": "MacBook Pro 14-inch",
+        "category": "Laptop",
+        "serialNumber": "MBP2024001",
+        "assignedTo": "uuid",
+        "assignedToName": "John Doe",
+        "departmentId": "uuid",
+        "departmentName": "IT",
+        "status": "assigned",
+        "value": 2499.00,
+        "purchaseDate": "2024-01-10",
+        "condition": "excellent",
+        "location": "Office Floor 3",
+        "warrantyExpiry": "2027-01-10",
+        "createdAt": "2024-01-10T12:00:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 250,
+      "totalPages": 13
+    },
+    "summary": {
+      "totalValue": 856750.00,
+      "assignedCount": 180,
+      "unassignedCount": 45,
+      "maintenanceCount": 15,
+      "retiredCount": 10
+    }
+  }
+}
+```
+
+#### POST /api/assets
+**Request:**
+```json
+{
+  "name": "Dell OptiPlex 7090",
+  "category": "Desktop",
+  "serialNumber": "DOP2024001",
+  "departmentId": "uuid",
+  "value": 899.00,
+  "purchaseDate": "2024-01-15",
+  "condition": "excellent",
+  "location": "Office Floor 2",
+  "warrantyExpiry": "2026-01-15",
+  "specifications": {
+    "processor": "Intel i7",
+    "ram": "16GB",
+    "storage": "512GB SSD"
+  }
+}
+```
+
+#### POST /api/asset-requests
+**Request:**
+```json
+{
+  "assetName": "MacBook Pro for Development",
+  "requestedDate": "2024-01-20",
+  "reason": "Current laptop is outdated and affecting productivity",
+  "durationType": "permanent",
+  "specifications": "MacBook Pro 14-inch, 16GB RAM, 512GB SSD",
+  "departmentId": "uuid"
+}
+```
+
+#### POST /api/asset-maintenance
+**Request:**
+```json
+{
+  "assetId": "uuid",
+  "issueDescription": "Screen flickering intermittently",
+  "maintenanceType": "repair",
+  "priority": "medium",
+  "estimatedCost": 350.00
+}
+```
+
+### 7.5 Reimbursement Management
+
+#### GET /api/reimbursements
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "reimbursements": [
+      {
+        "id": "uuid",
+        "name": "Medical Checkup",
+        "amount": 285.00,
+        "userId": "uuid",
+        "userName": "John Doe",
+        "departmentId": "uuid",
+        "departmentName": "IT",
+        "date": "2024-01-12",
+        "status": "pending",
+        "type": "medical",
+        "category": "Preventive Care",
+        "description": "Annual health checkup as per company policy",
+        "receiptUrls": [
+          "https://storage.example.com/receipts/medical-001.pdf"
+        ],
+        "createdAt": "2024-01-13T08:30:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 32,
+      "totalPages": 2
+    }
+  }
+}
+```
+
+#### POST /api/reimbursements
+**Request:**
+```json
+{
+  "name": "Business Travel to NYC",
+  "amount": 1250.00,
+  "date": "2024-01-18",
+  "type": "travel",
+  "category": "Airfare",
+  "description": "Flight tickets for client meeting in New York",
+  "receiptFiles": [
+    "base64-encoded-file-1",
+    "base64-encoded-file-2"
+  ]
+}
+```
+
+### 7.6 Complaints & Suggestions
+
+#### GET /api/feedback
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "feedback": [
+      {
+        "id": "uuid",
+        "title": "Improve cafeteria food quality",
+        "description": "The current food options are limited and quality has declined",
+        "type": "suggestion",
+        "category": "Facilities",
+        "priority": "medium",
+        "status": "open",
+        "submittedBy": "uuid",
+        "submitterName": "Jane Smith",
+        "departmentId": "uuid",
+        "departmentName": "HR",
+        "assignedTo": null,
+        "createdAt": "2024-01-14T11:45:00Z"
+      }
+    ]
+  }
+}
+```
+
+#### POST /api/feedback
+**Request:**
+```json
+{
+  "title": "AC not working in conference room B",
+  "description": "The air conditioning unit in conference room B has been malfunctioning for 3 days",
+  "type": "complaint",
+  "category": "Facilities",
+  "priority": "high"
+}
+```
+
+### 7.7 Ledger & Reporting
+
+#### GET /api/ledger
+**Request Query Params:**
+```
+?page=1&limit=50&dateFrom=2024-01-01&dateTo=2024-01-31&accountCode=EXP&referenceType=expense
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "entries": [
+      {
+        "id": "uuid",
+        "referenceId": "uuid",
+        "referenceType": "expense",
+        "accountCode": "EXP-001",
+        "description": "Office Supplies - IT Department",
+        "debitAmount": 156.75,
+        "creditAmount": 0.00,
+        "departmentId": "uuid",
+        "departmentName": "IT",
+        "postedBy": "uuid",
+        "postedByName": "System",
+        "postingDate": "2024-01-15",
+        "createdAt": "2024-01-15T16:30:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 50,
+      "total": 1205,
+      "totalPages": 25
+    },
+    "summary": {
+      "totalDebits": 145230.50,
+      "totalCredits": 145230.50,
+      "balance": 0.00
+    }
+  }
+}
+```
+
+#### GET /api/reports/expenses
+**Request Query Params:**
+```
+?period=monthly&year=2024&month=1&department=IT&groupBy=category
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "reportMetadata": {
+      "period": "January 2024",
+      "department": "IT",
+      "generatedAt": "2024-02-01T10:00:00Z",
+      "generatedBy": "uuid"
+    },
+    "summary": {
+      "totalExpenses": 15675.50,
+      "approvedExpenses": 12450.25,
+      "pendingExpenses": 2875.75,
+      "rejectedExpenses": 349.50,
+      "budgetUtilization": 72.5
+    },
+    "categoryBreakdown": [
+      {
+        "category": "Office Supplies",
+        "amount": 3245.50,
+        "count": 45,
+        "percentage": 20.7
+      },
+      {
+        "category": "Software Licenses",
+        "amount": 5670.00,
+        "count": 12,
+        "percentage": 36.2
+      }
+    ],
+    "monthlyTrend": [
+      {
+        "month": "2024-01",
+        "amount": 15675.50
+      }
+    ]
+  }
+}
+```
+
+#### GET /api/reports/financial-summary
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "summary": {
+      "totalExpenses": 245670.50,
+      "totalReimbursements": 67890.25,
+      "totalAssetValue": 1256780.00,
+      "budgetUtilization": 68.5,
+      "reportPeriod": "Q1 2024"
+    },
+    "departmentBreakdown": [
+      {
+        "departmentId": "uuid",
+        "departmentName": "IT",
+        "expenses": 45670.50,
+        "reimbursements": 12340.25,
+        "assetValue": 356780.00,
+        "budgetUtilization": 72.3
+      }
+    ],
+    "trends": {
+      "expenseGrowth": 5.2,
+      "reimbursementGrowth": -2.1,
+      "assetGrowth": 12.8
+    }
+  }
+}
+```
+
+### 7.8 Error Response Format
+**Standard Error Response:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid input data",
+    "details": [
+      {
+        "field": "amount",
+        "message": "Amount must be greater than 0"
+      },
+      {
+        "field": "date",
+        "message": "Date cannot be in the future"
+      }
+    ]
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+**HTTP Status Codes:**
+- `200`: Success
+- `201`: Created
+- `400`: Bad Request (validation errors)
+- `401`: Unauthorized
+- `403`: Forbidden (insufficient permissions)
+- `404`: Not Found
+- `409`: Conflict (duplicate data)
+- `422`: Unprocessable Entity
+- `500`: Internal Server Error
+   - HR sees all employee data
    - Admins see all data
 
 3. **Approval Authority**:
