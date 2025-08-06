@@ -2,29 +2,63 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import Index from "./pages/Index";
+import { AppLayout } from "@/components/layout/AppLayout";
+import LedgerPage from "./pages/LedgerPage";
+import ExpensePage from "./pages/ExpensePage";
+import AssetPage from "./pages/AssetPage";
+import ComplaintsPage from "./pages/ComplaintsPage";
 import NotFound from "./pages/NotFound";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="system" storageKey="nucleus-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [currentUser] = useState({
+    name: "John Doe",
+    role: "Employee"
+  });
+
+  // Mock pending claims count
+  const pendingClaims = 3;
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="system" storageKey="nucleus-theme">
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Navigate to="/ledger" replace />} />
+              <Route path="/ledger" element={
+                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims}>
+                  <LedgerPage />
+                </AppLayout>
+              } />
+              <Route path="/expenses" element={
+                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims}>
+                  <ExpensePage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin"} />
+                </AppLayout>
+              } />
+              <Route path="/assets" element={
+                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims}>
+                  <AssetPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin"} />
+                </AppLayout>
+              } />
+              <Route path="/complaints" element={
+                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims}>
+                  <ComplaintsPage userRole={currentUser.role.toLowerCase()} />
+                </AppLayout>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
