@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Wrench, AlertTriangle, CheckCircle, Package } from "lucide-react";
 import { AddAssetDialog } from "./AddAssetDialog";
-import { AssetActionDialog } from "./AssetActionDialog";
+import { AssetMaintenanceDialog } from "./AssetMaintenanceDialog";
 
 interface Asset {
   id: string;
@@ -32,7 +32,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   const [activeTab, setActiveTab] = useState(userRole === "employee" ? "my-assets" : "assigned");
   const [viewMode, setViewMode] = useState<"cards" | "list">("list");
   const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
-  const [isAssetActionOpen, setIsAssetActionOpen] = useState(false);
+  
 
   // Debug logging
   console.log('AssetManager Debug:', { userRole, currentUser, activeTab });
@@ -221,17 +221,10 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
           </p>
         </div>
         <div className="flex gap-2">
-          <AssetActionDialog userRole={userRole} />
           {userRole !== "employee" && <AddAssetDialog />}
         </div>
       </div>
 
-      {/* Asset Actions Dialog */}
-      <AssetActionDialog 
-        userRole={userRole} 
-        isOpen={isAssetActionOpen}
-        onClose={() => setIsAssetActionOpen(false)}
-      />
 
 {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4">
@@ -243,7 +236,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   My Assets
                 </CardTitle>
-                <AssetActionDialog userRole={userRole} />
+                <AssetMaintenanceDialog userRole={userRole} />
               </div>
             </CardHeader>
             <CardContent>
@@ -583,12 +576,6 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
         </TabsContent>
       </Tabs>
 
-      {/* Asset Action Dialog */}
-      <AssetActionDialog 
-        userRole={userRole} 
-        isOpen={isAssetActionOpen} 
-        onClose={() => setIsAssetActionOpen(false)} 
-      />
     </div>
   );
 }
