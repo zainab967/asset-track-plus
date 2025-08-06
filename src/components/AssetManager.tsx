@@ -22,7 +22,7 @@ interface Asset {
 }
 
 interface AssetManagerProps {
-  userRole?: "employee" | "hr" | "admin";
+  userRole?: "employee" | "hr" | "admin" | "manager";
   currentUser?: string;
 }
 
@@ -226,18 +226,12 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
         </div>
       </div>
 
-      {/* Asset Actions for Employee */}
-      {userRole === "employee" && (
-        <div className="flex justify-end">
-          <Button 
-            onClick={() => setIsAssetActionOpen(true)} 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Asset Actions
-          </Button>
-        </div>
-      )}
+      {/* Asset Actions Dialog */}
+      <AssetActionDialog 
+        userRole={userRole} 
+        isOpen={isAssetActionOpen}
+        onClose={() => setIsAssetActionOpen(false)}
+      />
 
 {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4">

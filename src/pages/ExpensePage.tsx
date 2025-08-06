@@ -2,7 +2,7 @@ import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { useSearchParams } from "react-router-dom";
 
 interface ExpensePageProps {
-  userRole?: "employee" | "hr" | "admin";
+  userRole?: "employee" | "hr" | "admin" | "manager";
 }
 
 export default function ExpensePage({ userRole = "admin" }: ExpensePageProps) {

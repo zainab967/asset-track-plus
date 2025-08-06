@@ -5,13 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Filter, Plus, Clock, CheckCircle, XCircle, Save, X } from "lucide-react";
-import { SubmitExpenseDialog } from "./SubmitExpenseDialog";
-import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
-import { ExpenseDescriptionDialog } from "./ExpenseDescriptionDialog";
+import { Search, Plus, Clock, CheckCircle, XCircle, Save, X } from "lucide-react";
+import { ExpenseDescriptionDialog } from "@/components/ExpenseDescriptionDialog";
 import { useToast } from "@/hooks/use-toast";
 
-interface Expense {
+interface Reimbursement {
   id: string;
   name: string;
   amount: number;
@@ -19,119 +17,89 @@ interface Expense {
   department: string;
   date: string;
   status: "pending" | "approved" | "rejected";
-  type: "one-time" | "recurring";
+  type: "medical" | "travel" | "equipment" | "other";
   category: string;
+  description?: string;
+  documents?: File[];
+  images?: File[];
 }
 
-interface ExpenseTrackerProps {
-  selectedDepartment?: string;
+interface ReimbursementPageProps {
   userRole?: "employee" | "hr" | "admin" | "manager";
 }
 
-export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: ExpenseTrackerProps) {
+export default function ReimbursementPage({ userRole = "admin" }: ReimbursementPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [departmentFilter, setDepartmentFilter] = useState<string>(selectedDepartment || "all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newExpense, setNewExpense] = useState<Partial<Expense>>({});
+  const [newReimbursement, setNewReimbursement] = useState<Partial<Reimbursement>>({});
   const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
   const [currentExpenseForDescription, setCurrentExpenseForDescription] = useState<any>(null);
   const { toast } = useToast();
 
-  const mockExpenses: Expense[] = [
+  const mockReimbursements: Reimbursement[] = [
     {
       id: "1",
-      name: "Office supplies and equipment",
-      amount: 1250,
+      name: "Medical checkup reimbursement",
+      amount: 350,
       user: "John Doe",
       department: "Engineering",
       date: "2024-01-15",
       status: "approved",
-      type: "one-time",
-      category: "Supplies"
+      type: "medical",
+      category: "Healthcare",
+      description: "Annual health checkup as per company policy"
     },
     {
-      id: "2", 
-      name: "Monthly software licenses",
-      amount: 2400,
+      id: "2",
+      name: "Business travel expenses",
+      amount: 1200,
       user: "Jane Smith",
-      department: "Engineering",
+      department: "Sales",
       date: "2024-01-14",
       status: "pending",
-      type: "recurring",
-      category: "Software"
+      type: "travel",
+      category: "Travel"
     },
     {
       id: "3",
-      name: "Team building event",
+      name: "Home office equipment",
       amount: 800,
       user: "Mike Johnson",
       department: "HR",
       date: "2024-01-13",
       status: "approved",
-      type: "one-time",
-      category: "Events"
-    },
-    {
-      id: "4",
-      name: "Marketing campaign budget",
-      amount: 5000,
-      user: "Sarah Williams",
-      department: "Marketing",
-      date: "2024-01-12",
-      status: "pending",
-      type: "one-time",
-      category: "Campaigns"
-    },
-    {
-      id: "5",
-      name: "Travel expenses - client meeting",
-      amount: 650,
-      user: "Tom Brown",
-      department: "Sales",
-      date: "2024-01-11",
-      status: "rejected",
-      type: "one-time",
-      category: "Travel"
-    },
-    {
-      id: "6", 
-      name: "chips",
-      amount: 50,
-      user: "Zainab",
-      department: "Operations",
-      date: "2024-01-14",
-      status: "pending",
-      type: "recurring",
-      category: "Food"
+      type: "equipment",
+      category: "Equipment"
     }
   ];
 
-  const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
+  const [reimbursements, setReimbursements] = useState<Reimbursement[]>(mockReimbursements);
 
-  const recurringExpenses = [
-    { name: "Monthly software licenses", category: "Software", amount: 2400, department: "Engineering" },
-    { name: "Office supplies", category: "Supplies", amount: 150, department: "Operations" },
-    { name: "Team lunch", category: "Food", amount: 200, department: "HR" }
+  const recurringReimbursements = [
+    { name: "Monthly internet allowance", category: "Utilities", amount: 80, department: "All", type: "other" },
+    { name: "Quarterly health checkup", category: "Healthcare", amount: 300, department: "All", type: "medical" },
+    { name: "Work from home setup", category: "Equipment", amount: 500, department: "Engineering", type: "equipment" }
   ];
 
   const handleAddNew = () => {
     setIsAddingNew(true);
-    setNewExpense({
+    setNewReimbursement({
       id: Date.now().toString(),
       name: "",
       amount: 0,
-      user: "Current User", // In a real app, this would come from auth
+      user: "Current User",
       department: "",
       date: new Date().toISOString().split('T')[0],
       status: "pending",
-      type: "one-time",
+      type: "other",
       category: ""
     });
   };
 
   const handleSaveNew = () => {
-    if (!newExpense.name || !newExpense.category || !newExpense.department || !newExpense.amount) {
+    if (!newReimbursement.name || !newReimbursement.category || !newReimbursement.department || !newReimbursement.amount) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -141,63 +109,67 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     }
 
     // Open description dialog
-    setCurrentExpenseForDescription(newExpense);
+    setCurrentExpenseForDescription(newReimbursement);
     setShowDescriptionDialog(true);
   };
 
   const handleDescriptionSave = (data: { description: string; documents: File[]; images: File[] }) => {
-    const expense: Expense = {
-      id: newExpense.id!,
-      name: newExpense.name!,
-      amount: Number(newExpense.amount),
-      user: newExpense.user!,
-      department: newExpense.department!,
-      date: newExpense.date!,
-      status: newExpense.status as "pending" | "approved" | "rejected",
-      type: newExpense.type as "one-time" | "recurring",
-      category: newExpense.category!
+    const reimbursement: Reimbursement = {
+      id: newReimbursement.id!,
+      name: newReimbursement.name!,
+      amount: Number(newReimbursement.amount),
+      user: newReimbursement.user!,
+      department: newReimbursement.department!,
+      date: newReimbursement.date!,
+      status: newReimbursement.status as "pending" | "approved" | "rejected",
+      type: newReimbursement.type as "medical" | "travel" | "equipment" | "other",
+      category: newReimbursement.category!,
+      description: data.description,
+      documents: data.documents,
+      images: data.images
     };
 
-    setExpenses(prev => [expense, ...prev]);
+    setReimbursements(prev => [reimbursement, ...prev]);
     setIsAddingNew(false);
-    setNewExpense({});
+    setNewReimbursement({});
     setCurrentExpenseForDescription(null);
     
     toast({
       title: "Success",
-      description: "Expense added successfully",
+      description: "Reimbursement request submitted successfully",
     });
   };
 
   const handleCancelNew = () => {
     setIsAddingNew(false);
-    setNewExpense({});
+    setNewReimbursement({});
   };
 
   const handleSelectRecurring = (value: string) => {
     const idx = parseInt(value);
-    const recurring = recurringExpenses[idx];
+    const recurring = recurringReimbursements[idx];
     if (recurring) {
-      setNewExpense(prev => ({
+      setNewReimbursement(prev => ({
         ...prev,
         name: recurring.name,
         category: recurring.category,
         amount: recurring.amount,
-        department: recurring.department
+        department: recurring.department === "All" ? "" : recurring.department,
+        type: recurring.type as "medical" | "travel" | "equipment" | "other"
       }));
     }
   };
 
-  const filteredExpenses = expenses.filter(expense => {
-    const matchesSearch = expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         expense.user.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || expense.status === statusFilter;
-    const matchesDepartment = departmentFilter === "all" || expense.department === departmentFilter;
+  const filteredReimbursements = reimbursements.filter(reimbursement => {
+    const matchesSearch = reimbursement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         reimbursement.user.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || reimbursement.status === statusFilter;
+    const matchesDepartment = departmentFilter === "all" || reimbursement.department === departmentFilter;
     
     return matchesSearch && matchesStatus && matchesDepartment;
   });
 
-  const pendingClaims = expenses.filter(e => e.status === "pending").length;
+  const pendingClaims = reimbursements.filter(r => r.status === "pending").length;
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -222,29 +194,35 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     );
   };
 
+  const getTypeBadge = (type: string) => {
+    const colors = {
+      medical: "bg-blue-100 text-blue-800",
+      travel: "bg-green-100 text-green-800",
+      equipment: "bg-purple-100 text-purple-800",
+      other: "bg-gray-100 text-gray-800"
+    };
+    
+    return (
+      <Badge variant="outline" className={colors[type as keyof typeof colors]}>
+        {type}
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-6 p-6">
-      {/* Header with actions */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Expense Tracker</h2>
+          <h2 className="text-2xl font-bold">Reimbursement Management</h2>
           <p className="text-muted-foreground">
             {pendingClaims > 0 && (
               <span className="text-yellow-600 font-medium">
-                {pendingClaims} pending claims require attention
+                {pendingClaims} pending reimbursement requests require attention
               </span>
             )}
           </p>
         </div>
-        <Button 
-          onClick={handleAddNew} 
-          size="sm" 
-          className="flex items-center gap-2"
-          disabled={isAddingNew}
-        >
-          <Plus className="h-4 w-4" />
-          Add Expense
-        </Button>
       </div>
 
       {/* Filters */}
@@ -290,11 +268,11 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
         </CardContent>
       </Card>
 
-      {/* Expenses Table */}
+      {/* Reimbursements Table */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Recent Expenses</CardTitle>
+            <CardTitle>Reimbursement Requests</CardTitle>
             <Button 
               onClick={handleAddNew} 
               size="sm" 
@@ -302,7 +280,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
               disabled={isAddingNew}
             >
               <Plus className="h-4 w-4" />
-              Add Expense
+              Add Request
             </Button>
           </div>
         </CardHeader>
@@ -317,7 +295,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                 <TableHead>Type</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead>Category</TableHead>
                 {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead>Action</TableHead>}
               </TableRow>
             </TableHeader>
@@ -326,9 +304,9 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                 <TableRow className="bg-muted/30">
                   <TableCell>
                     <Input
-                      value={newExpense.name || ""}
-                      onChange={(e) => setNewExpense(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Expense name"
+                      value={newReimbursement.name || ""}
+                      onChange={(e) => setNewReimbursement(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Reimbursement name"
                       className="h-8"
                     />
                     <Select onValueChange={handleSelectRecurring}>
@@ -336,7 +314,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                         <SelectValue placeholder="Or select recurring" />
                       </SelectTrigger>
                       <SelectContent>
-                        {recurringExpenses.map((recurring, idx) => (
+                        {recurringReimbursements.map((recurring, idx) => (
                           <SelectItem key={idx} value={idx.toString()}>
                             {recurring.name}
                           </SelectItem>
@@ -344,9 +322,9 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{newExpense.user}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{newReimbursement.user}</TableCell>
                   <TableCell>
-                    <Select value={newExpense.department || ""} onValueChange={(value) => setNewExpense(prev => ({ ...prev, department: value }))}>
+                    <Select value={newReimbursement.department || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, department: value }))}>
                       <SelectTrigger className="h-8">
                         <SelectValue placeholder="Department" />
                       </SelectTrigger>
@@ -362,39 +340,41 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                   <TableCell>
                     <Input
                       type="number"
-                      value={newExpense.amount || ""}
-                      onChange={(e) => setNewExpense(prev => ({ ...prev, amount: Number(e.target.value) }))}
+                      value={newReimbursement.amount || ""}
+                      onChange={(e) => setNewReimbursement(prev => ({ ...prev, amount: Number(e.target.value) }))}
                       placeholder="0"
                       className="h-8 font-mono"
                     />
                   </TableCell>
                   <TableCell>
-                    <Select value={newExpense.type || "one-time"} onValueChange={(value: "one-time" | "recurring") => setNewExpense(prev => ({ ...prev, type: value }))}>
+                    <Select value={newReimbursement.type || "other"} onValueChange={(value: "medical" | "travel" | "equipment" | "other") => setNewReimbursement(prev => ({ ...prev, type: value }))}>
                       <SelectTrigger className="h-8">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="one-time">One-time</SelectItem>
-                        <SelectItem value="recurring">Recurring</SelectItem>
+                        <SelectItem value="medical">Medical</SelectItem>
+                        <SelectItem value="travel">Travel</SelectItem>
+                        <SelectItem value="equipment">Equipment</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{newExpense.date}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{newReimbursement.date}</TableCell>
                   <TableCell>
                     <Badge variant="secondary">Pending</Badge>
                   </TableCell>
                   <TableCell>
-                    <Select value={newExpense.category || ""} onValueChange={(value) => setNewExpense(prev => ({ ...prev, category: value }))}>
+                    <Select value={newReimbursement.category || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger className="h-8">
                         <SelectValue placeholder="Category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Software">Software</SelectItem>
-                        <SelectItem value="Supplies">Supplies</SelectItem>
-                        <SelectItem value="Food">Food</SelectItem>
+                        <SelectItem value="Healthcare">Healthcare</SelectItem>
                         <SelectItem value="Travel">Travel</SelectItem>
-                        <SelectItem value="Events">Events</SelectItem>
-                        <SelectItem value="Campaigns">Campaigns</SelectItem>
+                        <SelectItem value="Equipment">Equipment</SelectItem>
+                        <SelectItem value="Utilities">Utilities</SelectItem>
+                        <SelectItem value="Training">Training</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
@@ -410,31 +390,27 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                   </TableCell>
                 </TableRow>
               )}
-              {filteredExpenses.map((expense) => (
-                <TableRow key={expense.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">{expense.name}</TableCell>
-                  <TableCell>{expense.user}</TableCell>
-                  <TableCell>{expense.department}</TableCell>
-                  <TableCell className="font-mono">${expense.amount.toLocaleString()}</TableCell>
+              {filteredReimbursements.map((reimbursement) => (
+                <TableRow key={reimbursement.id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium">{reimbursement.name}</TableCell>
+                  <TableCell>{reimbursement.user}</TableCell>
+                  <TableCell>{reimbursement.department}</TableCell>
+                  <TableCell className="font-mono">${reimbursement.amount.toLocaleString()}</TableCell>
                   <TableCell>
-                    <Badge variant={expense.type === "recurring" ? "default" : "outline"}>
-                      {expense.type}
-                    </Badge>
+                    {getTypeBadge(reimbursement.type)}
                   </TableCell>
-                  <TableCell>{expense.date}</TableCell>
+                  <TableCell>{reimbursement.date}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {getStatusIcon(expense.status)}
-                      {getStatusBadge(expense.status)}
+                      {getStatusIcon(reimbursement.status)}
+                      {getStatusBadge(reimbursement.status)}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <ExpenseDetailsDialog expense={expense} />
-                  </TableCell>
+                  <TableCell>{reimbursement.category}</TableCell>
                   {(userRole === "hr" || userRole === "admin" || userRole === "manager") && (
                     <TableCell>
                       <div className="flex gap-2">
-                        {expense.status === "pending" && (
+                        {reimbursement.status === "pending" && (
                           <>
                             <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2">
                               Approve

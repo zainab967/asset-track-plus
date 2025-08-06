@@ -1,4 +1,4 @@
-import { BarChart3, Receipt, Package, MessageSquare, ChevronDown } from "lucide-react";
+import { BarChart3, Receipt, Package, MessageSquare, ChevronDown, CreditCard } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import {
@@ -46,6 +46,13 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
       url: "/assets", 
       icon: Package,
       description: "Company assets",
+      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
+    },
+    {
+      title: "Reimbursements",
+      url: "/reimbursements",
+      icon: CreditCard,
+      description: "Reimbursement requests",
       allowedRoles: ["Admin", "Manager", "HR", "Employee"]
     },
     {

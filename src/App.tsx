@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import LedgerPage from "./pages/LedgerPage";
 import ExpensePage from "./pages/ExpensePage";
 import AssetPage from "./pages/AssetPage";
+import ReimbursementPage from "./pages/ReimbursementPage";
 import ComplaintsPage from "./pages/ComplaintsPage";
 import NotFound from "./pages/NotFound";
 import { useState } from "react";
@@ -46,12 +47,17 @@ const App = () => {
               } />
               <Route path="/expenses" element={
                 <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
-                  <ExpensePage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin"} />
+                  <ExpensePage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
                 </AppLayout>
               } />
               <Route path="/assets" element={
                 <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
-                  <AssetPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin"} />
+                  <AssetPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
+                </AppLayout>
+              } />
+              <Route path="/reimbursements" element={
+                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
+                  <ReimbursementPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
                 </AppLayout>
               } />
               <Route path="/complaints" element={
