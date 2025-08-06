@@ -224,7 +224,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header with actions */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold">Expense Tracker</h2>
@@ -236,15 +236,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
             )}
           </p>
         </div>
-        <Button 
-          onClick={handleAddNew} 
-          size="sm" 
-          className="flex items-center gap-2"
-          disabled={isAddingNew}
-        >
-          <Plus className="h-4 w-4" />
-          Add Expense
-        </Button>
       </div>
 
       {/* Filters */}
