@@ -10,13 +10,14 @@ interface AppLayoutProps {
     role: string;
   };
   pendingClaims: number;
+  onRoleChange?: (role: string) => void;
 }
 
-export function AppLayout({ children, currentUser, pendingClaims }: AppLayoutProps) {
+export function AppLayout({ children, currentUser, pendingClaims, onRoleChange }: AppLayoutProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full flex bg-gradient-to-br from-background via-background to-muted/20">
-        <AppSidebar userRole={currentUser.role} />
+        <AppSidebar userRole={currentUser.role} onRoleChange={onRoleChange} />
         
         <div className="flex-1 flex flex-col">
           <div className="flex items-center border-b border-sidebar-border bg-sidebar p-2">

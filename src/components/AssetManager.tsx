@@ -30,7 +30,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState(userRole === "employee" ? "my-assets" : "assigned");
-  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
+  const [viewMode, setViewMode] = useState<"cards" | "list">("list");
   const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
   const [isAssetActionOpen, setIsAssetActionOpen] = useState(false);
 

@@ -1,4 +1,4 @@
-import { BarChart3, Receipt, Package, MessageSquare, Menu } from "lucide-react";
+import { BarChart3, Receipt, Package, MessageSquare, ChevronDown } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import {
@@ -13,12 +13,15 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+// Logo will be created with CSS
 
 interface AppSidebarProps {
   userRole: string;
+  onRoleChange?: (role: string) => void;
 }
 
-export function AppSidebar({ userRole }: AppSidebarProps) {
+export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -62,16 +65,34 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
   const isExpanded = accessibleItems.some((item) => isActive(item.url));
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-            <Menu className="h-4 w-4 text-primary-foreground" />
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-gradient-to-b from-primary/5 to-primary/10">
+      <SidebarHeader className="p-4 border-b border-primary/20">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center shadow-lg">
+            <div className="relative">
+              <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                <span className="text-xs font-bold text-blue-600">$</span>
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-white/90 rounded-full flex items-center justify-center">
+                <div className="w-1 h-1 bg-teal-500 rounded-full"></div>
+              </div>
+            </div>
           </div>
           {state === "expanded" && (
-            <div>
-              <h2 className="font-semibold text-sidebar-foreground">Financial Hub</h2>
-              <p className="text-xs text-sidebar-foreground/60">{userRole}</p>
+            <div className="flex-1">
+              <h2 className="font-bold text-lg text-primary">AIIM</h2>
+              <Select value={userRole} onValueChange={onRoleChange}>
+                <SelectTrigger className="w-full h-6 text-xs bg-transparent border-0 p-0 hover:bg-primary/10 focus:ring-0">
+                  <SelectValue className="text-xs text-sidebar-foreground/80" />
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="Manager">Manager</SelectItem>
+                  <SelectItem value="HR">HR</SelectItem>
+                  <SelectItem value="Employee">Employee</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>

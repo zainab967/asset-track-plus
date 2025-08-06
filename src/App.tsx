@@ -15,13 +15,20 @@ import { useState } from "react";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [currentUser] = useState({
+  const [currentUser, setCurrentUser] = useState({
     name: "John Doe",
     role: "Employee"
   });
 
   // Mock pending claims count
   const pendingClaims = 3;
+
+  const handleRoleChange = (newRole: string) => {
+    setCurrentUser(prev => ({
+      ...prev,
+      role: newRole
+    }));
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -33,22 +40,22 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Navigate to="/ledger" replace />} />
               <Route path="/ledger" element={
-                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims}>
+                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
                   <LedgerPage />
                 </AppLayout>
               } />
               <Route path="/expenses" element={
-                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims}>
+                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
                   <ExpensePage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin"} />
                 </AppLayout>
               } />
               <Route path="/assets" element={
-                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims}>
+                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
                   <AssetPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin"} />
                 </AppLayout>
               } />
               <Route path="/complaints" element={
-                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims}>
+                <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
                   <ComplaintsPage userRole={currentUser.role.toLowerCase()} />
                 </AppLayout>
               } />
