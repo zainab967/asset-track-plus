@@ -19,10 +19,15 @@ export function AppLayout({ children, currentUser, pendingClaims }: AppLayoutPro
         <AppSidebar userRole={currentUser.role} />
         
         <div className="flex-1 flex flex-col">
-          <Header 
-            currentUser={currentUser}
-            pendingClaims={pendingClaims}
-          />
+          <div className="flex items-center border-b border-sidebar-border bg-sidebar p-2">
+            <SidebarTrigger className="mr-4" />
+            <div className="flex-1">
+              <Header 
+                currentUser={currentUser}
+                pendingClaims={pendingClaims}
+              />
+            </div>
+          </div>
           
           <main className="flex-1 overflow-auto">
             {children}

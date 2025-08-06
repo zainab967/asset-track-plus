@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface AppHeaderProps {
   currentUser: {
@@ -15,10 +14,9 @@ interface AppHeaderProps {
 
 export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
   return (
-    <header className="border-b sticky top-0 z-50" style={{ backgroundColor: 'hsl(var(--header-bg))' }}>
+    <header className="border-b-0 flex-1" style={{ backgroundColor: 'hsl(var(--header-bg))' }}>
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-6">
-          <SidebarTrigger className="text-white hover:bg-white/10" />
           <h1 className="text-2xl font-bold text-white">
             <span style={{ color: 'hsl(var(--header-brand-accent))' }}>AIIM</span>Track
           </h1>
