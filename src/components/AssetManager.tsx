@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Wrench, AlertTriangle, CheckCircle, Package } from "lucide-react";
 import { AddAssetDialog } from "./AddAssetDialog";
-import { AssetMaintenanceDialog } from "./AssetMaintenanceDialog";
+import { AssetActionDialog } from "./AssetActionDialog";
 
 interface Asset {
   id: string;
@@ -236,7 +236,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   My Assets
                 </CardTitle>
-                <AssetMaintenanceDialog userRole={userRole} />
+                <AssetActionDialog userRole={userRole} />
               </div>
             </CardHeader>
             <CardContent>
