@@ -34,7 +34,7 @@ export function AssetActionDialog({ userRole, isOpen, onClose }: AssetActionDial
     setDialogOpen(false);
   };
 
-  const canSubmitRequest = userRole === "Employee" || userRole === "HR" || userRole === "Admin" || userRole === "Manager";
+  const canSubmitRequest = userRole === "employee" || userRole === "hr" || userRole === "admin" || userRole === "manager";
 
   if (!canSubmitRequest) {
     return null;
@@ -71,7 +71,7 @@ export function AssetActionDialog({ userRole, isOpen, onClose }: AssetActionDial
                 <RadioGroupItem value="request" id="request" />
                 <Label htmlFor="request">Asset Request</Label>
               </div>
-              {(userRole === "HR" || userRole === "Admin") && (
+              {(userRole === "hr" || userRole === "admin" || userRole === "manager") && (
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="log" id="log" />
                   <Label htmlFor="log">Log Asset</Label>
