@@ -6,8 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Plus, MessageSquare, AlertCircle, CheckCircle, Clock, Upload, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Search, Plus, MessageSquare, AlertCircle, CheckCircle, Clock, Upload, X, Eye, Edit, FileText, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ComplaintSuggestion {
@@ -21,6 +21,7 @@ interface ComplaintSuggestion {
   submittedBy: string;
   department: string;
   date: string;
+  attachedFiles?: File[];
 }
 
 interface ComplaintsPageProps {
@@ -32,13 +33,18 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<ComplaintSuggestion | null>(null);
+  const [editingItem, setEditingItem] = useState<ComplaintSuggestion | null>(null);
   const { toast } = useToast();
 
   const [newItem, setNewItem] = useState({
     title: "",
     description: "",
     type: "complaint" as "complaint" | "suggestion",
-    category: ""
+    category: "",
+    department: ""
   });
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -141,7 +147,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
   };
 
   const handleSubmit = () => {
-    if (!newItem.title || !newItem.description || !newItem.category) {
+    if (!newItem.title || !newItem.description || !newItem.category || !newItem.department) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -155,9 +161,39 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
       description: `${newItem.type === "complaint" ? "Complaint" : "Suggestion"} submitted successfully`,
     });
 
-    setNewItem({ title: "", description: "", type: "complaint", category: "" });
+    setNewItem({ title: "", description: "", type: "complaint", category: "", department: "" });
     setUploadedFiles([]);
     setIsSubmitDialogOpen(false);
+  };
+
+  const handleViewDetails = (item: ComplaintSuggestion) => {
+    setSelectedItem(item);
+    setIsDetailsDialogOpen(true);
+  };
+
+  const handleEditItem = (item: ComplaintSuggestion) => {
+    setEditingItem(item);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateStatus = (newStatus: "open" | "in-progress" | "resolved") => {
+    if (editingItem) {
+      toast({
+        title: "Status Updated",
+        description: `Status changed to ${newStatus}`,
+      });
+      setIsEditDialogOpen(false);
+    }
+  };
+
+  const handleUpdatePriority = (newPriority: "low" | "medium" | "high") => {
+    if (editingItem) {
+      toast({
+        title: "Priority Updated", 
+        description: `Priority changed to ${newPriority}`,
+      });
+      setIsEditDialogOpen(false);
+    }
   };
 
   return (
@@ -194,21 +230,39 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                 </Select>
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Category</label>
-                <Select value={newItem.category} onValueChange={(value) => setNewItem(prev => ({ ...prev, category: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Workplace Environment">Workplace Environment</SelectItem>
-                    <SelectItem value="HR Policy">HR Policy</SelectItem>
-                    <SelectItem value="Equipment">Equipment</SelectItem>
-                    <SelectItem value="Process Improvement">Process Improvement</SelectItem>
-                    <SelectItem value="Technology">Technology</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Category</label>
+                  <Select value={newItem.category} onValueChange={(value) => setNewItem(prev => ({ ...prev, category: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Workplace Environment">Workplace Environment</SelectItem>
+                      <SelectItem value="HR Policy">HR Policy</SelectItem>
+                      <SelectItem value="Equipment">Equipment</SelectItem>
+                      <SelectItem value="Process Improvement">Process Improvement</SelectItem>
+                      <SelectItem value="Technology">Technology</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Department</label>
+                  <Select value={newItem.department} onValueChange={(value) => setNewItem(prev => ({ ...prev, department: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Engineering">Engineering</SelectItem>
+                      <SelectItem value="Marketing">Marketing</SelectItem>
+                      <SelectItem value="Sales">Sales</SelectItem>
+                      <SelectItem value="HR">HR</SelectItem>
+                      <SelectItem value="Operations">Operations</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div>
@@ -230,30 +284,81 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Attach Files (Optional)</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Documents (Optional)
+                  </label>
                   <div className="flex items-center gap-2">
-                    <Input 
-                      type="file" 
-                      multiple 
-                      accept="image/*,.pdf,.doc,.docx,.txt"
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                      multiple
                       onChange={handleFileUpload}
-                      className="file:mr-2 file:px-2 file:py-1 file:rounded file:border-0 file:bg-muted file:text-foreground"
+                      className="h-8"
                     />
-                    <Upload className="h-4 w-4 text-muted-foreground" />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-3"
+                    >
+                      <Upload className="h-3 w-3" />
+                    </Button>
                   </div>
-                  
-                  {uploadedFiles.length > 0 && (
+                  {uploadedFiles.filter(f => !f.type.startsWith('image/')).length > 0 && (
                     <div className="space-y-1">
-                      {uploadedFiles.map((file, index) => (
+                      {uploadedFiles.filter(f => !f.type.startsWith('image/')).map((file, index) => (
                         <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
                           <span className="truncate">{file.name}</span>
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeFile(index)}
+                            onClick={() => removeFile(uploadedFiles.indexOf(file))}
+                            className="h-6 w-6 p-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Image className="h-4 w-4" />
+                    Images (Optional)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="h-8"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-3"
+                    >
+                      <Upload className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  {uploadedFiles.filter(f => f.type.startsWith('image/')).length > 0 && (
+                    <div className="space-y-1">
+                      {uploadedFiles.filter(f => f.type.startsWith('image/')).map((file, index) => (
+                        <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                          <span className="truncate">{file.name}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFile(uploadedFiles.indexOf(file))}
                             className="h-6 w-6 p-0"
                           >
                             <X className="h-3 w-3" />
@@ -338,6 +443,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                 <TableHead>Submitted By</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Date</TableHead>
+                <TableHead>Details</TableHead>
                 {userRole !== "employee" && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
@@ -361,12 +467,29 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                   <TableCell>{item.submittedBy}</TableCell>
                   <TableCell>{item.department}</TableCell>
                   <TableCell>{item.date}</TableCell>
+                  <TableCell>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-7 px-2"
+                      onClick={() => handleViewDetails(item)}
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      View
+                    </Button>
+                  </TableCell>
                   {userRole !== "employee" && (
                     <TableCell>
                       <div className="flex gap-2">
-                        {item.status !== "resolved" && (
-                          <Button size="sm" variant="outline" className="h-7 px-2">
-                            Update
+                        {userRole === "admin" && (
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="h-7 px-2"
+                            onClick={() => handleEditItem(item)}
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit
                           </Button>
                         )}
                       </div>
@@ -378,6 +501,128 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
           </Table>
         </CardContent>
       </Card>
+
+      {/* Details Dialog */}
+      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedItem?.type === "complaint" ? "Complaint" : "Suggestion"} Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedItem && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Type</label>
+                  <p className="capitalize">{selectedItem.type}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Category</label>
+                  <p>{selectedItem.category}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Priority</label>
+                  <div>{getPriorityBadge(selectedItem.priority)}</div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Status</label>
+                  <div>{getStatusBadge(selectedItem.status)}</div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Submitted By</label>
+                  <p>{selectedItem.submittedBy}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Department</label>
+                  <p>{selectedItem.department}</p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Title</label>
+                <p className="font-medium">{selectedItem.title}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Description</label>
+                <p className="text-sm">{selectedItem.description}</p>
+              </div>
+
+              {selectedItem.attachedFiles && selectedItem.attachedFiles.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Attached Files</label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {selectedItem.attachedFiles.map((file, index) => (
+                      <div key={index} className="p-2 border rounded flex items-center gap-2">
+                        {file.type.startsWith('image/') ? (
+                          <Image className="h-4 w-4" />
+                        ) : (
+                          <FileText className="h-4 w-4" />
+                        )}
+                        <span className="text-sm truncate">{file.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog for Admin */}
+      {userRole === "admin" && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Update {editingItem?.type}</DialogTitle>
+            </DialogHeader>
+            {editingItem && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Priority</label>
+                  <Select 
+                    value={editingItem.priority} 
+                    onValueChange={(value: "low" | "medium" | "high") => handleUpdatePriority(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Status</label>
+                  <Select 
+                    value={editingItem.status} 
+                    onValueChange={(value: "open" | "in-progress" | "resolved") => handleUpdateStatus(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="in-progress">In Progress</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

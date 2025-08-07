@@ -71,10 +71,12 @@ export function AssetActionDialog({ userRole, isOpen, onClose }: AssetActionDial
                 <RadioGroupItem value="request" id="request" />
                 <Label htmlFor="request">Asset Request</Label>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="log" id="log" />
-                <Label htmlFor="log">Log Asset</Label>
-              </div>
+              {userRole !== "employee" && (
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="log" id="log" />
+                  <Label htmlFor="log">Log Asset</Label>
+                </div>
+              )}
             </RadioGroup>
           </div>
 
