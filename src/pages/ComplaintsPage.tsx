@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Plus, MessageSquare, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { Search, Plus, MessageSquare, AlertCircle, CheckCircle, Clock, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ComplaintSuggestion {
@@ -40,6 +40,8 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
     type: "complaint" as "complaint" | "suggestion",
     category: ""
   });
+
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const mockData: ComplaintSuggestion[] = [
     {
@@ -126,6 +128,18 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
     );
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setUploadedFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = () => {
     if (!newItem.title || !newItem.description || !newItem.category) {
       toast({
@@ -142,6 +156,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
     });
 
     setNewItem({ title: "", description: "", type: "complaint", category: "" });
+    setUploadedFiles([]);
     setIsSubmitDialogOpen(false);
   };
 
@@ -213,6 +228,41 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                   placeholder="Provide detailed information..."
                   rows={4}
                 />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Attach Files (Optional)</label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      type="file" 
+                      multiple 
+                      accept="image/*,.pdf,.doc,.docx,.txt"
+                      onChange={handleFileUpload}
+                      className="file:mr-2 file:px-2 file:py-1 file:rounded file:border-0 file:bg-muted file:text-foreground"
+                    />
+                    <Upload className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  
+                  {uploadedFiles.length > 0 && (
+                    <div className="space-y-1">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                          <span className="truncate">{file.name}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFile(index)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-2 pt-4">

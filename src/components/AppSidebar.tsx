@@ -39,7 +39,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
       url: "/expenses",
       icon: Receipt,
       description: "Claims & expenses",
-      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
+      allowedRoles: ["Admin", "Manager", "HR"]
     },
     {
       title: "Asset Manager",
