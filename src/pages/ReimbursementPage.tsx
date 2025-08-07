@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Clock, CheckCircle, XCircle, Save, X } from "lucide-react";
+import { Search, Plus, Clock, CheckCircle, XCircle, Save, X, Upload, FileText, Image } from "lucide-react";
 import { ExpenseDescriptionDialog } from "@/components/ExpenseDescriptionDialog";
 import { useToast } from "@/hooks/use-toast";
 
@@ -36,6 +36,8 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   const [newReimbursement, setNewReimbursement] = useState<Partial<Reimbursement>>({});
   const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
   const [currentExpenseForDescription, setCurrentExpenseForDescription] = useState<any>(null);
+  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const { toast } = useToast();
 
   const mockReimbursements: Reimbursement[] = [
@@ -85,6 +87,8 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
 
   const handleAddNew = () => {
     setIsAddingNew(true);
+    setUploadedDocuments([]);
+    setUploadedImages([]);
     setNewReimbursement({
       id: Date.now().toString(),
       name: "",
@@ -113,6 +117,24 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
     setShowDescriptionDialog(true);
   };
 
+  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setUploadedDocuments(prev => [...prev, ...files]);
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setUploadedImages(prev => [...prev, ...files]);
+  };
+
+  const removeDocument = (index: number) => {
+    setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleDescriptionSave = (data: { description: string; documents: File[]; images: File[] }) => {
     const reimbursement: Reimbursement = {
       id: newReimbursement.id!,
@@ -125,13 +147,15 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
       type: newReimbursement.type as "medical" | "travel" | "equipment" | "other",
       category: newReimbursement.category!,
       description: data.description,
-      documents: data.documents,
-      images: data.images
+      documents: [...uploadedDocuments, ...data.documents],
+      images: [...uploadedImages, ...data.images]
     };
 
     setReimbursements(prev => [reimbursement, ...prev]);
     setIsAddingNew(false);
     setNewReimbursement({});
+    setUploadedDocuments([]);
+    setUploadedImages([]);
     setCurrentExpenseForDescription(null);
     
     toast({
@@ -143,6 +167,8 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   const handleCancelNew = () => {
     setIsAddingNew(false);
     setNewReimbursement({});
+    setUploadedDocuments([]);
+    setUploadedImages([]);
   };
 
   const handleSelectRecurring = (value: string) => {
@@ -301,94 +327,187 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
             </TableHeader>
             <TableBody>
               {isAddingNew && (
-                <TableRow className="bg-muted/30">
-                  <TableCell>
-                    <Input
-                      value={newReimbursement.name || ""}
-                      onChange={(e) => setNewReimbursement(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Reimbursement name"
-                      className="h-8"
-                    />
-                    <Select onValueChange={handleSelectRecurring}>
-                      <SelectTrigger className="h-6 text-xs mt-1">
-                        <SelectValue placeholder="Or select recurring" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {recurringReimbursements.map((recurring, idx) => (
-                          <SelectItem key={idx} value={idx.toString()}>
-                            {recurring.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{newReimbursement.user}</TableCell>
-                  <TableCell>
-                    <Select value={newReimbursement.department || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, department: value }))}>
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Department" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Engineering">Engineering</SelectItem>
-                        <SelectItem value="Marketing">Marketing</SelectItem>
-                        <SelectItem value="Sales">Sales</SelectItem>
-                        <SelectItem value="HR">HR</SelectItem>
-                        <SelectItem value="Operations">Operations</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={newReimbursement.amount || ""}
-                      onChange={(e) => setNewReimbursement(prev => ({ ...prev, amount: Number(e.target.value) }))}
-                      placeholder="0"
-                      className="h-8 font-mono"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Select value={newReimbursement.type || "other"} onValueChange={(value: "medical" | "travel" | "equipment" | "other") => setNewReimbursement(prev => ({ ...prev, type: value }))}>
-                      <SelectTrigger className="h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="medical">Medical</SelectItem>
-                        <SelectItem value="travel">Travel</SelectItem>
-                        <SelectItem value="equipment">Equipment</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{newReimbursement.date}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">Pending</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Select value={newReimbursement.category || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, category: value }))}>
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Healthcare">Healthcare</SelectItem>
-                        <SelectItem value="Travel">Travel</SelectItem>
-                        <SelectItem value="Equipment">Equipment</SelectItem>
-                        <SelectItem value="Utilities">Utilities</SelectItem>
-                        <SelectItem value="Training">Training</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button size="sm" onClick={handleSaveNew} className="h-7 w-7 p-0">
-                        <Save className="h-3 w-3" />
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={handleCancelNew} className="h-7 w-7 p-0">
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <>
+                  <TableRow className="bg-muted/30">
+                    <TableCell>
+                      <Input
+                        value={newReimbursement.name || ""}
+                        onChange={(e) => setNewReimbursement(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Reimbursement name"
+                        className="h-8"
+                      />
+                      <Select onValueChange={handleSelectRecurring}>
+                        <SelectTrigger className="h-6 text-xs mt-1">
+                          <SelectValue placeholder="Or select recurring" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {recurringReimbursements.map((recurring, idx) => (
+                            <SelectItem key={idx} value={idx.toString()}>
+                              {recurring.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{newReimbursement.user}</TableCell>
+                    <TableCell>
+                      <Select value={newReimbursement.department || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, department: value }))}>
+                        <SelectTrigger className="h-8">
+                          <SelectValue placeholder="Department" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Engineering">Engineering</SelectItem>
+                          <SelectItem value="Marketing">Marketing</SelectItem>
+                          <SelectItem value="Sales">Sales</SelectItem>
+                          <SelectItem value="HR">HR</SelectItem>
+                          <SelectItem value="Operations">Operations</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        value={newReimbursement.amount || ""}
+                        onChange={(e) => setNewReimbursement(prev => ({ ...prev, amount: Number(e.target.value) }))}
+                        placeholder="0"
+                        className="h-8 font-mono"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Select value={newReimbursement.type || "other"} onValueChange={(value: "medical" | "travel" | "equipment" | "other") => setNewReimbursement(prev => ({ ...prev, type: value }))}>
+                        <SelectTrigger className="h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="medical">Medical</SelectItem>
+                          <SelectItem value="travel">Travel</SelectItem>
+                          <SelectItem value="equipment">Equipment</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{newReimbursement.date}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">Pending</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Select value={newReimbursement.category || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, category: value }))}>
+                        <SelectTrigger className="h-8">
+                          <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Healthcare">Healthcare</SelectItem>
+                          <SelectItem value="Travel">Travel</SelectItem>
+                          <SelectItem value="Equipment">Equipment</SelectItem>
+                          <SelectItem value="Utilities">Utilities</SelectItem>
+                          <SelectItem value="Training">Training</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button size="sm" onClick={handleSaveNew} className="h-7 w-7 p-0">
+                          <Save className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={handleCancelNew} className="h-7 w-7 p-0">
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="bg-muted/20">
+                    <TableCell colSpan={8} className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Document Upload */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Documents
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="file"
+                              accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                              multiple
+                              onChange={handleDocumentUpload}
+                              className="h-8"
+                              id="document-upload"
+                            />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => document.getElementById('document-upload')?.click()}
+                              className="h-8 px-2"
+                            >
+                              <Upload className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          {uploadedDocuments.length > 0 && (
+                            <div className="space-y-1">
+                              {uploadedDocuments.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between text-xs bg-background p-1 rounded border">
+                                  <span className="truncate">{file.name}</span>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => removeDocument(index)}
+                                    className="h-4 w-4 p-0"
+                                  >
+                                    <X className="h-2 w-2" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Image Upload */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium flex items-center gap-2">
+                            <Image className="h-4 w-4" />
+                            Images
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={handleImageUpload}
+                              className="h-8"
+                              id="image-upload"
+                            />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => document.getElementById('image-upload')?.click()}
+                              className="h-8 px-2"
+                            >
+                              <Upload className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          {uploadedImages.length > 0 && (
+                            <div className="space-y-1">
+                              {uploadedImages.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between text-xs bg-background p-1 rounded border">
+                                  <span className="truncate">{file.name}</span>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => removeImage(index)}
+                                    className="h-4 w-4 p-0"
+                                  >
+                                    <X className="h-2 w-2" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </>
               )}
               {filteredReimbursements.map((reimbursement) => (
                 <TableRow key={reimbursement.id} className="hover:bg-muted/50">
