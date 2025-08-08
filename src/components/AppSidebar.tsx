@@ -42,7 +42,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
       allowedRoles: ["Admin", "Manager", "HR"]
     },
     {
-      title: "Asset Manager",
+      title: "Assets",
       url: "/assets", 
       icon: Package,
       description: "Company assets",
@@ -87,7 +87,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
           </div>
           {state === "expanded" && (
             <div className="flex-1">
-              <h2 className="font-bold text-lg text-primary">AIIM</h2>
+              <h2 className="font-bold text-lg text-primary">AIIMTRACK</h2>
               <Select value={userRole} onValueChange={onRoleChange}>
                 <SelectTrigger className="w-full h-6 text-xs bg-transparent border-0 p-0 hover:bg-primary/10 focus:ring-0">
                   <SelectValue className="text-xs text-sidebar-foreground/80" />
