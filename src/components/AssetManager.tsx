@@ -11,7 +11,7 @@ import { AssetActionDialog } from "./AssetActionDialog";
 
 interface Asset {
   id: string;
-  name: string;
+  assetid: string;
   category: string;
   assignedTo: string | null;
   department: string;
@@ -40,7 +40,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   const assets: Asset[] = [
     {
       id: "1",
-      name: "MacBook Pro 16-inch",
+      assetid: "l-3232",
       category: "Laptop",
       assignedTo: "John Doe",
       department: "Engineering",
@@ -51,7 +51,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "2",
-      name: "Standing Desk",
+      assetid: "f-323",
       category: "Furniture",
       assignedTo: "Jane Smith",
       department: "Engineering",
@@ -62,7 +62,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "3",
-      name: "Dell Monitor 27-inch",
+      assetid: "M-32323",
       category: "Monitor",
       assignedTo: null,
       department: "Unassigned",
@@ -73,7 +73,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "4",
-      name: "Office Printer",
+      assetid: "e-32323",
       category: "Equipment",
       assignedTo: "Shared Resource",
       department: "Operations",
@@ -84,7 +84,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "5",
-      name: "Conference Room TV",
+      assetid: "e-323",
       category: "Electronics",
       assignedTo: "Meeting Room A",
       department: "Operations",
@@ -95,7 +95,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "6",
-      name: "Wireless Mouse",
+      assetid: "p-3233",
       category: "Peripheral",
       assignedTo: "Current User",
       department: "Engineering",
@@ -106,7 +106,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "7",
-      name: "Mechanical Keyboard",
+      assetid: "M-2323",
       category: "Peripheral",
       assignedTo: "Current User",
       department: "Engineering",
@@ -118,7 +118,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   ];
 
   const filteredAssets = assets.filter(asset => {
-    const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = asset.assetid.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          asset.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (asset.assignedTo && asset.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesDepartment = departmentFilter === "all" || asset.department === departmentFilter;
@@ -209,7 +209,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold">
-            {userRole === "employee" ? "My Assets" : userRole === "hr" ? "HR Asset Management" : "Asset Manager"}
+            {userRole === "employee" ? "My Assets" : userRole === "hr" ? "HR Asset Management" : "Assets"}
           </h2>
           <p className="text-muted-foreground">
             {userRole === "employee" 
@@ -247,7 +247,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                       <div className="flex items-center gap-3">
                         {getStatusIcon(asset.status)}
                         <div>
-                          <p className="font-medium">{asset.name}</p>
+                          <p className="font-medium">{asset.assetid}</p>
                           <p className="text-sm text-muted-foreground">{asset.category}</p>
                         </div>
                       </div>
@@ -327,7 +327,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                     <div className="flex items-center gap-3">
                       {getStatusIcon(asset.status)}
                       <div>
-                        <p className="font-medium">{asset.name}</p>
+                        <p className="font-medium">{asset.assetid}</p>
                         <p className="text-sm text-muted-foreground">{asset.category}</p>
                       </div>
                     </div>
@@ -519,7 +519,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                   <table className="w-full">
                     <thead>
                       <tr className="border-b bg-muted/50">
-                        <th className="text-left p-4 font-medium">Asset Name</th>
+                        <th className="text-left p-4 font-medium">Asset ID</th>
                         <th className="text-left p-4 font-medium">Category</th>
                         <th className="text-left p-4 font-medium">Assigned To</th>
                         <th className="text-left p-4 font-medium">Department</th>
@@ -535,7 +535,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                     <tbody>
                       {filteredAssets.map((asset) => (
                         <tr key={asset.id} className="border-b hover:bg-muted/30">
-                          <td className="p-4 font-medium">{asset.name}</td>
+                          <td className="p-4 font-medium">{asset.assetid}</td>
                           <td className="p-4 text-muted-foreground">{asset.category}</td>
                           <td className="p-4">{asset.assignedTo || "Unassigned"}</td>
                           <td className="p-4">{asset.department}</td>
