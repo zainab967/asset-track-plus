@@ -11,6 +11,7 @@ import { AssetActionDialog } from "./AssetActionDialog";
 
 interface Asset {
   id: string;
+  name: string;
   assetid: string;
   category: string;
   assignedTo: string | null;
@@ -40,6 +41,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   const assets: Asset[] = [
     {
       id: "1",
+      name: "MacBook Pro 16\"",
       assetid: "l-3232",
       category: "Laptop",
       assignedTo: "John Doe",
@@ -51,6 +53,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "2",
+      name: "Standing Desk",
       assetid: "f-323",
       category: "Furniture",
       assignedTo: "Jane Smith",
@@ -62,6 +65,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "3",
+      name: "4K Monitor",
       assetid: "M-32323",
       category: "Monitor",
       assignedTo: null,
@@ -73,6 +77,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "4",
+      name: "Conference Phone",
       assetid: "e-32323",
       category: "Equipment",
       assignedTo: "Shared Resource",
@@ -84,6 +89,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "5",
+      name: "Projector",
       assetid: "e-323",
       category: "Electronics",
       assignedTo: "Meeting Room A",
@@ -95,6 +101,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "6",
+      name: "Wireless Mouse",
       assetid: "p-3233",
       category: "Peripheral",
       assignedTo: "Current User",
@@ -106,6 +113,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     },
     {
       id: "7",
+      name: "Mechanical Keyboard",
       assetid: "M-2323",
       category: "Peripheral",
       assignedTo: "Current User",
