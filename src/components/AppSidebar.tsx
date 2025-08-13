@@ -31,35 +31,30 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
       title: "Ledger View",
       url: "/ledger",
       icon: BarChart3,
-      description: "Financial overview",
       allowedRoles: ["Admin", "Manager", "HR"]
     },
     {
       title: "Expense Tracker", 
       url: "/expenses",
       icon: Receipt,
-      description: "Claims & expenses",
       allowedRoles: ["Admin", "Manager", "HR"]
     },
     {
       title: "Assets",
       url: "/assets", 
       icon: Package,
-      description: "Company assets",
       allowedRoles: ["Admin", "Manager", "HR", "Employee"]
     },
     {
       title: "Reimbursements",
       url: "/reimbursements",
       icon: CreditCard,
-      description: "Reimbursement requests",
       allowedRoles: ["Admin", "Manager", "HR", "Employee"]
     },
     {
       title: "Complaints & Suggestions",
       url: "/complaints",
       icon: MessageSquare,
-      description: "Feedback system",
       allowedRoles: ["Admin", "Manager", "HR", "Employee"]
     }
   ];
