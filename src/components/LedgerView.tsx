@@ -29,11 +29,11 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
   const overallChangePercent = (totalChange / totalBalance) * 100;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Company Overview */}
       <Card className="border-l-4 border-l-primary">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-semibold flex items-center justify-between">
             <span>Company Financial Overview</span>
             <Badge variant={overallChangePercent >= 0 ? "default" : "destructive"} className="text-sm">
               {overallChangePercent >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
@@ -41,20 +41,20 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold text-primary">
+        <CardContent className="space-y-4">
+          <div className="text-4xl font-bold text-primary">
             ${totalBalance.toLocaleString()}
           </div>
-          <p className="text-muted-foreground">Total approved expenses across all departments</p>
+          <p className="text-base text-muted-foreground">Total approved expenses across all departments</p>
         </CardContent>
       </Card>
 
       {/* Department Summaries */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {departments.map((dept) => (
           <Card key={dept.name} className="hover:shadow-md transition-all duration-200 group cursor-pointer">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center justify-between">
+            <CardHeader className="space-y-1 pb-3">
+              <CardTitle className="text-lg font-medium flex items-center justify-between">
                 <span>{dept.name}</span>
                 <Badge 
                   variant={dept.status === "positive" ? "default" : dept.status === "negative" ? "destructive" : "secondary"}
@@ -64,8 +64,8 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
                 </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
                 <div className="text-2xl font-bold">
                   ${dept.balance.toLocaleString()}
                 </div>
@@ -84,9 +84,9 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
-          <CardContent className="p-4 text-center">
+          <CardContent className="p-6 text-center space-y-1">
             <div className="text-2xl font-bold text-primary">6</div>
             <p className="text-sm text-muted-foreground">Active Departments</p>
           </CardContent>

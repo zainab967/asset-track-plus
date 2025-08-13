@@ -45,8 +45,8 @@ const Index = () => {
       pendingClaims={4}
     >
       {/* Demo Role Selector */}
-      <div className="p-4 bg-muted/30 border-b">
-        <div className="max-w-xs">
+      <div className="p-6 bg-muted/30 border-b">
+        <div className="max-w-xs space-y-1">
           <Select value={currentUser.role} onValueChange={(role) => {
             let name = "Admin User";
             if (role === "Employee") {
@@ -77,7 +77,7 @@ const Index = () => {
         userRole={currentUser.role}
       />
       
-      <main className="pb-8">
+      <main className="space-y-6 p-6">
         {renderActiveModule()}
       </main>
     </DashboardLayout>

@@ -15,9 +15,9 @@ interface AppHeaderProps {
 export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
   return (
     <header className="border-b-0 flex-1 bg-primary">
-      <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-6">
-          <h1 className="text-2xl font-bold text-primary-foreground">
+      <div className="flex items-center justify-between px-8 py-6">
+        <div className="flex items-center gap-8">
+          <h1 className="text-4xl font-bold text-primary-foreground">
             <span className="text-accent">AIIM</span>Track
           </h1>
           <div className="relative w-80">
@@ -29,7 +29,7 @@ export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <ThemeToggle />
           
           <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary-foreground/10">
@@ -41,11 +41,11 @@ export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
             )}
           </Button>
           
-          <div className="flex items-center gap-2 text-sm text-primary-foreground">
-            <User className="h-4 w-4" />
+          <div className="flex items-center gap-3 text-base text-primary-foreground">
+            <User className="h-5 w-5" />
             <div>
               <p className="font-medium">{currentUser.name}</p>
-              <p className="text-primary-foreground/70 text-xs">{currentUser.role}</p>
+              <p className="text-primary-foreground/70 text-sm">{currentUser.role}</p>
             </div>
           </div>
         </div>

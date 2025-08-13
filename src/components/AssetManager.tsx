@@ -212,14 +212,14 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-bold">
             {userRole === "employee" ? "My Assets" : userRole === "hr" ? "HR Asset Management" : "Assets"}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             {userRole === "employee" 
               ? "View your assigned assets and request new ones"
               : userRole === "hr"
@@ -247,8 +247,8 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                 <AssetActionDialog userRole={userRole} />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
                 {assets.filter(a => a.assignedTo === currentUser).length > 0 ? (
                   assets.filter(a => a.assignedTo === currentUser).map((asset) => (
                     <div key={asset.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
@@ -279,9 +279,9 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <>
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Assigned Assets</p>
                     <p className="text-2xl font-bold text-green-600">{assetCounts.assigned}</p>
                   </div>

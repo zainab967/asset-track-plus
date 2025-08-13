@@ -223,12 +223,12 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Expense Tracker</h2>
-          <p className="text-muted-foreground">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-bold">Expense Tracker</h2>
+          <p className="text-base text-muted-foreground">
             {pendingClaims > 0 && (
               <span className="text-yellow-600 font-medium">
                 {pendingClaims} pending claims require attention
@@ -240,8 +240,8 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row gap-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
