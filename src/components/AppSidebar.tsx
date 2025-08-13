@@ -123,9 +123,9 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
                       >
                         <Icon className="h-4 w-4" />
                         {state === "expanded" && (
-                          <div>
-                            <div className="font-medium">{item.title}</div>
-                            <div className="text-xs opacity-70">{item.description}</div>
+                          <div className="transition-all duration-300 ease-out hover:scale-105">
+                            <div className="font-medium transition-colors duration-200 hover:text-primary">{item.title}</div>
+                            <div className="text-xs opacity-70 transition-opacity duration-200 hover:opacity-90">{item.description}</div>
                           </div>
                         )}
                       </NavLink>
