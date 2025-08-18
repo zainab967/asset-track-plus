@@ -114,14 +114,13 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
                     <SidebarMenuButton asChild isActive={active}>
                       <NavLink 
                         to={item.url} 
-                        className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
+                        className="flex items-center gap-3 px-2 py-2 mx-1 rounded-lg transition-all duration-200"
                       >
-                        <Icon className="h-4 w-4" />
+                        <Icon className="h-4 w-4 flex-shrink-0" />
                         {state === "expanded" && (
-                          <div className="transition-all duration-300 ease-out hover:scale-105">
-                            <div className="font-medium transition-colors duration-200 hover:text-primary">{item.title}</div>
-                            <div className="text-xs opacity-70 transition-opacity duration-200 hover:opacity-90">{item.description}</div>
-                          </div>
+                          <span className="font-medium transition-all duration-200 hover:scale-105 hover:text-primary truncate">
+                            {item.title}
+                          </span>
                         )}
                       </NavLink>
                     </SidebarMenuButton>
