@@ -552,17 +552,45 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
               {selectedItem.attachedFiles && selectedItem.attachedFiles.length > 0 && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Attached Files</label>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    {selectedItem.attachedFiles.map((file, index) => (
-                      <div key={index} className="p-2 border rounded flex items-center gap-2">
-                        {file.type.startsWith('image/') ? (
-                          <Image className="h-4 w-4" />
-                        ) : (
-                          <FileText className="h-4 w-4" />
-                        )}
-                        <span className="text-sm truncate">{file.name}</span>
+                  <div className="space-y-3 mt-2">
+                    {/* Documents */}
+                    {selectedItem.attachedFiles.filter(f => !f.type.startsWith('image/')).length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Documents</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {selectedItem.attachedFiles.filter(f => !f.type.startsWith('image/')).map((file, index) => (
+                            <div key={index} className="p-2 border rounded flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              <span className="text-sm truncate">{file.name}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    ))}
+                    )}
+                    
+                    {/* Images */}
+                    {selectedItem.attachedFiles.filter(f => f.type.startsWith('image/')).length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Images</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {selectedItem.attachedFiles.filter(f => f.type.startsWith('image/')).map((file, index) => (
+                            <div key={index} className="space-y-1">
+                              <div className="aspect-video border rounded overflow-hidden bg-muted">
+                                <img 
+                                  src={URL.createObjectURL(file)} 
+                                  alt={file.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Image className="h-3 w-3" />
+                                <span className="truncate">{file.name}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

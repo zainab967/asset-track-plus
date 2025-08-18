@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Clock, CheckCircle, XCircle, Save, X, Upload, FileText, Image } from "lucide-react";
+import { Search, Plus, Clock, CheckCircle, XCircle, Save, X, Upload, FileText, Image, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ExpenseDescriptionDialog } from "@/components/ExpenseDescriptionDialog";
 import { useToast } from "@/hooks/use-toast";
 
@@ -38,6 +39,8 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   const [currentExpenseForDescription, setCurrentExpenseForDescription] = useState<any>(null);
   const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedReimbursement, setSelectedReimbursement] = useState<Reimbursement | null>(null);
   const { toast } = useToast();
 
   const mockReimbursements: Reimbursement[] = [
@@ -186,6 +189,11 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
     }
   };
 
+  const handleViewDetails = (reimbursement: Reimbursement) => {
+    setSelectedReimbursement(reimbursement);
+    setIsViewDialogOpen(true);
+  };
+
   const filteredReimbursements = reimbursements.filter(reimbursement => {
     const matchesSearch = reimbursement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          reimbursement.user.toLowerCase().includes(searchTerm.toLowerCase());
@@ -322,6 +330,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead>Details</TableHead>
                 {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead>Action</TableHead>}
               </TableRow>
             </TableHeader>
@@ -526,6 +535,17 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                     </div>
                   </TableCell>
                   <TableCell>{reimbursement.category}</TableCell>
+                  <TableCell>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-7 px-2"
+                      onClick={() => handleViewDetails(reimbursement)}
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      View
+                    </Button>
+                  </TableCell>
                   {(userRole === "hr" || userRole === "admin" || userRole === "manager") && (
                     <TableCell>
                       <div className="flex gap-2">
@@ -558,6 +578,110 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
         onSave={handleDescriptionSave}
         expense={currentExpenseForDescription}
       />
+
+      {/* View Details Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Reimbursement Details</DialogTitle>
+          </DialogHeader>
+          {selectedReimbursement && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Name</label>
+                  <p className="font-medium">{selectedReimbursement.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Amount</label>
+                  <p className="font-mono text-lg">${selectedReimbursement.amount.toLocaleString()}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Type</label>
+                  <div>{getTypeBadge(selectedReimbursement.type)}</div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Status</label>
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(selectedReimbursement.status)}
+                    {getStatusBadge(selectedReimbursement.status)}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">User</label>
+                  <p>{selectedReimbursement.user}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Department</label>
+                  <p>{selectedReimbursement.department}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Category</label>
+                  <p>{selectedReimbursement.category}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Date</label>
+                  <p>{selectedReimbursement.date}</p>
+                </div>
+              </div>
+
+              {selectedReimbursement.description && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Description</label>
+                  <p className="text-sm">{selectedReimbursement.description}</p>
+                </div>
+              )}
+
+              {((selectedReimbursement.documents && selectedReimbursement.documents.length > 0) || 
+                (selectedReimbursement.images && selectedReimbursement.images.length > 0)) && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Attachments</label>
+                  <div className="space-y-3 mt-2">
+                    {/* Documents */}
+                    {selectedReimbursement.documents && selectedReimbursement.documents.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Documents</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {selectedReimbursement.documents.map((file, index) => (
+                            <div key={index} className="p-2 border rounded flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              <span className="text-sm truncate">{file.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Images */}
+                    {selectedReimbursement.images && selectedReimbursement.images.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Images</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {selectedReimbursement.images.map((file, index) => (
+                            <div key={index} className="space-y-1">
+                              <div className="aspect-video border rounded overflow-hidden bg-muted">
+                                <img 
+                                  src={URL.createObjectURL(file)} 
+                                  alt={file.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Image className="h-3 w-3" />
+                                <span className="truncate">{file.name}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
