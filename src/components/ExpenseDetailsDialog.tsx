@@ -75,7 +75,7 @@ export function ExpenseDetailsDialog({ expense }: ExpenseDetailsDialogProps) {
             <div className="flex items-center gap-2">
               <Building className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm text-muted-foreground">Department</p>
+                <p className="text-sm text-muted-foreground">Building</p>
                 <p className="font-medium">{expense.department}</p>
               </div>
             </div>

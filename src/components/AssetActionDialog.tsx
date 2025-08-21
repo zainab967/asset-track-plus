@@ -89,17 +89,14 @@ export function AssetActionDialog({ userRole, isOpen, onClose }: AssetActionDial
             
             {actionType !== "log" && (
               <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
+                <Label htmlFor="building">Building</Label>
                 <Select required>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder="Select Office" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="engineering">Engineering</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="sales">Sales</SelectItem>
-                    <SelectItem value="hr">HR</SelectItem>
-                    <SelectItem value="operations">Operations</SelectItem>
+                    <SelectItem value="engineering">Etihad Office</SelectItem>
+                    <SelectItem value="marketing">Abdalian Office</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

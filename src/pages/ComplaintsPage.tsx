@@ -197,7 +197,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -386,7 +386,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -398,7 +398,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
             </div>
             
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
@@ -409,7 +409,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
             </Select>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -428,7 +428,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            Feedback Items
+          Feedback Items
           </CardTitle>
         </CardHeader>
         <CardContent>

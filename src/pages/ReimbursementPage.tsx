@@ -244,7 +244,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -274,7 +274,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
             </div>
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -286,7 +286,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
             </Select>
 
             <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Department" />
               </SelectTrigger>
               <SelectContent>

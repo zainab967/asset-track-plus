@@ -20,7 +20,7 @@ export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
           <h1 className="text-4xl font-bold text-primary-foreground">
             <span className="text-accent">AIIM</span>Track
           </h1>
-          <div className="relative w-80">
+          <div className="relative w-full max-w-md sm:max-w-lg lg:max-w-2xl">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-foreground/70 h-4 w-4" />
             <Input 
               placeholder="Search expenses, assets, departments..." 

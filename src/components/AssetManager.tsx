@@ -45,7 +45,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "l-3232",
       category: "Laptop",
       assignedTo: "John Doe",
-      department: "Engineering",
+      department: "Etihad Office",
       status: "assigned",
       value: 2499,
       purchaseDate: "2023-06-15",
@@ -57,7 +57,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "f-323",
       category: "Furniture",
       assignedTo: "Jane Smith",
-      department: "Engineering",
+      department: "Etihad Office",
       status: "assigned",
       value: 799,
       purchaseDate: "2023-08-20",
@@ -69,7 +69,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "M-32323",
       category: "Monitor",
       assignedTo: null,
-      department: "Unassigned",
+      department: "Abdalian Office",
       status: "unassigned",
       value: 399,
       purchaseDate: "2023-09-10",
@@ -81,7 +81,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "e-32323",
       category: "Equipment",
       assignedTo: "Shared Resource",
-      department: "Operations",
+      department: "Etihad Office",
       status: "maintenance",
       value: 1200,
       purchaseDate: "2022-03-15",
@@ -93,7 +93,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "e-323",
       category: "Electronics",
       assignedTo: "Meeting Room A",
-      department: "Operations",
+      department: "Etihad Office",
       status: "maintenance",
       value: 899,
       purchaseDate: "2022-11-05",
@@ -105,7 +105,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "p-3233",
       category: "Peripheral",
       assignedTo: "Current User",
-      department: "Engineering",
+      department: "Etihad Office",
       status: "assigned",
       value: 89,
       purchaseDate: "2023-12-01",
@@ -117,7 +117,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "M-2323",
       category: "Peripheral",
       assignedTo: "Current User",
-      department: "Engineering",
+      department: "Etihad Office",
       status: "assigned",
       value: 159,
       purchaseDate: "2023-12-01",
@@ -212,7 +212,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
@@ -376,13 +376,10 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                 <SelectValue placeholder="Filter by department" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                <SelectItem value="Engineering">Engineering</SelectItem>
-                <SelectItem value="Marketing">Marketing</SelectItem>
-                <SelectItem value="Sales">Sales</SelectItem>
-                <SelectItem value="HR">HR</SelectItem>
-                <SelectItem value="Operations">Operations</SelectItem>
-              </SelectContent>
+                <SelectItem value="all">All Offices</SelectItem>
+                <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
+            </SelectContent>
             </Select>
 
             <Select value={sortBy} onValueChange={(value: "all" | "assigned" | "unassigned" | "maintenance") => setSortBy(value)}>
@@ -467,7 +464,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Department:</span>
+                        <span className="text-muted-foreground">Office:</span>
                         <span>{asset.department}</span>
                       </div>
                       <div className="flex justify-between text-sm">

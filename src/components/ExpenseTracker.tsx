@@ -44,7 +44,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Office supplies and equipment",
       amount: 1250,
       user: "John Doe",
-      department: "Engineering",
+      department: "Abdalian Office",
       date: "2024-01-15",
       status: "approved",
       type: "one-time",
@@ -55,7 +55,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Monthly software licenses",
       amount: 2400,
       user: "Jane Smith",
-      department: "Engineering",
+      department: "Etihad Office",
       date: "2024-01-14",
       status: "pending",
       type: "recurring",
@@ -66,7 +66,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Team building event",
       amount: 800,
       user: "Mike Johnson",
-      department: "HR",
+      department: "Etihad Office",
       date: "2024-01-13",
       status: "approved",
       type: "one-time",
@@ -77,7 +77,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Marketing campaign budget",
       amount: 5000,
       user: "Sarah Williams",
-      department: "Marketing",
+      department: "Abdalian Office",
       date: "2024-01-12",
       status: "pending",
       type: "one-time",
@@ -88,7 +88,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Travel expenses - client meeting",
       amount: 650,
       user: "Tom Brown",
-      department: "Sales",
+      department: "Etihad Office",
       date: "2024-01-11",
       status: "rejected",
       type: "one-time",
@@ -99,7 +99,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "chips",
       amount: 50,
       user: "Zainab",
-      department: "Operations",
+      department: "Etihad Office",
       date: "2024-01-14",
       status: "pending",
       type: "recurring",
@@ -110,9 +110,9 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
 
   const recurringExpenses = [
-    { name: "Monthly software licenses", category: "Software", amount: 2400, department: "Engineering" },
-    { name: "Office supplies", category: "Supplies", amount: 150, department: "Operations" },
-    { name: "Team lunch", category: "Food", amount: 200, department: "HR" }
+    { name: "Monthly software licenses", category: "Software", amount: 2400, department: "Etihad Office" },
+    { name: "Office supplies", category: "Supplies", amount: 150, department: "Abdalian Offie" },
+    { name: "Team lunch", category: "Food", amount: 200, department: "Etihad Office" }
   ];
 
   const handleAddNew = () => {
@@ -223,7 +223,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
@@ -240,7 +240,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -253,7 +253,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
             </div>
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -265,16 +265,13 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
             </Select>
 
             <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Department" />
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="Building" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Departments</SelectItem>
-                <SelectItem value="Engineering">Engineering</SelectItem>
-                <SelectItem value="Marketing">Marketing</SelectItem>
-                <SelectItem value="Sales">Sales</SelectItem>
-                <SelectItem value="HR">HR</SelectItem>
-                <SelectItem value="Operations">Operations</SelectItem>
+                <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
               </SelectContent>
             </Select>
           </div>

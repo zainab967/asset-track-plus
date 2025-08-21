@@ -85,11 +85,8 @@ export function AddAssetDialog() {
                     <SelectValue placeholder="Select department" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="finance">Finance</SelectItem>
-                    <SelectItem value="hr">Human Resources</SelectItem>
-                    <SelectItem value="it">IT</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="operations">Operations</SelectItem>
+                    <SelectItem value="finance">Etihad Office</SelectItem>
+                    <SelectItem value="hr">Abdalian Office</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -127,17 +124,14 @@ export function AddAssetDialog() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="requestDept">Department</Label>
+                <Label htmlFor="requestDept">Building</Label>
                 <Select required>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder="Select Building" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="finance">Finance</SelectItem>
-                    <SelectItem value="hr">Human Resources</SelectItem>
-                    <SelectItem value="it">IT</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="operations">Operations</SelectItem>
+                    <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                    <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -179,12 +173,12 @@ export function AddAssetDialog() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="department">Department</Label>
+                    <Label htmlFor="building">Building</Label>
                     <Input
-                      id="department"
+                      id="building"
                       value={department}
                       onChange={(e) => setDepartment(e.target.value)}
-                      placeholder="Enter department"
+                      placeholder="Enter Building"
                     />
                   </div>
                 </>

@@ -70,13 +70,13 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-gradient-to-b from-primary/5 to-primary/10">
       <SidebarHeader className="p-4 border-b border-primary/20">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center shadow-lg">
+          <div className="h-10 w-10 rounded-lg bg-gradient-primary flex items-center justify-center shadow-lg">
             <div className="relative">
               <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-                <span className="text-xs font-bold text-blue-600">$</span>
+                <span className="text-xs font-bold text-primary">$</span>
               </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-white/90 rounded-full flex items-center justify-center">
-                <div className="w-1 h-1 bg-teal-500 rounded-full"></div>
+                <div className="w-1 h-1 bg-primary rounded-full"></div>
               </div>
             </div>
           </div>
@@ -116,7 +116,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
                         to={item.url} 
                         className="flex items-center gap-2 px-2 py-1.5 mx-0.5 rounded-md transition-all duration-200 overflow-hidden"
                       >
-                        <Icon className="h-4 w-4 flex-shrink-0" />
+                        <Icon className={"h-4 w-4 flex-shrink-0 " + (active ? "text-primary" : "text-sidebar-foreground/70")} />
                         {state === "expanded" && (
                           <span className="font-medium transition-transform duration-200 hover:scale-[1.02] truncate max-w-full">
                             {item.title}
