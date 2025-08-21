@@ -15,7 +15,7 @@ interface Asset {
   assetid: string;
   category: string;
   assignedTo: string | null;
-  department: string;
+  building: string;
   status: "assigned" | "unassigned" | "maintenance";
   value: number;
   purchaseDate: string;
@@ -29,7 +29,7 @@ interface AssetManagerProps {
 
 export function AssetManager({ userRole = "admin", currentUser = "Current User" }: AssetManagerProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [buildingFilter, setBuildingFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState(userRole === "employee" ? "my-assets" : "assigned");
   const [viewMode, setViewMode] = useState<"cards" | "list">("list");
   const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
@@ -45,7 +45,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "l-3232",
       category: "Laptop",
       assignedTo: "John Doe",
-      department: "Etihad Office",
+      building: "Etihad Office",
       status: "assigned",
       value: 2499,
       purchaseDate: "2023-06-15",
@@ -57,7 +57,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "f-323",
       category: "Furniture",
       assignedTo: "Jane Smith",
-      department: "Etihad Office",
+      building: "Etihad Office",
       status: "assigned",
       value: 799,
       purchaseDate: "2023-08-20",
@@ -69,7 +69,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "M-32323",
       category: "Monitor",
       assignedTo: null,
-      department: "Abdalian Office",
+      building: "Abdalian Office",
       status: "unassigned",
       value: 399,
       purchaseDate: "2023-09-10",
@@ -81,7 +81,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "e-32323",
       category: "Equipment",
       assignedTo: "Shared Resource",
-      department: "Etihad Office",
+      building: "Etihad Office",
       status: "maintenance",
       value: 1200,
       purchaseDate: "2022-03-15",
@@ -93,7 +93,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "e-323",
       category: "Electronics",
       assignedTo: "Meeting Room A",
-      department: "Etihad Office",
+      building: "Etihad Office",
       status: "maintenance",
       value: 899,
       purchaseDate: "2022-11-05",
@@ -105,7 +105,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "p-3233",
       category: "Peripheral",
       assignedTo: "Current User",
-      department: "Etihad Office",
+      building: "Etihad Office",
       status: "assigned",
       value: 89,
       purchaseDate: "2023-12-01",
@@ -117,7 +117,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       assetid: "M-2323",
       category: "Peripheral",
       assignedTo: "Current User",
-      department: "Etihad Office",
+      building: "Etihad Office",
       status: "assigned",
       value: 159,
       purchaseDate: "2023-12-01",
@@ -129,7 +129,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     const matchesSearch = asset.assetid.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          asset.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (asset.assignedTo && asset.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesDepartment = departmentFilter === "all" || asset.department === departmentFilter;
+    const matchesDepartment = buildingFilter === "all" || asset.building === buildingFilter;
     
     // Filter based on sort criteria
     let matchesSort = true;
@@ -371,12 +371,12 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
               />
             </div>
 
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+            <Select value={buildingFilter} onValueChange={setBuildingFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by department" />
+                <SelectValue placeholder="Filter by building" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Offices</SelectItem>
+                <SelectItem value="all">All Buildings</SelectItem>
                 <SelectItem value="Etihad Office">Etihad Office</SelectItem>
                 <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
             </SelectContent>
@@ -465,7 +465,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Office:</span>
-                        <span>{asset.department}</span>
+                        <span>{asset.building}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Value:</span>
@@ -527,7 +527,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                         <th className="text-left p-4 font-medium">Asset ID</th>
                         <th className="text-left p-4 font-medium">Category</th>
                         <th className="text-left p-4 font-medium">Assigned To</th>
-                        <th className="text-left p-4 font-medium">Department</th>
+                        <th className="text-left p-4 font-medium">Building</th>
                         <th className="text-left p-4 font-medium">Status</th>
                         <th className="text-left p-4 font-medium">Value</th>
                         <th className="text-left p-4 font-medium">Condition</th>
@@ -543,7 +543,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                           <td className="p-4 font-medium">{asset.assetid}</td>
                           <td className="p-4 text-muted-foreground">{asset.category}</td>
                           <td className="p-4">{asset.assignedTo || "Unassigned"}</td>
-                          <td className="p-4">{asset.department}</td>
+                          <td className="p-4">{asset.building}</td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
                               {getStatusIcon(asset.status)}

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
 
-interface DepartmentSummary {
+interface BuildingSummary {
   name: string;
   balance: number;
   monthlyChange: number;
@@ -11,17 +11,17 @@ interface DepartmentSummary {
 }
 
 interface LedgerViewProps {
-  onNavigateToExpenses: (department: string) => void;
+  onNavigateToExpenses: (building: string) => void;
 }
 
 export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
-  const departments: DepartmentSummary[] = [
-    { name: "Engineering", balance: 45600, monthlyChange: 12.5, status: "positive" },
-    { name: "Marketing", balance: 32100, monthlyChange: -8.2, status: "negative" },
-    { name: "Sales", balance: 28400, monthlyChange: 5.7, status: "positive" },
-    { name: "HR", balance: 19800, monthlyChange: -2.1, status: "negative" },
-    { name: "Operations", balance: 15300, monthlyChange: 0.8, status: "neutral" },
-    { name: "Finance", balance: 12900, monthlyChange: 15.2, status: "positive" }
+  const departments: BuildingSummary[] = [
+    { name: "Etihad Office", balance: 45600, monthlyChange: 12.5, status: "positive" },
+    { name: "Abdalian Office", balance: 32100, monthlyChange: -8.2, status: "negative" },
+   // { name: "Sales", balance: 28400, monthlyChange: 5.7, status: "positive" },
+    //{ name: "HR", balance: 19800, monthlyChange: -2.1, status: "negative" },
+    //{ name: "Operations", balance: 15300, monthlyChange: 0.8, status: "neutral" },
+    //{ name: "Finance", balance: 12900, monthlyChange: 15.2, status: "positive" }
   ];
 
   const totalBalance = departments.reduce((sum, dept) => sum + dept.balance, 0);
@@ -49,30 +49,30 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
         </CardContent>
       </Card>
 
-      {/* Department Summaries */}
+      {/* Building Summaries */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {departments.map((dept) => (
-          <Card key={dept.name} className="hover:shadow-md transition-all duration-200 group cursor-pointer">
+        {departments.map((building) => (
+          <Card key={building.name} className="hover:shadow-md transition-all duration-200 group cursor-pointer">
             <CardHeader className="space-y-1 pb-3">
               <CardTitle className="text-lg font-medium flex items-center justify-between">
-                <span>{dept.name}</span>
-                <Badge 
-                  variant={dept.status === "positive" ? "default" : dept.status === "negative" ? "destructive" : "secondary"}
+                <span>{building.name}</span>
+                <Badge
+                  variant={building.status === "positive" ? "default" : building.status === "negative" ? "destructive" : "secondary"}
                   className="text-xs"
                 >
-                  {dept.monthlyChange >= 0 ? "+" : ""}{dept.monthlyChange}%
+                  {building.monthlyChange >= 0 ? "+" : ""}{building.monthlyChange}%
                 </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">
                 <div className="text-2xl font-bold">
-                  ${dept.balance.toLocaleString()}
+                  ${building.balance.toLocaleString()}
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => onNavigateToExpenses(dept.name)}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onNavigateToExpenses(building.name)}
                   className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                 >
                   View Details <ArrowRight className="ml-2 h-3 w-3" />
@@ -88,7 +88,7 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
         <Card>
           <CardContent className="p-6 text-center space-y-1">
             <div className="text-2xl font-bold text-primary">6</div>
-            <p className="text-sm text-muted-foreground">Active Departments</p>
+            <p className="text-sm text-muted-foreground">Active Buildings</p>
           </CardContent>
         </Card>
         <Card>

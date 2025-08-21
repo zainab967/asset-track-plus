@@ -16,7 +16,7 @@ interface Expense {
   name: string;
   amount: number;
   user: string;
-  department: string;
+  building: string;
   date: string;
   status: "pending" | "approved" | "rejected";
   type: "one-time" | "recurring";
@@ -31,7 +31,7 @@ interface ExpenseTrackerProps {
 export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: ExpenseTrackerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [departmentFilter, setDepartmentFilter] = useState<string>(selectedDepartment || "all");
+  const [buildingFilter, setBuildingFilter] = useState<string>(selectedDepartment || "all");
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newExpense, setNewExpense] = useState<Partial<Expense>>({});
   const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
@@ -44,7 +44,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Office supplies and equipment",
       amount: 1250,
       user: "John Doe",
-      department: "Abdalian Office",
+      building: "Abdalian Office",
       date: "2024-01-15",
       status: "approved",
       type: "one-time",
@@ -55,7 +55,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Monthly software licenses",
       amount: 2400,
       user: "Jane Smith",
-      department: "Etihad Office",
+      building: "Etihad Office",
       date: "2024-01-14",
       status: "pending",
       type: "recurring",
@@ -66,7 +66,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Team building event",
       amount: 800,
       user: "Mike Johnson",
-      department: "Etihad Office",
+      building: "Etihad Office",
       date: "2024-01-13",
       status: "approved",
       type: "one-time",
@@ -77,7 +77,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Marketing campaign budget",
       amount: 5000,
       user: "Sarah Williams",
-      department: "Abdalian Office",
+      building: "Abdalian Office",
       date: "2024-01-12",
       status: "pending",
       type: "one-time",
@@ -88,7 +88,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "Travel expenses - client meeting",
       amount: 650,
       user: "Tom Brown",
-      department: "Etihad Office",
+      building: "Etihad Office",
       date: "2024-01-11",
       status: "rejected",
       type: "one-time",
@@ -99,7 +99,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "chips",
       amount: 50,
       user: "Zainab",
-      department: "Etihad Office",
+      building: "Etihad Office",
       date: "2024-01-14",
       status: "pending",
       type: "recurring",
@@ -122,7 +122,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       name: "",
       amount: 0,
       user: "Current User", // In a real app, this would come from auth
-      department: "",
+      building: "",
       date: new Date().toISOString().split('T')[0],
       status: "pending",
       type: "one-time",
@@ -131,7 +131,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   };
 
   const handleSaveNew = () => {
-    if (!newExpense.name || !newExpense.category || !newExpense.department || !newExpense.amount) {
+    if (!newExpense.name || !newExpense.category || !newExpense.building || !newExpense.amount) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -145,18 +145,20 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     setShowDescriptionDialog(true);
   };
 
-  const handleDescriptionSave = (data: { description: string; documents: File[]; images: File[] }) => {
+  const handleDescriptionSave = (data: { description: string; media: File[] }) => {
     const expense: Expense = {
       id: newExpense.id!,
       name: newExpense.name!,
       amount: Number(newExpense.amount),
       user: newExpense.user!,
-      department: newExpense.department!,
+      building: newExpense.building!,
       date: newExpense.date!,
       status: newExpense.status as "pending" | "approved" | "rejected",
       type: newExpense.type as "one-time" | "recurring",
       category: newExpense.category!
     };
+
+    // You can use data.media here if needed
 
     setExpenses(prev => [expense, ...prev]);
     setIsAddingNew(false);
@@ -192,7 +194,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     const matchesSearch = expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          expense.user.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || expense.status === statusFilter;
-    const matchesDepartment = departmentFilter === "all" || expense.department === departmentFilter;
+    const matchesDepartment = buildingFilter === "all" || expense.building === buildingFilter;
     
     return matchesSearch && matchesStatus && matchesDepartment;
   });
@@ -264,12 +266,12 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
               </SelectContent>
             </Select>
 
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+            <Select value={buildingFilter} onValueChange={setBuildingFilter}>
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Building" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
+                <SelectItem value="all">All Buildings</SelectItem>
                 <SelectItem value="Etihad Office">Etihad Office</SelectItem>
                 <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
               </SelectContent>
@@ -300,7 +302,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>User</TableHead>
-                <TableHead>Department</TableHead>
+                <TableHead>Building</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Date</TableHead>
@@ -334,7 +336,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">{newExpense.user}</TableCell>
                   <TableCell>
-                    <Select value={newExpense.department || ""} onValueChange={(value) => setNewExpense(prev => ({ ...prev, department: value }))}>
+                    <Select value={newExpense.building || ""} onValueChange={(value) => setNewExpense(prev => ({ ...prev, department: value }))}>
                       <SelectTrigger className="h-8">
                         <SelectValue placeholder="Department" />
                       </SelectTrigger>
@@ -402,7 +404,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                 <TableRow key={expense.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{expense.name}</TableCell>
                   <TableCell>{expense.user}</TableCell>
-                  <TableCell>{expense.department}</TableCell>
+                  <TableCell>{expense.building}</TableCell>
                   <TableCell className="font-mono">${expense.amount.toLocaleString()}</TableCell>
                   <TableCell>
                     <Badge variant={expense.type === "recurring" ? "default" : "outline"}>

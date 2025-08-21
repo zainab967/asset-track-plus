@@ -9,7 +9,7 @@ interface ExpenseDetailsDialogProps {
     name: string;
     amount: number;
     user: string;
-    department: string;
+    building: string;
     date: string;
     status: string;
     type: string;
@@ -76,7 +76,7 @@ export function ExpenseDetailsDialog({ expense }: ExpenseDetailsDialogProps) {
               <Building className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">Building</p>
-                <p className="font-medium">{expense.department}</p>
+                <p className="font-medium">{expense.building}</p>
               </div>
             </div>
           </div>

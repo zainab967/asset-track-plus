@@ -9,7 +9,7 @@ import { FileText, Upload, X, Image } from "lucide-react";
 interface ExpenseDescriptionDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: { description: string; documents: File[]; images: File[] }) => void;
+  onSave: (data: { description: string; media: File[] }) => void;
   expense?: {
     name: string;
     amount: number;
@@ -24,39 +24,26 @@ export function ExpenseDescriptionDialog({
   expense 
 }: ExpenseDescriptionDialogProps) {
   const [description, setDescription] = useState("");
-  const [documents, setDocuments] = useState<File[]>([]);
-  const [images, setImages] = useState<File[]>([]);
+  const [media, setMedia] = useState<File[]>([]);
 
-  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setDocuments(prev => [...prev, ...files]);
+    setMedia(prev => [...prev, ...files]);
   };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setImages(prev => [...prev, ...files]);
-  };
-
-  const removeDocument = (index: number) => {
-    setDocuments(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+  const removeMedia = (index: number) => {
+    setMedia(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSave = () => {
-    onSave({ description, documents, images });
+    onSave({ description, media });
     setDescription("");
-    setDocuments([]);
-    setImages([]);
+    setMedia([]);
     onClose();
   };
 
   const handleCancel = () => {
     setDescription("");
-    setDocuments([]);
-    setImages([]);
+    setMedia([]);
     onClose();
   };
 
@@ -66,7 +53,6 @@ export function ExpenseDescriptionDialog({
         <DialogHeader>
           <DialogTitle>Add Expense Details</DialogTitle>
         </DialogHeader>
-
         <div className="space-y-6">
           {expense && (
             <div className="bg-muted/30 p-4 rounded-lg">
@@ -76,7 +62,6 @@ export function ExpenseDescriptionDialog({
               </p>
             </div>
           )}
-
           <div className="space-y-2">
             <Label htmlFor="description">Description *</Label>
             <Textarea
@@ -90,34 +75,34 @@ export function ExpenseDescriptionDialog({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Upload Documents</Label>
+              <Label>Upload Media</Label>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <Input
                     type="file"
                     multiple
-                    accept=".pdf,.doc,.docx,.txt,.xlsx,.xls"
-                    onChange={handleDocumentUpload}
+                    accept=".pdf,.doc,.docx,.txt,.xlsx,.xls,image/*"
+                    onChange={handleMediaUpload}
                     className="hidden"
-                    id="document-upload"
+                    id="media-upload"
                   />
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => document.getElementById('document-upload')?.click()}
+                    onClick={() => document.getElementById('media-upload')?.click()}
                     className="flex items-center gap-2"
                   >
                     <FileText className="h-4 w-4" />
-                    Add Documents
+                    Add Media
                   </Button>
                   <span className="text-sm text-muted-foreground">
-                    PDF, DOC, TXT, Excel files
+                    PDF, DOC, TXT, Excel files, Images
                   </span>
                 </div>
                 
-                {documents.length > 0 && (
+                {media.length > 0 && (
                   <div className="space-y-2">
-                    {documents.map((file, index) => (
+                    {media.map((file, index) => (
                       <div key={index} className="flex items-center justify-between bg-muted/30 p-2 rounded">
                         <div className="flex items-center gap-2">
                           <FileText className="h-4 w-4" />
@@ -130,7 +115,7 @@ export function ExpenseDescriptionDialog({
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeDocument(index)}
+                          onClick={() => removeMedia(index)}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -140,61 +125,8 @@ export function ExpenseDescriptionDialog({
                 )}
               </div>
             </div>
-
-            <div className="space-y-2">
-              <Label>Upload Images</Label>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById('image-upload')?.click()}
-                    className="flex items-center gap-2"
-                  >
-                    <Image className="h-4 w-4" />
-                    Add Images
-                  </Button>
-                  <span className="text-sm text-muted-foreground">
-                    JPG, PNG, GIF files
-                  </span>
-                </div>
-                
-                {images.length > 0 && (
-                  <div className="space-y-2">
-                    {images.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between bg-muted/30 p-2 rounded">
-                        <div className="flex items-center gap-2">
-                          <Image className="h-4 w-4" />
-                          <span className="text-sm">{file.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                          </span>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeImage(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
           </div>
-        </div>
-
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
             Cancel
@@ -202,8 +134,8 @@ export function ExpenseDescriptionDialog({
           <Button 
             onClick={handleSave}
             disabled={!description.trim()}
-          >
-            Save Details
+            >
+             Save Details
           </Button>
         </DialogFooter>
       </DialogContent>

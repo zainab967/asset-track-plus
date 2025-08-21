@@ -19,9 +19,9 @@ interface ComplaintSuggestion {
   priority: "low" | "medium" | "high";
   status: "open" | "in-progress" | "resolved";
   submittedBy: string;
-  department: string;
+  building: string;
   date: string;
-  attachedFiles?: File[];
+  attachedmedia?: File[];
 }
 
 interface ComplaintsPageProps {
@@ -47,7 +47,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
     department: ""
   });
 
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
 
   const mockData: ComplaintSuggestion[] = [
     {
@@ -55,11 +55,11 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
       title: "Office temperature too cold",
       description: "The AC is set too low in the engineering department",
       type: "complaint",
-      category: "Workplace Environment",
+      building: "Abdalian Office",
       priority: "medium",
       status: "open",
       submittedBy: "John Doe",
-      department: "Engineering",
+      category: "Workplace Environment",
       date: "2024-01-15"
     },
     {
@@ -67,11 +67,11 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
       title: "Implement flexible working hours",
       description: "Allow employees to choose their working hours within core business hours",
       type: "suggestion",
-      category: "HR Policy",
+      building: "Etihad Office",
       priority: "medium",
       status: "in-progress",
       submittedBy: "Jane Smith",
-      department: "HR",
+      category: "HR Policy",
       date: "2024-01-14"
     },
     {
@@ -79,11 +79,11 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
       title: "Coffee machine not working",
       description: "The coffee machine on the 3rd floor has been broken for a week",
       type: "complaint",
-      category: "Equipment",
+      building: "Abdalian Office",
       priority: "low",
       status: "resolved",
       submittedBy: "Mike Johnson",
-      department: "Operations",
+      category: "Equipment",
       date: "2024-01-13"
     }
   ];
@@ -138,12 +138,12 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
     const files = event.target.files;
     if (files) {
       const newFiles = Array.from(files);
-      setUploadedFiles(prev => [...prev, ...newFiles]);
+      setUploadedMedia(prev => [...prev, ...newFiles]);
     }
   };
 
   const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    setUploadedMedia(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = () => {
@@ -162,7 +162,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
     });
 
     setNewItem({ title: "", description: "", type: "complaint", category: "", department: "" });
-    setUploadedFiles([]);
+    setUploadedMedia([]);
     setIsSubmitDialogOpen(false);
   };
 
@@ -249,17 +249,14 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium">Department</label>
-                  <Select value={newItem.department} onValueChange={(value) => setNewItem(prev => ({ ...prev, department: value }))}>
+                  <label className="text-sm font-medium">Building</label>
+                  <Select value={newItem.department} onValueChange={(value) => setNewItem(prev => ({ ...prev, building: value }))}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder="Select Building" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Engineering">Engineering</SelectItem>
-                      <SelectItem value="Marketing">Marketing</SelectItem>
-                      <SelectItem value="Sales">Sales</SelectItem>
-                      <SelectItem value="HR">HR</SelectItem>
-                      <SelectItem value="Operations">Operations</SelectItem>
+                      <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                      <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -288,12 +285,12 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                 <div className="space-y-2">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <FileText className="h-4 w-4" />
-                    Documents (Optional)
+                    Media (Optional)
                   </label>
                   <div className="flex items-center gap-2">
                     <Input
                       type="file"
-                      accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                      accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,image/*"
                       multiple
                       onChange={handleFileUpload}
                       className="h-8"
@@ -307,58 +304,16 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                       <Upload className="h-3 w-3" />
                     </Button>
                   </div>
-                  {uploadedFiles.filter(f => !f.type.startsWith('image/')).length > 0 && (
+                  {uploadedMedia.filter(f => !f.type.startsWith('image/')).length > 0 && (
                     <div className="space-y-1">
-                      {uploadedFiles.filter(f => !f.type.startsWith('image/')).map((file, index) => (
+                      {uploadedMedia.filter(f => !f.type.startsWith('image/')).map((file, index) => (
                         <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
                           <span className="truncate">{file.name}</span>
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeFile(uploadedFiles.indexOf(file))}
-                            className="h-6 w-6 p-0"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Image className="h-4 w-4" />
-                    Images (Optional)
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleFileUpload}
-                      className="h-8"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="h-8 px-3"
-                    >
-                      <Upload className="h-3 w-3" />
-                    </Button>
-                  </div>
-                  {uploadedFiles.filter(f => f.type.startsWith('image/')).length > 0 && (
-                    <div className="space-y-1">
-                      {uploadedFiles.filter(f => f.type.startsWith('image/')).map((file, index) => (
-                        <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
-                          <span className="truncate">{file.name}</span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFile(uploadedFiles.indexOf(file))}
+                            onClick={() => removeFile(uploadedMedia.indexOf(file))}
                             className="h-6 w-6 p-0"
                           >
                             <X className="h-3 w-3" />
@@ -369,7 +324,6 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                   )}
                 </div>
               </div>
-
               <div className="flex gap-2 pt-4">
                 <Button onClick={handleSubmit} className="flex-1">
                   Submit
@@ -441,7 +395,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                 <TableHead>Priority</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Submitted By</TableHead>
-                <TableHead>Department</TableHead>
+                <TableHead>Building</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Details</TableHead>
                 {userRole !== "employee" && <TableHead>Actions</TableHead>}
@@ -465,7 +419,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                     </div>
                   </TableCell>
                   <TableCell>{item.submittedBy}</TableCell>
-                  <TableCell>{item.department}</TableCell>
+                  <TableCell>{item.building}</TableCell>
                   <TableCell>{item.date}</TableCell>
                   <TableCell>
                     <Button 
@@ -534,8 +488,8 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                   <p>{selectedItem.submittedBy}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Department</label>
-                  <p>{selectedItem.department}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Building</label>
+                  <p>{selectedItem.building}</p>
                 </div>
               </div>
               
@@ -549,43 +503,19 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                 <p className="text-sm">{selectedItem.description}</p>
               </div>
 
-              {selectedItem.attachedFiles && selectedItem.attachedFiles.length > 0 && (
+              {selectedItem.attachedmedia && selectedItem.attachedmedia.length > 0 && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Attached Files</label>
                   <div className="space-y-3 mt-2">
-                    {/* Documents */}
-                    {selectedItem.attachedFiles.filter(f => !f.type.startsWith('image/')).length > 0 && (
+                    {/* Media */}
+                    {selectedItem.attachedmedia.filter(f => !f.type.startsWith('image/')).length > 0 && (
                       <div>
-                        <h4 className="text-sm font-medium mb-2">Documents</h4>
+                        <h4 className="text-sm font-medium mb-2">Media</h4>
                         <div className="grid grid-cols-2 gap-2">
-                          {selectedItem.attachedFiles.filter(f => !f.type.startsWith('image/')).map((file, index) => (
+                          {selectedItem.attachedmedia.filter(f => !f.type.startsWith('image/')).map((file, index) => (
                             <div key={index} className="p-2 border rounded flex items-center gap-2">
                               <FileText className="h-4 w-4" />
                               <span className="text-sm truncate">{file.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Images */}
-                    {selectedItem.attachedFiles.filter(f => f.type.startsWith('image/')).length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Images</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          {selectedItem.attachedFiles.filter(f => f.type.startsWith('image/')).map((file, index) => (
-                            <div key={index} className="space-y-1">
-                              <div className="aspect-video border rounded overflow-hidden bg-muted">
-                                <img 
-                                  src={URL.createObjectURL(file)} 
-                                  alt={file.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Image className="h-3 w-3" />
-                                <span className="truncate">{file.name}</span>
-                              </div>
                             </div>
                           ))}
                         </div>

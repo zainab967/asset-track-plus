@@ -15,14 +15,13 @@ interface Reimbursement {
   name: string;
   amount: number;
   user: string;
-  department: string;
+  category: string;
   date: string;
   status: "pending" | "approved" | "rejected";
   type: "medical" | "travel" | "equipment" | "other";
-  category: string;
+  building: string;
   description?: string;
-  documents?: File[];
-  images?: File[];
+  media?: File[];
 }
 
 interface ReimbursementPageProps {
@@ -32,13 +31,12 @@ interface ReimbursementPageProps {
 export default function ReimbursementPage({ userRole = "admin" }: ReimbursementPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [buildingFilter, setBuildingFilter] = useState<string>("all");
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newReimbursement, setNewReimbursement] = useState<Partial<Reimbursement>>({});
   const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
   const [currentExpenseForDescription, setCurrentExpenseForDescription] = useState<any>(null);
-  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedReimbursement, setSelectedReimbursement] = useState<Reimbursement | null>(null);
   const { toast } = useToast();
@@ -49,55 +47,53 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
       name: "Medical checkup reimbursement",
       amount: 350,
       user: "John Doe",
-      department: "Engineering",
+      category: "Healthcare",
       date: "2024-01-15",
       status: "approved",
       type: "medical",
-      category: "Healthcare",
-      description: "Annual health checkup as per company policy"
+      building: "Etihad Office"
     },
     {
       id: "2",
       name: "Business travel expenses",
       amount: 1200,
       user: "Jane Smith",
-      department: "Sales",
+      category:" Sales",
       date: "2024-01-14",
       status: "pending",
       type: "travel",
-      category: "Travel"
+      building: "Etihad Office"
     },
     {
       id: "3",
       name: "Home office equipment",
       amount: 800,
       user: "Mike Johnson",
-      department: "HR",
+      category: "Equipment",
       date: "2024-01-13",
       status: "approved",
       type: "equipment",
-      category: "Equipment"
+      building: "Abdalian Office"
     }
   ];
 
   const [reimbursements, setReimbursements] = useState<Reimbursement[]>(mockReimbursements);
 
   const recurringReimbursements = [
-    { name: "Monthly internet allowance", category: "Utilities", amount: 80, department: "All", type: "other" },
-    { name: "Quarterly health checkup", category: "Healthcare", amount: 300, department: "All", type: "medical" },
-    { name: "Work from home setup", category: "Equipment", amount: 500, department: "Engineering", type: "equipment" }
+    { name: "Monthly internet allowance", category: "Utilities", amount: 80, building: "All", type: "other" },
+    { name: "Quarterly health checkup", category: "Healthcare", amount: 300, building: "All", type: "medical" },
+    { name: "Work from home setup", category: "Equipment", amount: 500, building: "Etihad Office", type: "equipment" }
   ];
 
   const handleAddNew = () => {
     setIsAddingNew(true);
-    setUploadedDocuments([]);
-    setUploadedImages([]);
+    setUploadedMedia([]);
     setNewReimbursement({
       id: Date.now().toString(),
       name: "",
       amount: 0,
       user: "Current User",
-      department: "",
+      building: "",
       date: new Date().toISOString().split('T')[0],
       status: "pending",
       type: "other",
@@ -106,7 +102,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   };
 
   const handleSaveNew = () => {
-    if (!newReimbursement.name || !newReimbursement.category || !newReimbursement.department || !newReimbursement.amount) {
+    if (!newReimbursement.name || !newReimbursement.category || !newReimbursement.building || !newReimbursement.amount) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -120,45 +116,35 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
     setShowDescriptionDialog(true);
   };
 
-  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setUploadedDocuments(prev => [...prev, ...files]);
+    setUploadedMedia(prev => [...prev, ...files]);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setUploadedImages(prev => [...prev, ...files]);
+  const removeMedia = (index: number) => {
+    setUploadedMedia(prev => prev.filter((_, i) => i !== index));
   };
 
-  const removeDocument = (index: number) => {
-    setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const removeImage = (index: number) => {
-    setUploadedImages(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleDescriptionSave = (data: { description: string; documents: File[]; images: File[] }) => {
+  const handleDescriptionSave = (data: { description: string; media: File[] }) => {
+    const allMedia = [...uploadedMedia, ...(data.media || [])];
     const reimbursement: Reimbursement = {
       id: newReimbursement.id!,
       name: newReimbursement.name!,
       amount: Number(newReimbursement.amount),
       user: newReimbursement.user!,
-      department: newReimbursement.department!,
+      category: newReimbursement.category!,
       date: newReimbursement.date!,
       status: newReimbursement.status as "pending" | "approved" | "rejected",
       type: newReimbursement.type as "medical" | "travel" | "equipment" | "other",
-      category: newReimbursement.category!,
+      building: newReimbursement.building!,
       description: data.description,
-      documents: [...uploadedDocuments, ...data.documents],
-      images: [...uploadedImages, ...data.images]
+      media: allMedia
     };
 
     setReimbursements(prev => [reimbursement, ...prev]);
     setIsAddingNew(false);
     setNewReimbursement({});
-    setUploadedDocuments([]);
-    setUploadedImages([]);
+    setUploadedMedia([]);
     setCurrentExpenseForDescription(null);
     
     toast({
@@ -170,8 +156,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   const handleCancelNew = () => {
     setIsAddingNew(false);
     setNewReimbursement({});
-    setUploadedDocuments([]);
-    setUploadedImages([]);
+    setUploadedMedia([]);
   };
 
   const handleSelectRecurring = (value: string) => {
@@ -183,7 +168,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
         name: recurring.name,
         category: recurring.category,
         amount: recurring.amount,
-        department: recurring.department === "All" ? "" : recurring.department,
+        building: recurring.building === "All" ? "" : recurring.building,
         type: recurring.type as "medical" | "travel" | "equipment" | "other"
       }));
     }
@@ -198,9 +183,9 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
     const matchesSearch = reimbursement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          reimbursement.user.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || reimbursement.status === statusFilter;
-    const matchesDepartment = departmentFilter === "all" || reimbursement.department === departmentFilter;
-    
-    return matchesSearch && matchesStatus && matchesDepartment;
+    const matchesBuilding = buildingFilter === "all" || reimbursement.building === buildingFilter;
+
+    return matchesSearch && matchesStatus && matchesBuilding;
   });
 
   const pendingClaims = reimbursements.filter(r => r.status === "pending").length;
@@ -285,17 +270,14 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
               </SelectContent>
             </Select>
 
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+            <Select value={buildingFilter} onValueChange={setBuildingFilter}>
               <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Department" />
+                <SelectValue placeholder="Building" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                <SelectItem value="Engineering">Engineering</SelectItem>
-                <SelectItem value="Marketing">Marketing</SelectItem>
-                <SelectItem value="Sales">Sales</SelectItem>
-                <SelectItem value="HR">HR</SelectItem>
-                <SelectItem value="Operations">Operations</SelectItem>
+                <SelectItem value="all">All Buildings</SelectItem>
+                <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -324,12 +306,12 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>User</TableHead>
-                <TableHead>Department</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead>Building</TableHead>
                 <TableHead>Details</TableHead>
                 {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead>Action</TableHead>}
               </TableRow>
@@ -360,16 +342,13 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">{newReimbursement.user}</TableCell>
                     <TableCell>
-                      <Select value={newReimbursement.department || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, department: value }))}>
+                      <Select value={newReimbursement.building || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, building: value }))}>
                         <SelectTrigger className="h-8">
-                          <SelectValue placeholder="Department" />
+                          <SelectValue placeholder="Building" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Engineering">Engineering</SelectItem>
-                          <SelectItem value="Marketing">Marketing</SelectItem>
-                          <SelectItem value="Sales">Sales</SelectItem>
-                          <SelectItem value="HR">HR</SelectItem>
-                          <SelectItem value="Operations">Operations</SelectItem>
+                          <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                          <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
@@ -428,82 +407,39 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                   <TableRow className="bg-muted/20">
                     <TableCell colSpan={8} className="p-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Document Upload */}
+                        {/* Media Upload */}
                         <div className="space-y-2">
                           <label className="text-sm font-medium flex items-center gap-2">
                             <FileText className="h-4 w-4" />
-                            Documents
+                            Media
                           </label>
                           <div className="flex items-center gap-2">
                             <Input
                               type="file"
-                              accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                              accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,image/*"
                               multiple
-                              onChange={handleDocumentUpload}
+                              onChange={handleMediaUpload}
                               className="h-8"
-                              id="document-upload"
+                              id="media-upload"
                             />
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => document.getElementById('document-upload')?.click()}
+                              onClick={() => document.getElementById('media-upload')?.click()}
                               className="h-8 px-2"
                             >
                               <Upload className="h-3 w-3" />
                             </Button>
                           </div>
-                          {uploadedDocuments.length > 0 && (
+                          {uploadedMedia.length > 0 && (
                             <div className="space-y-1">
-                              {uploadedDocuments.map((file, index) => (
+                              {uploadedMedia.map((file, index) => (
                                 <div key={index} className="flex items-center justify-between text-xs bg-background p-1 rounded border">
                                   <span className="truncate">{file.name}</span>
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => removeDocument(index)}
-                                    className="h-4 w-4 p-0"
-                                  >
-                                    <X className="h-2 w-2" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Image Upload */}
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium flex items-center gap-2">
-                            <Image className="h-4 w-4" />
-                            Images
-                          </label>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              onChange={handleImageUpload}
-                              className="h-8"
-                              id="image-upload"
-                            />
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => document.getElementById('image-upload')?.click()}
-                              className="h-8 px-2"
-                            >
-                              <Upload className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          {uploadedImages.length > 0 && (
-                            <div className="space-y-1">
-                              {uploadedImages.map((file, index) => (
-                                <div key={index} className="flex items-center justify-between text-xs bg-background p-1 rounded border">
-                                  <span className="truncate">{file.name}</span>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => removeImage(index)}
+                                    onClick={() => removeMedia(index)}
                                     className="h-4 w-4 p-0"
                                   >
                                     <X className="h-2 w-2" />
@@ -522,7 +458,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                 <TableRow key={reimbursement.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{reimbursement.name}</TableCell>
                   <TableCell>{reimbursement.user}</TableCell>
-                  <TableCell>{reimbursement.department}</TableCell>
+                  <TableCell>{reimbursement.category}</TableCell>
                   <TableCell className="font-mono">${reimbursement.amount.toLocaleString()}</TableCell>
                   <TableCell>
                     {getTypeBadge(reimbursement.type)}
@@ -534,7 +470,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                       {getStatusBadge(reimbursement.status)}
                     </div>
                   </TableCell>
-                  <TableCell>{reimbursement.category}</TableCell>
+                  <TableCell>{reimbursement.building}</TableCell>
                   <TableCell>
                     <Button 
                       size="sm" 
@@ -612,8 +548,8 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                   <p>{selectedReimbursement.user}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Department</label>
-                  <p>{selectedReimbursement.department}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Building</label>
+                  <p>{selectedReimbursement.building}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Category</label>
@@ -632,17 +568,17 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                 </div>
               )}
 
-              {((selectedReimbursement.documents && selectedReimbursement.documents.length > 0) || 
-                (selectedReimbursement.images && selectedReimbursement.images.length > 0)) && (
+              {((selectedReimbursement.media && selectedReimbursement.media.length > 0)
+               && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Attachments</label>
                   <div className="space-y-3 mt-2">
                     {/* Documents */}
-                    {selectedReimbursement.documents && selectedReimbursement.documents.length > 0 && (
+                    {selectedReimbursement.media && selectedReimbursement.media.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-medium mb-2">Documents</h4>
+                        <h4 className="text-sm font-medium mb-2">Media</h4>
                         <div className="grid grid-cols-2 gap-2">
-                          {selectedReimbursement.documents.map((file, index) => (
+                          {selectedReimbursement.media.map((file, index) => (
                             <div key={index} className="p-2 border rounded flex items-center gap-2">
                               <FileText className="h-4 w-4" />
                               <span className="text-sm truncate">{file.name}</span>
@@ -651,33 +587,9 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                         </div>
                       </div>
                     )}
-                    
-                    {/* Images */}
-                    {selectedReimbursement.images && selectedReimbursement.images.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Images</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          {selectedReimbursement.images.map((file, index) => (
-                            <div key={index} className="space-y-1">
-                              <div className="aspect-video border rounded overflow-hidden bg-muted">
-                                <img 
-                                  src={URL.createObjectURL(file)} 
-                                  alt={file.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Image className="h-3 w-3" />
-                                <span className="truncate">{file.name}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
-              )}
+              ))}
             </div>
           )}
         </DialogContent>
