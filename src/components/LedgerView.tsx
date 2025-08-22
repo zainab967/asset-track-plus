@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { FinancialAnalyticsDashboard } from "./FinancialAnalyticsDashboard";
 import { useExpenses } from "@/contexts/ExpenseContext";
 
 interface BuildingSummary {
@@ -59,16 +59,6 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
   const totalChange = departments.reduce((sum, dept) => sum + (dept.balance * dept.monthlyChange / 100), 0);
   const overallChangePercent = totalBalance > 0 ? (totalChange / totalBalance) * 100 : 0;
 
-  // Financial analytics data
-  const analyticsData = [
-    { month: 'Jan', revenue: 45000, expenses: 32000, reserves: 13000, teams: 2 },
-    { month: 'Feb', revenue: 52000, expenses: 38000, reserves: 14000, teams: 2 },
-    { month: 'Mar', revenue: 48000, expenses: 35000, reserves: 13000, teams: 2 },
-    { month: 'Apr', revenue: 61000, expenses: 42000, reserves: 19000, teams: 2 },
-    { month: 'May', revenue: 55000, expenses: 39000, reserves: 16000, teams: 2 },
-    { month: 'Jun', revenue: 67000, expenses: 45000, reserves: 22000, teams: 2 },
-  ];
-
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Company Overview */}
@@ -123,58 +113,8 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
           </Card>
         ))}
       </div>
-      {/* Financial Analytics */}
-      <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">Financial Analytics</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={analyticsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <Tooltip formatter={(value, name) => [`$${Number(value).toLocaleString()}`, name]} />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={2}
-                  name="Revenue"
-                  yAxisId="left"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="expenses" 
-                  stroke="hsl(var(--destructive))" 
-                  strokeWidth={2}
-                  name="Expenses"
-                  yAxisId="left"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="reserves" 
-                  stroke="hsl(var(--success))" 
-                  strokeWidth={2}
-                  name="Reserves"
-                  yAxisId="left"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="teams" 
-                  stroke="hsl(var(--muted-foreground))" 
-                  strokeWidth={2}
-                  name="Teams"
-                  yAxisId="right"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Financial Analytics Dashboard */}
+      <FinancialAnalyticsDashboard />
     </div>
   );
 }
