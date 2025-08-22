@@ -338,7 +338,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="hover:shadow-md transition-shadow">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-6">
             <div className="relative flex-1">
@@ -347,7 +347,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                 placeholder="Search feedback..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 hover:shadow-md transition-shadow"
               />
             </div>
             
@@ -378,7 +378,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
       </Card>
 
       {/* Feedback Table */}
-      <Card>
+      <Card className="hover:shadow-md transition-shadow">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />

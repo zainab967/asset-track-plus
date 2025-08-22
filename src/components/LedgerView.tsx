@@ -27,7 +27,7 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Company Overview */}
-      <Card className="border-l-4 border-l-primary">
+      <Card className="border-l-4 border-l-primary hover:shadow-md hover:shadow-primary/20 transition-shadow">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-semibold flex items-center justify-between">
             <span>Company Financial Overview</span>
@@ -80,25 +80,25 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
       </div>
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
+        <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
           <CardContent className="p-6 text-center space-y-1">
             <div className="text-2xl font-bold text-primary">6</div>
             <p className="text-sm text-muted-foreground">Active Buildings</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-primary">142</div>
             <p className="text-sm text-muted-foreground">Total Transactions</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-primary">89%</div>
             <p className="text-sm text-muted-foreground">Approval Rate</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-primary">$12.5K</div>
             <p className="text-sm text-muted-foreground">Avg Monthly</p>

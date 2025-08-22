@@ -272,7 +272,7 @@ const handleSelectRecurring = (value: string) => {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="hover:shadow-md transition-shadow">
         <CardContent className="p-4 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -281,7 +281,7 @@ const handleSelectRecurring = (value: string) => {
                 placeholder="Search by name or user..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 hover:shadow-md transition-shadow"
               />
             </div>
             
@@ -372,14 +372,14 @@ const handleSelectRecurring = (value: string) => {
       </Card>
      
 {/* Expenses Table */}
-<Card>
+<Card className="hover:shadow-md transition-shadow">
   <CardHeader>
     <div className="flex items-center justify-between">
       <CardTitle>Recent Expenses</CardTitle>
       <Button 
         onClick={handleAddNew} 
         size="sm" 
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 hover:shadow-md transition-shadow"
         disabled={isAddingNew}
       >
         <Plus className="h-4 w-4" />
