@@ -14,18 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Calendar } from "lucide-react";
-
-interface Expense {
-  id: string;
-  name: string;
-  amount: number;
-  user: string;
-  building: string;
-  date: string;
-  status: "pending" | "approved" | "rejected";
-  type: "one-time" | "recurring";
-  category: string;
-}
+import { useExpenses, Expense } from "@/contexts/ExpenseContext";
 
 interface ExpenseTrackerProps {
   selectedDepartment?: string;
@@ -33,6 +22,7 @@ interface ExpenseTrackerProps {
 }
 
 export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: ExpenseTrackerProps) {
+  const { expenses, addExpense } = useExpenses();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [buildingFilter, setBuildingFilter] = useState<string>(selectedDepartment || "all");
@@ -44,77 +34,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
   const [currentExpenseForDescription, setCurrentExpenseForDescription] = useState<any>(null);
   const { toast } = useToast();
-
-  const mockExpenses: Expense[] = [
-    {
-      id: "1",
-      name: "Office supplies and equipment",
-      amount: 1250,
-      user: "John Doe",
-      building: "Abdalian Office",
-      date: "2024-01-15",
-      status: "approved",
-      type: "one-time",
-      category: "Supplies"
-    },
-    {
-      id: "2", 
-      name: "Monthly software licenses",
-      amount: 2400,
-      user: "Jane Smith",
-      building: "Etihad Office",
-      date: "2024-01-14",
-      status: "pending",
-      type: "recurring",
-      category: "Software"
-    },
-    {
-      id: "3",
-      name: "Team building event",
-      amount: 800,
-      user: "Mike Johnson",
-      building: "Etihad Office",
-      date: "2024-01-13",
-      status: "approved",
-      type: "one-time",
-      category: "Events"
-    },
-    {
-      id: "4",
-      name: "Marketing campaign budget",
-      amount: 5000,
-      user: "Sarah Williams",
-      building: "Abdalian Office",
-      date: "2024-01-12",
-      status: "pending",
-      type: "one-time",
-      category: "Campaigns"
-    },
-    {
-      id: "5",
-      name: "Travel expenses - client meeting",
-      amount: 650,
-      user: "Tom Brown",
-      building: "Etihad Office",
-      date: "2024-01-11",
-      status: "rejected",
-      type: "one-time",
-      category: "Travel"
-    },
-    {
-      id: "6", 
-      name: "chips",
-      amount: 50,
-      user: "Zainab",
-      building: "Etihad Office",
-      date: "2024-01-14",
-      status: "pending",
-      type: "recurring",
-      category: "Food"
-    }
-  ];
-
-  const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
 
   const recurringExpenses = [
     { name: "Monthly software licenses", category: "Software", amount: 2400, department: "Etihad Office" },
@@ -167,7 +86,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
     // You can use data.media here if needed
 
-    setExpenses(prev => [expense, ...prev]);
+    addExpense(expense);
     setIsAddingNew(false);
     setNewExpense({});
     setCurrentExpenseForDescription(null);

@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useExpenses } from "@/contexts/ExpenseContext";
 
 interface BuildingSummary {
   name: string;
@@ -15,14 +17,57 @@ interface LedgerViewProps {
 }
 
 export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
+  const { expenses } = useExpenses();
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  // Calculate dynamic building summaries based on actual expense data
+  const calculateBuildingSummary = (buildingName: string): BuildingSummary => {
+    const buildingExpenses = expenses.filter(expense => expense.building === buildingName);
+    const currentMonthExpenses = buildingExpenses.filter(expense => {
+      const expenseDate = new Date(expense.date);
+      return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear;
+    });
+    
+    const previousMonthExpenses = buildingExpenses.filter(expense => {
+      const expenseDate = new Date(expense.date);
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      return expenseDate.getMonth() === prevMonth && expenseDate.getFullYear() === prevYear;
+    });
+
+    const currentTotal = currentMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const previousTotal = previousMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    
+    const monthlyChange = previousTotal > 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0;
+    const status: "positive" | "negative" | "neutral" = monthlyChange > 0 ? "negative" : monthlyChange < 0 ? "positive" : "neutral";
+
+    return {
+      name: buildingName,
+      balance: currentTotal,
+      monthlyChange,
+      status
+    };
+  };
+
   const departments: BuildingSummary[] = [
-    { name: "Etihad Office", balance: 45600, monthlyChange: 12.5, status: "positive" },
-    { name: "Abdalian Office", balance: 32100, monthlyChange: -8.2, status: "negative" },
+    calculateBuildingSummary("Etihad Office"),
+    calculateBuildingSummary("Abdalian Office"),
   ];
 
   const totalBalance = departments.reduce((sum, dept) => sum + dept.balance, 0);
   const totalChange = departments.reduce((sum, dept) => sum + (dept.balance * dept.monthlyChange / 100), 0);
-  const overallChangePercent = (totalChange / totalBalance) * 100;
+  const overallChangePercent = totalBalance > 0 ? (totalChange / totalBalance) * 100 : 0;
+
+  // Financial analytics data
+  const analyticsData = [
+    { month: 'Jan', revenue: 45000, expenses: 32000, reserves: 13000, teams: 2 },
+    { month: 'Feb', revenue: 52000, expenses: 38000, reserves: 14000, teams: 2 },
+    { month: 'Mar', revenue: 48000, expenses: 35000, reserves: 13000, teams: 2 },
+    { month: 'Apr', revenue: 61000, expenses: 42000, reserves: 19000, teams: 2 },
+    { month: 'May', revenue: 55000, expenses: 39000, reserves: 16000, teams: 2 },
+    { month: 'Jun', revenue: 67000, expenses: 45000, reserves: 22000, teams: 2 },
+  ];
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
@@ -78,33 +123,54 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
           </Card>
         ))}
       </div>
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
-          <CardContent className="p-6 text-center space-y-1">
-            <div className="text-2xl font-bold text-primary">6</div>
-            <p className="text-sm text-muted-foreground">Active Buildings</p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">142</div>
-            <p className="text-sm text-muted-foreground">Total Transactions</p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">89%</div>
-            <p className="text-sm text-muted-foreground">Approval Rate</p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">$12.5K</div>
-            <p className="text-sm text-muted-foreground">Avg Monthly</p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Financial Analytics */}
+      <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">Financial Analytics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={analyticsData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value, name) => [`$${Number(value).toLocaleString()}`, name]} />
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="revenue" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  name="Revenue"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="expenses" 
+                  stroke="hsl(var(--destructive))" 
+                  strokeWidth={2}
+                  name="Expenses"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="reserves" 
+                  stroke="hsl(var(--success))" 
+                  strokeWidth={2}
+                  name="Reserves"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="teams" 
+                  stroke="hsl(var(--muted-foreground))" 
+                  strokeWidth={2}
+                  name="Teams"
+                  yAxisId="right"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
