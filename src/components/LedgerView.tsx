@@ -134,7 +134,8 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
               <LineChart data={analyticsData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
-                <YAxis />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
                 <Tooltip formatter={(value, name) => [`$${Number(value).toLocaleString()}`, name]} />
                 <Legend />
                 <Line 
@@ -143,6 +144,7 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
                   stroke="hsl(var(--primary))" 
                   strokeWidth={2}
                   name="Revenue"
+                  yAxisId="left"
                 />
                 <Line 
                   type="monotone" 
@@ -150,6 +152,7 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
                   stroke="hsl(var(--destructive))" 
                   strokeWidth={2}
                   name="Expenses"
+                  yAxisId="left"
                 />
                 <Line 
                   type="monotone" 
@@ -157,6 +160,7 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
                   stroke="hsl(var(--success))" 
                   strokeWidth={2}
                   name="Reserves"
+                  yAxisId="left"
                 />
                 <Line 
                   type="monotone" 
