@@ -18,10 +18,6 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
   const departments: BuildingSummary[] = [
     { name: "Etihad Office", balance: 45600, monthlyChange: 12.5, status: "positive" },
     { name: "Abdalian Office", balance: 32100, monthlyChange: -8.2, status: "negative" },
-   // { name: "Sales", balance: 28400, monthlyChange: 5.7, status: "positive" },
-    //{ name: "HR", balance: 19800, monthlyChange: -2.1, status: "negative" },
-    //{ name: "Operations", balance: 15300, monthlyChange: 0.8, status: "neutral" },
-    //{ name: "Finance", balance: 12900, monthlyChange: 15.2, status: "positive" }
   ];
 
   const totalBalance = departments.reduce((sum, dept) => sum + dept.balance, 0);
@@ -50,9 +46,9 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
       </Card>
 
       {/* Building Summaries */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {departments.map((building) => (
-          <Card key={building.name} className="hover:shadow-md transition-all duration-200 group cursor-pointer">
+          <Card key={building.name} className=" w-full hover:shadow-md transition-all duration-200 group cursor-pointer">
             <CardHeader className="space-y-1 pb-3">
               <CardTitle className="text-lg font-medium flex items-center justify-between">
                 <span>{building.name}</span>
@@ -82,7 +78,6 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
           </Card>
         ))}
       </div>
-
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>

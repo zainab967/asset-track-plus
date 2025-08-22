@@ -10,6 +10,9 @@ import { SubmitExpenseDialog } from "./SubmitExpenseDialog";
 import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
 import { ExpenseDescriptionDialog } from "./ExpenseDescriptionDialog";
 import { useToast } from "@/hooks/use-toast";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { Calendar } from "lucide-react";
 
 interface Expense {
   id: string;
@@ -32,6 +35,9 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [buildingFilter, setBuildingFilter] = useState<string>(selectedDepartment || "all");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newExpense, setNewExpense] = useState<Partial<Expense>>({});
   const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
@@ -174,10 +180,27 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   const handleCancelNew = () => {
     setIsAddingNew(false);
     setNewExpense({});
-  };
+  }
+ const handlePrevMonth = () => {
+  setCurrentMonth(prev => {
+    const newMonth = new Date(prev);
+    newMonth.setMonth(newMonth.getMonth() - 1);
+    return newMonth;
+  });
+  setSelectedDate(null);
+};
 
-  const handleSelectRecurring = (value: string) => {
-    const idx = parseInt(value);
+const handleNextMonth = () => {
+  setCurrentMonth(prev => {
+    const newMonth = new Date(prev);
+    newMonth.setMonth(newMonth.getMonth() + 1);
+    return newMonth;
+  });
+  setSelectedDate(null);
+};
+
+const handleSelectRecurring = (value: string) => {
+  const idx = parseInt(value);
     const recurring = recurringExpenses[idx];
     if (recurring) {
       setNewExpense(prev => ({
@@ -191,12 +214,20 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   };
 
   const filteredExpenses = expenses.filter(expense => {
+    const expenseDate = new Date(expense.date);
     const matchesSearch = expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         expense.user.toLowerCase().includes(searchTerm.toLowerCase());
+      expense.user.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || expense.status === statusFilter;
     const matchesDepartment = buildingFilter === "all" || expense.building === buildingFilter;
+    const matchesMonth =
+      expenseDate.getFullYear() === currentMonth.getFullYear() &&
+      expenseDate.getMonth() === currentMonth.getMonth();
+    const matchesDate = !selectedDate ||
+      (expenseDate.getFullYear() === selectedDate.getFullYear() &&
+        expenseDate.getMonth() === selectedDate.getMonth() &&
+        expenseDate.getDate() === selectedDate.getDate());
     
-    return matchesSearch && matchesStatus && matchesDepartment;
+    return matchesSearch && matchesStatus && matchesDepartment && matchesMonth && matchesDate;
   });
 
   const pendingClaims = expenses.filter(e => e.status === "pending").length;
@@ -276,183 +307,230 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                 <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Expenses Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Recent Expenses</CardTitle>
-            <Button 
-              onClick={handleAddNew} 
-              size="sm" 
-              className="flex items-center gap-2"
-              disabled={isAddingNew}
-            >
-              <Plus className="h-4 w-4" />
-              Add Expense
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Building</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Details</TableHead>
-                {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead>Action</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isAddingNew && (
-                <TableRow className="bg-muted/30">
-                  <TableCell>
-                    <Input
-                      value={newExpense.name || ""}
-                      onChange={(e) => setNewExpense(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Expense name"
-                      className="h-8"
-                    />
-                    <Select onValueChange={handleSelectRecurring}>
-                      <SelectTrigger className="h-6 text-xs mt-1">
-                        <SelectValue placeholder="Or select recurring" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {recurringExpenses.map((recurring, idx) => (
-                          <SelectItem key={idx} value={idx.toString()}>
-                            {recurring.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{newExpense.user}</TableCell>
-                  <TableCell>
-                    <Select value={newExpense.building || ""} onValueChange={(value) => setNewExpense(prev => ({ ...prev, department: value }))}>
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Department" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Engineering">Engineering</SelectItem>
-                        <SelectItem value="Marketing">Marketing</SelectItem>
-                        <SelectItem value="Sales">Sales</SelectItem>
-                        <SelectItem value="HR">HR</SelectItem>
-                        <SelectItem value="Operations">Operations</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={newExpense.amount || ""}
-                      onChange={(e) => setNewExpense(prev => ({ ...prev, amount: Number(e.target.value) }))}
-                      placeholder="0"
-                      className="h-8 font-mono"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Select value={newExpense.type || "one-time"} onValueChange={(value: "one-time" | "recurring") => setNewExpense(prev => ({ ...prev, type: value }))}>
-                      <SelectTrigger className="h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="one-time">One-time</SelectItem>
-                        <SelectItem value="recurring">Recurring</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{newExpense.date}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">Pending</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Select value={newExpense.category || ""} onValueChange={(value) => setNewExpense(prev => ({ ...prev, category: value }))}>
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Software">Software</SelectItem>
-                        <SelectItem value="Supplies">Supplies</SelectItem>
-                        <SelectItem value="Food">Food</SelectItem>
-                        <SelectItem value="Travel">Travel</SelectItem>
-                        <SelectItem value="Events">Events</SelectItem>
-                        <SelectItem value="Campaigns">Campaigns</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button size="sm" onClick={handleSaveNew} className="h-7 w-7 p-0">
-                        <Save className="h-3 w-3" />
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={handleCancelNew} className="h-7 w-7 p-0">
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+          <div className="relative flex flex-col items-center">
+          <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handlePrevMonth}
+                className="h-8 w-8"
+                aria-label="Previous month"
+              >
+                <span>&lt;</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowDatePicker(true)}
+                className="h-8 w-8"
+                aria-label="Open calendar"
+              >
+                <Calendar className="h-5 w-5 text-muted-foreground" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleNextMonth}
+                className="h-8 w-8"
+                aria-label="Next month"
+                disabled={
+                  currentMonth.getMonth() === new Date().getMonth() &&
+                  currentMonth.getFullYear() === new Date().getFullYear()
+                }
+              >
+                <span>&gt;</span>
+              </Button>
+              </div>
+              <span className="text-xs text-muted-foreground mt-1">
+                {currentMonth.toLocaleString("default", { month: "long", year: "numeric" })}
+                {selectedDate && (
+                  <> — {selectedDate.toLocaleDateString()}</>
+                )}
+              </span>
+              {showDatePicker && (
+                <div className="absolute z-50 mt-2">
+                <ReactDatePicker
+                  selected={selectedDate}
+                  onChange={(date: Date | null) => {
+                    setSelectedDate(date);
+                    setShowDatePicker(false);
+                    setCurrentMonth(date ? new Date(date.getFullYear(), date.getMonth(), 1) : new Date());
+                  }}
+                  inline
+                  onClickOutside={() => setShowDatePicker(false)}
+                  calendarClassName="shadow-lg rounded-lg"
+                />
+                </div>
               )}
-              {filteredExpenses.map((expense) => (
-                <TableRow key={expense.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">{expense.name}</TableCell>
-                  <TableCell>{expense.user}</TableCell>
-                  <TableCell>{expense.building}</TableCell>
-                  <TableCell className="font-mono">${expense.amount.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={expense.type === "recurring" ? "default" : "outline"}>
-                      {expense.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{expense.date}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(expense.status)}
-                      {getStatusBadge(expense.status)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <ExpenseDetailsDialog expense={expense} />
-                  </TableCell>
-                  {(userRole === "hr" || userRole === "admin" || userRole === "manager") && (
-                    <TableCell>
-                      <div className="flex gap-2">
-                        {expense.status === "pending" && (
-                          <>
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2">
-                              Approve
-                            </Button>
-                            <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 h-7 px-2">
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <ExpenseDescriptionDialog
-        isOpen={showDescriptionDialog}
-        onClose={() => {
-          setShowDescriptionDialog(false);
-          setCurrentExpenseForDescription(null);
-        }}
-        onSave={handleDescriptionSave}
-        expense={currentExpenseForDescription}
-      />
+                </div>
+                </div>
+                </CardContent>
+                </Card>
+     
+{/* Expenses Table */}
+<Card>
+  <CardHeader>
+    <div className="flex items-center justify-between">
+      <CardTitle>Recent Expenses</CardTitle>
+      <Button 
+        onClick={handleAddNew} 
+        size="sm" 
+        className="flex items-center gap-2"
+        disabled={isAddingNew}
+      >
+        <Plus className="h-4 w-4" />
+        Add Expense
+      </Button>
     </div>
+  </CardHeader>
+  <CardContent>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>User</TableHead>
+          <TableHead>Building</TableHead>
+          <TableHead>Amount</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Details</TableHead>
+          {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead>Action</TableHead>}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {isAddingNew && (
+          <TableRow className="bg-muted/30">
+            <TableCell>
+              <Input
+                value={newExpense.name || ""}
+                onChange={(e) => setNewExpense(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Expense name"
+                className="h-8"
+              />
+              <Select onValueChange={handleSelectRecurring}>
+                <SelectTrigger className="h-6 text-xs mt-1">
+                  <SelectValue placeholder="Or select recurring" />
+                </SelectTrigger>
+                <SelectContent>
+                  {recurringExpenses.map((recurring, idx) => (
+                    <SelectItem key={idx} value={idx.toString()}>
+                      {recurring.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </TableCell>
+            <TableCell className="text-muted-foreground text-sm">{newExpense.user}</TableCell>
+            <TableCell>
+              <Select value={newExpense.building || ""} onValueChange={(value) => setNewExpense(prev => ({ ...prev, building: value }))}>
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Building" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                  <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
+                  <SelectItem value="Engineering">Engineering</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Sales">Sales</SelectItem>
+                  <SelectItem value="HR">HR</SelectItem>
+                  <SelectItem value="Operations">Operations</SelectItem>
+                </SelectContent>
+              </Select>
+            </TableCell>
+            <TableCell>
+              <Input
+                type="number"
+                value={newExpense.amount || ""}
+                onChange={(e) => setNewExpense(prev => ({ ...prev, amount: Number(e.target.value) }))}
+                placeholder="0"
+                className="h-8 font-mono"
+              />
+            </TableCell>
+            <TableCell>
+              <Select value={newExpense.type || "one-time"} onValueChange={(value: "one-time" | "recurring") => setNewExpense(prev => ({ ...prev, type: value }))}>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="one-time">One-time</SelectItem>
+                  <SelectItem value="recurring">Recurring</SelectItem>
+                </SelectContent>
+              </Select>
+            </TableCell>
+            <TableCell className="text-muted-foreground text-sm">{newExpense.date}</TableCell>
+            <TableCell>
+              <Badge variant="secondary">Pending</Badge>
+            </TableCell>
+            <TableCell>
+              <Select value={newExpense.category || ""} onValueChange={(value) => setNewExpense(prev => ({ ...prev, category: value }))}>
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Software">Software</SelectItem>
+                  <SelectItem value="Supplies">Supplies</SelectItem>
+                  <SelectItem value="Food">Food</SelectItem>
+                  <SelectItem value="Travel">Travel</SelectItem>
+                  <SelectItem value="Events">Events</SelectItem>
+                  <SelectItem value="Campaigns">Campaigns</SelectItem>
+                </SelectContent>
+              </Select>
+            </TableCell>
+            <TableCell>
+              <div className="flex gap-1">
+                <Button size="sm" onClick={handleSaveNew} className="h-7 w-7 p-0">
+                  <Save className="h-3 w-3" />
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleCancelNew} className="h-7 w-7 p-0">
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+        )}
+        {filteredExpenses.map((expense) => (
+          <TableRow key={expense.id} className="hover:bg-muted/50">
+            <TableCell className="font-medium">{expense.name}</TableCell>
+            <TableCell>{expense.user}</TableCell>
+            <TableCell>{expense.building}</TableCell>
+            <TableCell className="font-mono">${expense.amount.toLocaleString()}</TableCell>
+            <TableCell>
+              <Badge variant={expense.type === "recurring" ? "default" : "outline"}>
+                {expense.type}
+              </Badge>
+            </TableCell>
+            <TableCell>{expense.date}</TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                {getStatusIcon(expense.status)}
+                {getStatusBadge(expense.status)}
+              </div>
+            </TableCell>
+            <TableCell>
+              <ExpenseDetailsDialog expense={expense} />
+            </TableCell>
+            {(userRole === "hr" || userRole === "admin" || userRole === "manager") && (
+              <TableCell>
+                <div className="flex gap-2">
+                  {expense.status === "pending" && (
+                    <>
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2">
+                        Approve
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 h-7 px-2">
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </TableCell>
+            )}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </CardContent>
+</Card></div>
   );
 }
