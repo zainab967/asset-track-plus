@@ -48,7 +48,7 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
       {/* Building Summaries */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {departments.map((building) => (
-          <Card key={building.name} className=" w-full hover:shadow-md transition-all duration-200 group cursor-pointer">
+          <Card key={building.name} className="w-full hover:shadow-md hover:shadow-primary/20 transition-shadow cursor-pointer">
             <CardHeader className="space-y-1 pb-3">
               <CardTitle className="text-lg font-medium flex items-center justify-between">
                 <span>{building.name}</span>
@@ -65,12 +65,12 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
                 <div className="text-2xl font-bold">
                   ${building.balance.toLocaleString()}
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onNavigateToExpenses(building.name)}
-                  className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                >
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => onNavigateToExpenses(building.name)}
+                   className="w-full hover:shadow-md hover:shadow-primary/20 transition-shadow"
+                 >
                   View Details <ArrowRight className="ml-2 h-3 w-3" />
                 </Button>
               </div>

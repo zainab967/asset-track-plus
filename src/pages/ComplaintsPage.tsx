@@ -386,21 +386,22 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Submitted By</TableHead>
-                <TableHead>Building</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Details</TableHead>
-                {userRole !== "employee" && <TableHead>Actions</TableHead>}
-              </TableRow>
-            </TableHeader>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[150px]">Title</TableHead>
+                  <TableHead className="min-w-[100px]">Type</TableHead>
+                  <TableHead className="min-w-[120px]">Category</TableHead>
+                  <TableHead className="min-w-[100px]">Priority</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[120px]">Submitted By</TableHead>
+                  <TableHead className="min-w-[120px]">Building</TableHead>
+                  <TableHead className="min-w-[100px]">Date</TableHead>
+                  <TableHead className="min-w-[100px]">Details</TableHead>
+                  {userRole !== "employee" && <TableHead className="min-w-[100px]">Actions</TableHead>}
+                </TableRow>
+              </TableHeader>
             <TableBody>
               {filteredItems.map((item) => (
                 <TableRow key={item.id} className="hover:bg-muted/50">
@@ -425,7 +426,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="h-7 px-2"
+                      className="h-7 px-2 hover:shadow-md transition-shadow"
                       onClick={() => handleViewDetails(item)}
                     >
                       <Eye className="h-3 w-3 mr-1" />
@@ -436,15 +437,15 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                     <TableCell>
                       <div className="flex gap-2">
                         {userRole === "admin" && (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="h-7 px-2"
-                            onClick={() => handleEditItem(item)}
-                          >
-                            <Edit className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
+                           <Button 
+                             size="sm" 
+                             variant="outline" 
+                             className="h-7 px-2 hover:shadow-md transition-shadow"
+                             onClick={() => handleEditItem(item)}
+                           >
+                             <Edit className="h-3 w-3 mr-1" />
+                             Edit
+                           </Button>
                         )}
                       </div>
                     </TableCell>
@@ -453,6 +454,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

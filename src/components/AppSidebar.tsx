@@ -112,16 +112,16 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={active}>
-                      <NavLink 
-                        to={item.url} 
-                        className="flex items-center gap-2 px-2 py-1.5 mx-0.5 rounded-md transition-all duration-200 overflow-hidden"
-                      >
-                        <Icon className={"h-4 w-4 flex-shrink-0 " + (active ? "text-primary" : "text-sidebar-foreground/70")} />
-                        {state === "expanded" && (
-                          <span className="font-medium transition-transform duration-200 hover:scale-[1.02] truncate max-w-full">
-                            {item.title}
-                          </span>
-                        )}
+                       <NavLink 
+                         to={item.url} 
+                         className="flex items-center gap-2 px-2 py-1.5 mx-0.5 rounded-md transition-all duration-200 overflow-hidden hover:shadow-md"
+                       >
+                         <Icon className={"h-4 w-4 flex-shrink-0 " + (active ? "text-primary" : "text-sidebar-foreground/70")} />
+                         {state === "expanded" && (
+                           <span className="font-medium transition-shadow duration-200 truncate max-w-full">
+                             {item.title}
+                           </span>
+                         )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

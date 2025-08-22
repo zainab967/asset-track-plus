@@ -301,21 +301,22 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Building</TableHead>
-                <TableHead>Details</TableHead>
-                {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead>Action</TableHead>}
-              </TableRow>
-            </TableHeader>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[150px]">Name</TableHead>
+                  <TableHead className="min-w-[100px]">User</TableHead>
+                  <TableHead className="min-w-[120px]">Category</TableHead>
+                  <TableHead className="min-w-[100px]">Amount</TableHead>
+                  <TableHead className="min-w-[100px]">Type</TableHead>
+                  <TableHead className="min-w-[100px]">Date</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[120px]">Building</TableHead>
+                  <TableHead className="min-w-[100px]">Details</TableHead>
+                  {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead className="min-w-[100px]">Action</TableHead>}
+                </TableRow>
+              </TableHeader>
             <TableBody>
               {isAddingNew && (
                 <>
@@ -475,7 +476,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="h-7 px-2"
+                      className="h-7 px-2 hover:shadow-md transition-shadow"
                       onClick={() => handleViewDetails(reimbursement)}
                     >
                       <Eye className="h-3 w-3 mr-1" />
@@ -486,14 +487,14 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                     <TableCell>
                       <div className="flex gap-2">
                         {reimbursement.status === "pending" && (
-                          <>
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2">
-                              Approve
-                            </Button>
-                            <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 h-7 px-2">
-                              Reject
-                            </Button>
-                          </>
+                           <>
+                             <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2 hover:shadow-md transition-shadow">
+                               Approve
+                             </Button>
+                             <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 h-7 px-2 hover:shadow-md transition-shadow">
+                               Reject
+                             </Button>
+                           </>
                         )}
                       </div>
                     </TableCell>
@@ -502,6 +503,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

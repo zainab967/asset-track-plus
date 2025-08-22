@@ -165,12 +165,8 @@ All colors MUST be HSL.
   }
 
   /* Hover effects */
-  .hover-scale {
-    @apply hover:scale-105 transition-transform;
-  }
-  
   .hover-glow {
-    @apply hover:shadow-lg hover:shadow-primary/25;
+    @apply hover:shadow-lg hover:shadow-primary/25 transition-shadow;
   }
 
   /* Gradient backgrounds */

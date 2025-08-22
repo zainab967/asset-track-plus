@@ -273,8 +273,8 @@ const handleSelectRecurring = (value: string) => {
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-6">
+        <CardContent className="p-4 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -307,13 +307,16 @@ const handleSelectRecurring = (value: string) => {
                 <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
               </SelectContent>
             </Select>
-          <div className="relative flex flex-col items-center">
-          <div className="flex items-center gap-2">
+          </div>
+          
+          {/* Date picker moved to separate row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handlePrevMonth}
-                className="h-8 w-8"
+                className="h-8 w-8 hover:shadow-md transition-shadow"
                 aria-label="Previous month"
               >
                 <span>&lt;</span>
@@ -321,8 +324,8 @@ const handleSelectRecurring = (value: string) => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setShowDatePicker(true)}
-                className="h-8 w-8"
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="h-8 w-8 hover:shadow-md transition-shadow"
                 aria-label="Open calendar"
               >
                 <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -331,7 +334,7 @@ const handleSelectRecurring = (value: string) => {
                 variant="ghost"
                 size="icon"
                 onClick={handleNextMonth}
-                className="h-8 w-8"
+                className="h-8 w-8 hover:shadow-md transition-shadow"
                 aria-label="Next month"
                 disabled={
                   currentMonth.getMonth() === new Date().getMonth() &&
@@ -340,32 +343,33 @@ const handleSelectRecurring = (value: string) => {
               >
                 <span>&gt;</span>
               </Button>
-              </div>
-              <span className="text-xs text-muted-foreground mt-1">
-                {currentMonth.toLocaleString("default", { month: "long", year: "numeric" })}
-                {selectedDate && (
-                  <> — {selectedDate.toLocaleDateString()}</>
-                )}
-              </span>
-              {showDatePicker && (
-                <div className="absolute z-50 mt-2">
-                <ReactDatePicker
-                  selected={selectedDate}
-                  onChange={(date: Date | null) => {
-                    setSelectedDate(date);
-                    setShowDatePicker(false);
-                    setCurrentMonth(date ? new Date(date.getFullYear(), date.getMonth(), 1) : new Date());
-                  }}
-                  inline
-                  onClickOutside={() => setShowDatePicker(false)}
-                  calendarClassName="shadow-lg rounded-lg"
-                />
-                </div>
+            </div>
+            <span className="text-sm text-muted-foreground">
+              {currentMonth.toLocaleString("default", { month: "long", year: "numeric" })}
+              {selectedDate && (
+                <> — {selectedDate.toLocaleDateString()}</>
               )}
-                </div>
-                </div>
-                </CardContent>
-                </Card>
+            </span>
+          </div>
+          
+          {/* Calendar in separate container to prevent overlap */}
+          {showDatePicker && (
+            <div className="flex justify-center">
+              <ReactDatePicker
+                selected={selectedDate}
+                onChange={(date: Date | null) => {
+                  setSelectedDate(date);
+                  setShowDatePicker(false);
+                  setCurrentMonth(date ? new Date(date.getFullYear(), date.getMonth(), 1) : new Date());
+                }}
+                inline
+                onClickOutside={() => setShowDatePicker(false)}
+                calendarClassName="shadow-lg rounded-lg border"
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
      
 {/* Expenses Table */}
 <Card>
@@ -384,20 +388,21 @@ const handleSelectRecurring = (value: string) => {
     </div>
   </CardHeader>
   <CardContent>
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>User</TableHead>
-          <TableHead>Building</TableHead>
-          <TableHead>Amount</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Details</TableHead>
-          {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead>Action</TableHead>}
-        </TableRow>
-      </TableHeader>
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="min-w-[150px]">Name</TableHead>
+            <TableHead className="min-w-[100px]">User</TableHead>
+            <TableHead className="min-w-[120px]">Building</TableHead>
+            <TableHead className="min-w-[100px]">Amount</TableHead>
+            <TableHead className="min-w-[100px]">Type</TableHead>
+            <TableHead className="min-w-[100px]">Date</TableHead>
+            <TableHead className="min-w-[100px]">Status</TableHead>
+            <TableHead className="min-w-[100px]">Details</TableHead>
+            {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead className="min-w-[100px]">Action</TableHead>}
+          </TableRow>
+        </TableHeader>
       <TableBody>
         {isAddingNew && (
           <TableRow className="bg-muted/30">
@@ -530,6 +535,7 @@ const handleSelectRecurring = (value: string) => {
         ))}
       </TableBody>
     </Table>
+    </div>
   </CardContent>
 </Card></div>
   );
