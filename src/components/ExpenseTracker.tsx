@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, Filter, Plus, Clock, CheckCircle, XCircle, Save, X } from "lucide-react";
 import { SubmitExpenseDialog } from "./SubmitExpenseDialog";
 import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
@@ -309,7 +310,7 @@ const handleSelectRecurring = (value: string) => {
             </Select>
           </div>
           
-          {/* Date picker moved to separate row */}
+          {/* Date picker with popover */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button
@@ -321,15 +322,32 @@ const handleSelectRecurring = (value: string) => {
               >
                 <span>&lt;</span>
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowDatePicker(!showDatePicker)}
-                className="h-8 w-8 hover:shadow-md transition-shadow"
-                aria-label="Open calendar"
-              >
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-              </Button>
+              
+              <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 hover:shadow-md transition-shadow"
+                    aria-label="Open calendar"
+                  >
+                    <Calendar className="h-5 w-5 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <ReactDatePicker
+                    selected={selectedDate}
+                    onChange={(date: Date | null) => {
+                      setSelectedDate(date);
+                      setShowDatePicker(false);
+                      setCurrentMonth(date ? new Date(date.getFullYear(), date.getMonth(), 1) : new Date());
+                    }}
+                    inline
+                    calendarClassName="shadow-none border-none"
+                  />
+                </PopoverContent>
+              </Popover>
+              
               <Button
                 variant="ghost"
                 size="icon"
@@ -351,23 +369,6 @@ const handleSelectRecurring = (value: string) => {
               )}
             </span>
           </div>
-          
-          {/* Calendar in separate container to prevent overlap */}
-          {showDatePicker && (
-            <div className="flex justify-center">
-              <ReactDatePicker
-                selected={selectedDate}
-                onChange={(date: Date | null) => {
-                  setSelectedDate(date);
-                  setShowDatePicker(false);
-                  setCurrentMonth(date ? new Date(date.getFullYear(), date.getMonth(), 1) : new Date());
-                }}
-                inline
-                onClickOutside={() => setShowDatePicker(false)}
-                calendarClassName="shadow-lg rounded-lg border"
-              />
-            </div>
-          )}
         </CardContent>
       </Card>
      
