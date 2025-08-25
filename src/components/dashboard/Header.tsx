@@ -15,21 +15,21 @@ interface AppHeaderProps {
 export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
   return (
     <header className="border-b-0 flex-1 bg-primary">
-      <div className="flex items-center justify-between px-8 py-6">
-        <div className="flex items-center gap-8">
+      <div className="flex items-center justify-between px-6 py-2">
+        <div className="flex items-center gap-4">
           <h1 className="text-4xl font-bold text-primary-foreground">
             <span className="text-accent">AIIM</span>Track
           </h1>
-          <div className="relative w-full max-w-md sm:max-w-lg lg:max-w-2xl">
+          <div className="relative w-full max-w-md ">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-foreground/70 h-4 w-4" />
             <Input 
               placeholder="Search expenses, assets, departments..." 
-              className="pl-10 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/60 focus:bg-primary-foreground/20"
+              className="pl-9 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/60 focus:bg-primary-foreground/20"
             />
           </div>
         </div>
-        
-        <div className="flex items-center gap-6">
+
+        <div className="flex items-center gap-2 text-sm text-primary-foreground">
           <ThemeToggle />
           
           <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary-foreground/10">

@@ -355,11 +355,6 @@ const handleSelectRecurring = (value: string) => {
                 <SelectContent>
                   <SelectItem value="Etihad Office">Etihad Office</SelectItem>
                   <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
-                  <SelectItem value="Engineering">Engineering</SelectItem>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="Sales">Sales</SelectItem>
-                  <SelectItem value="HR">HR</SelectItem>
-                  <SelectItem value="Operations">Operations</SelectItem>
                 </SelectContent>
               </Select>
             </TableCell>
