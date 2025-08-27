@@ -18,8 +18,7 @@ interface ComplaintSuggestion {
   type: "complaint" | "suggestion";
   category: string;
   priority: "low" | "medium" | "high";
-  status: "open" | "in-progress" | "resolved" | string;
-  resolved?: boolean;
+  status: "open" | "in-progress" | "resolved";
   createdAt: string;
   department?: string;
   assignedTo?: string;
@@ -594,7 +593,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                     <Button
                       variant="default"
                       onClick={() => handleUpdateStatus(selectedItem.id, 'resolved')}
-                      disabled={selectedItem.status === "resolved"}
+                      disabled={selectedItem.status === 'resolved'}
                     >
                       Mark Resolved
                     </Button>

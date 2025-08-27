@@ -49,14 +49,11 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
-        },
-        mode: 'cors',
-        credentials: 'include'
+        }
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -64,21 +61,15 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
         setExpenses(data);
       } else if (data.items && Array.isArray(data.items)) {
         setExpenses(data.items);
-      } else if (data.data && Array.isArray(data.data)) {  // Handle .NET API response format
-        setExpenses(data.data);
       } else {
         console.error('Unexpected data format:', data);
         throw new Error('Invalid data format received');
       }
     } catch (error) {
       console.error('Fetch error:', error);
-      const errorMessage = error instanceof Error 
-        ? error.message
-        : 'Failed to connect to the server. Please ensure the backend is running.';
-      
       toast({
         title: "Error",
-        description: errorMessage,
+        description: `Failed to fetch expenses: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {

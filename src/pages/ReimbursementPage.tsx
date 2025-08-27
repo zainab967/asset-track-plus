@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Search, Plus, Clock, CheckCircle, XCircle, Save, X, Upload, FileText, I
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ExpenseDescriptionDialog } from "@/components/ExpenseDescriptionDialog";
 import { useToast } from "@/hooks/use-toast";
+import { API_ENDPOINTS } from "@/config/api";
 
 interface Reimbursement {
   id: string;
@@ -39,45 +40,132 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedReimbursement, setSelectedReimbursement] = useState<Reimbursement | null>(null);
+  const [reimbursements, setReimbursements] = useState<Reimbursement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const mockReimbursements: Reimbursement[] = [
-    {
-      id: "1",
-      name: "Medical checkup reimbursement",
-      amount: 350,
-      user: "John Doe",
-      category: "Healthcare",
-      date: "2024-01-15",
-      status: "approved",
-      type: "medical",
-      building: "Etihad Office"
-    },
-    {
-      id: "2",
-      name: "Business travel expenses",
-      amount: 1200,
-      user: "Jane Smith",
-      category:" Sales",
-      date: "2024-01-14",
-      status: "pending",
-      type: "travel",
-      building: "Etihad Office"
-    },
-    {
-      id: "3",
-      name: "Home office equipment",
-      amount: 800,
-      user: "Mike Johnson",
-      category: "Equipment",
-      date: "2024-01-13",
-      status: "approved",
-      type: "equipment",
-      building: "Abdalian Office"
-    }
-  ];
+  useEffect(() => {
+    fetchReimbursements();
+  }, []);
 
-  const [reimbursements, setReimbursements] = useState<Reimbursement[]>(mockReimbursements);
+  const fetchReimbursements = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(API_ENDPOINTS.REIMBURSEMENTS, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setReimbursements(data);
+      } else if (data.items && Array.isArray(data.items)) {
+        setReimbursements(data.items);
+      } else {
+        console.error('Unexpected data format:', data);
+        throw new Error('Invalid data format received');
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      toast({
+        title: "Error",
+        description: `Failed to fetch reimbursements: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStatusUpdate = async (id: string, newStatus: "approved" | "rejected") => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.REIMBURSEMENT_BY_ID(id)}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.message || 
+          `Failed to update status (HTTP ${response.status})`
+        );
+      }
+
+      const updatedReimbursement = await response.json();
+      setReimbursements(prev => 
+        prev.map(r => r.id === id ? { ...r, status: newStatus } : r)
+      );
+
+      toast({
+        title: "Success",
+        description: `Reimbursement ${newStatus} successfully`,
+      });
+    } catch (error) {
+      console.error('Status update error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update reimbursement status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSubmitReimbursement = async (formData: FormData) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.REIMBURSEMENTS, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.message || 
+          `Failed to submit reimbursement (HTTP ${response.status})`
+        );
+      }
+
+      const newReimbursement = await response.json();
+      setReimbursements(prev => [...prev, newReimbursement]);
+      setIsAddingNew(false);
+      
+      toast({
+        title: "Success",
+        description: "Reimbursement submitted successfully",
+      });
+    } catch (error) {
+      console.error('Submit error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to submit reimbursement",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const filteredReimbursements = reimbursements
+    .filter(reimbursement => {
+      const matchesSearch = reimbursement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reimbursement.user.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === "all" || reimbursement.status === statusFilter;
+      const matchesBuilding = buildingFilter === "all" || reimbursement.building === buildingFilter;
+      return matchesSearch && matchesStatus && matchesBuilding;
+    });
 
   const recurringReimbursements = [
     { name: "Monthly internet allowance", category: "Utilities", amount: 80, building: "All", type: "other" },
@@ -111,7 +199,6 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
       return;
     }
 
-    // Open description dialog
     setCurrentExpenseForDescription(newReimbursement);
     setShowDescriptionDialog(true);
   };
@@ -125,32 +212,37 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
     setUploadedMedia(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleDescriptionSave = (data: { description: string; media: File[] }) => {
-    const allMedia = [...uploadedMedia, ...(data.media || [])];
-    const reimbursement: Reimbursement = {
-      id: newReimbursement.id!,
-      name: newReimbursement.name!,
-      amount: Number(newReimbursement.amount),
-      user: newReimbursement.user!,
-      category: newReimbursement.category!,
-      date: newReimbursement.date!,
-      status: newReimbursement.status as "pending" | "approved" | "rejected",
-      type: newReimbursement.type as "medical" | "travel" | "equipment" | "other",
-      building: newReimbursement.building!,
-      description: data.description,
-      media: allMedia
-    };
+  const handleDescriptionSave = async (data: { description: string; media: File[] }) => {
+    try {
+      const allMedia = [...uploadedMedia, ...(data.media || [])];
+      const formData = new FormData();
+      
+      formData.append('name', newReimbursement.name || '');
+      formData.append('amount', (newReimbursement.amount || 0).toString());
+      formData.append('category', newReimbursement.category || '');
+      formData.append('type', newReimbursement.type || 'other');
+      formData.append('building', newReimbursement.building || '');
+      formData.append('description', data.description);
+      formData.append('date', newReimbursement.date || new Date().toISOString().split('T')[0]);
+      formData.append('user', newReimbursement.user || 'Current User');
+      
+      allMedia.forEach((file, index) => {
+        formData.append(`media${index}`, file);
+      });
 
-    setReimbursements(prev => [reimbursement, ...prev]);
-    setIsAddingNew(false);
-    setNewReimbursement({});
-    setUploadedMedia([]);
-    setCurrentExpenseForDescription(null);
-    
-    toast({
-      title: "Success",
-      description: "Reimbursement request submitted successfully",
-    });
+      await handleSubmitReimbursement(formData);
+      setShowDescriptionDialog(false);
+      setIsAddingNew(false);
+      setNewReimbursement({});
+      setUploadedMedia([]);
+      setCurrentExpenseForDescription(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit reimbursement",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCancelNew = () => {
@@ -178,15 +270,6 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
     setSelectedReimbursement(reimbursement);
     setIsViewDialogOpen(true);
   };
-
-  const filteredReimbursements = reimbursements.filter(reimbursement => {
-    const matchesSearch = reimbursement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         reimbursement.user.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || reimbursement.status === statusFilter;
-    const matchesBuilding = buildingFilter === "all" || reimbursement.building === buildingFilter;
-
-    return matchesSearch && matchesStatus && matchesBuilding;
-  });
 
   const pendingClaims = reimbursements.filter(r => r.status === "pending").length;
 
@@ -229,373 +312,386 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   };
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Reimbursement Management</h2>
-          <p className="text-muted-foreground">
-            {pendingClaims > 0 && (
-              <span className="text-yellow-600 font-medium">
-                {pendingClaims} pending reimbursement requests require attention
-              </span>
-            )}
-          </p>
+    <div className="flex-1">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        {/* Header */}
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">Reimbursement Management</h2>
+          {pendingClaims > 0 && (
+            <p className="text-yellow-600 font-medium">
+              {pendingClaims} pending reimbursement requests require attention
+            </p>
+          )}
         </div>
-      </div>
 
-      {/* Filters */}
-      <Card className="hover:shadow-md transition-shadow">
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search by name or user..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 hover:shadow-md transition-shadow"
-              />
+        {/* Filters */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search by name or user..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={buildingFilter} onValueChange={setBuildingFilter}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Building" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Buildings</SelectItem>
+                  <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                  <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
+          </CardContent>
+        </Card>
 
-            <Select value={buildingFilter} onValueChange={setBuildingFilter}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Building" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Buildings</SelectItem>
-                <SelectItem value="Etihad Office">Etihad Office</SelectItem>
-                <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Reimbursements Table */}
-      <Card className="hover:shadow-md transition-shadow">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Reimbursement Requests</CardTitle>
-            <Button 
-              onClick={handleAddNew} 
-              size="sm" 
-              className="flex items-center gap-2 hover:shadow-md transition-shadow"
-              disabled={isAddingNew}
-            >
-              <Plus className="h-4 w-4" />
-              Add Request
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[150px]">Name</TableHead>
-                  <TableHead className="min-w-[100px]">User</TableHead>
-                  <TableHead className="min-w-[120px]">Category</TableHead>
-                  <TableHead className="min-w-[100px]">Amount</TableHead>
-                  <TableHead className="min-w-[100px]">Type</TableHead>
-                  <TableHead className="min-w-[100px]">Date</TableHead>
-                  <TableHead className="min-w-[100px]">Status</TableHead>
-                  <TableHead className="min-w-[120px]">Building</TableHead>
-                  <TableHead className="min-w-[100px]">Details</TableHead>
-                  {(userRole === "hr" || userRole === "admin" || userRole === "manager") && <TableHead className="min-w-[100px]">Action</TableHead>}
-                </TableRow>
-              </TableHeader>
-            <TableBody>
-              {isAddingNew && (
-                <>
-                  <TableRow className="bg-muted/30">
-                    <TableCell>
-                      <Input
-                        value={newReimbursement.name || ""}
-                        onChange={(e) => setNewReimbursement(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="Reimbursement name"
-                        className="h-8"
-                      />
-                      <Select onValueChange={handleSelectRecurring}>
-                        <SelectTrigger className="h-6 text-xs mt-1">
-                          <SelectValue placeholder="Or select recurring" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {recurringReimbursements.map((recurring, idx) => (
-                            <SelectItem key={idx} value={idx.toString()}>
-                              {recurring.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{newReimbursement.user}</TableCell>
-                    <TableCell>
-                      <Select value={newReimbursement.building || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, building: value }))}>
-                        <SelectTrigger className="h-8">
-                          <SelectValue placeholder="Building" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Etihad Office">Etihad Office</SelectItem>
-                          <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        value={newReimbursement.amount || ""}
-                        onChange={(e) => setNewReimbursement(prev => ({ ...prev, amount: Number(e.target.value) }))}
-                        placeholder="0"
-                        className="h-8 font-mono"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Select value={newReimbursement.type || "other"} onValueChange={(value: "medical" | "travel" | "equipment" | "other") => setNewReimbursement(prev => ({ ...prev, type: value }))}>
-                        <SelectTrigger className="h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="medical">Medical</SelectItem>
-                          <SelectItem value="travel">Travel</SelectItem>
-                          <SelectItem value="equipment">Equipment</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{newReimbursement.date}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">Pending</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Select value={newReimbursement.category || ""} onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, category: value }))}>
-                        <SelectTrigger className="h-8">
-                          <SelectValue placeholder="Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Healthcare">Healthcare</SelectItem>
-                          <SelectItem value="Travel">Travel</SelectItem>
-                          <SelectItem value="Equipment">Equipment</SelectItem>
-                          <SelectItem value="Utilities">Utilities</SelectItem>
-                          <SelectItem value="Training">Training</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button size="sm" onClick={handleSaveNew} className="h-7 w-7 p-0">
-                          <Save className="h-3 w-3" />
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={handleCancelNew} className="h-7 w-7 p-0">
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </TableCell>
+        {/* Reimbursements Table */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Reimbursement Requests</CardTitle>
+              <Button 
+                onClick={handleAddNew} 
+                size="sm" 
+                className="flex items-center gap-2"
+                disabled={isAddingNew}
+              >
+                <Plus className="h-4 w-4" />
+                Add Request
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="relative w-full overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Building</TableHead>
+                    <TableHead>Details</TableHead>
+                    {(userRole === "hr" || userRole === "admin" || userRole === "manager") && 
+                      <TableHead>Action</TableHead>
+                    }
                   </TableRow>
-                  <TableRow className="bg-muted/20">
-                    <TableCell colSpan={8} className="p-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Media Upload */}
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            Media
-                          </label>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="file"
-                              accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,image/*"
-                              multiple
-                              onChange={handleMediaUpload}
-                              className="h-8"
-                              id="media-upload"
-                            />
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => document.getElementById('media-upload')?.click()}
-                              className="h-8 px-2"
-                            >
-                              <Upload className="h-3 w-3" />
+                </TableHeader>
+                <TableBody>
+                  {isAddingNew && (
+                    <>
+                      <TableRow className="bg-muted/30">
+                        <TableCell>
+                          <Input
+                            value={newReimbursement.name || ""}
+                            onChange={(e) => setNewReimbursement(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="Reimbursement name"
+                            className="h-8"
+                          />
+                          <Select onValueChange={handleSelectRecurring}>
+                            <SelectTrigger className="h-6 text-xs mt-1">
+                              <SelectValue placeholder="Or select recurring" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {recurringReimbursements.map((recurring, idx) => (
+                                <SelectItem key={idx} value={idx.toString()}>
+                                  {recurring.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {newReimbursement.user}
+                        </TableCell>
+                        <TableCell>
+                          <Select 
+                            value={newReimbursement.category || ""} 
+                            onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, category: value }))}
+                          >
+                            <SelectTrigger className="h-8">
+                              <SelectValue placeholder="Category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Healthcare">Healthcare</SelectItem>
+                              <SelectItem value="Travel">Travel</SelectItem>
+                              <SelectItem value="Equipment">Equipment</SelectItem>
+                              <SelectItem value="Utilities">Utilities</SelectItem>
+                              <SelectItem value="Training">Training</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            value={newReimbursement.amount || ""}
+                            onChange={(e) => setNewReimbursement(prev => ({ ...prev, amount: Number(e.target.value) }))}
+                            placeholder="0"
+                            className="h-8 w-24"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Select 
+                            value={newReimbursement.type || "other"} 
+                            onValueChange={(value: "medical" | "travel" | "equipment" | "other") => 
+                              setNewReimbursement(prev => ({ ...prev, type: value }))
+                            }
+                          >
+                            <SelectTrigger className="h-8">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="medical">Medical</SelectItem>
+                              <SelectItem value="travel">Travel</SelectItem>
+                              <SelectItem value="equipment">Equipment</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {newReimbursement.date}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">Pending</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Select 
+                            value={newReimbursement.building || ""} 
+                            onValueChange={(value) => setNewReimbursement(prev => ({ ...prev, building: value }))}
+                          >
+                            <SelectTrigger className="h-8">
+                              <SelectValue placeholder="Building" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                              <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button size="sm" onClick={handleSaveNew} className="h-7 w-7 p-0">
+                              <Save className="h-3 w-3" />
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={handleCancelNew} className="h-7 w-7 p-0">
+                              <X className="h-3 w-3" />
                             </Button>
                           </div>
-                          {uploadedMedia.length > 0 && (
-                            <div className="space-y-1">
-                              {uploadedMedia.map((file, index) => (
-                                <div key={index} className="flex items-center justify-between text-xs bg-background p-1 rounded border">
-                                  <span className="truncate">{file.name}</span>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => removeMedia(index)}
-                                    className="h-4 w-4 p-0"
-                                  >
-                                    <X className="h-2 w-2" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                </>
-              )}
-              {filteredReimbursements.map((reimbursement) => (
-                <TableRow key={reimbursement.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">{reimbursement.name}</TableCell>
-                  <TableCell>{reimbursement.user}</TableCell>
-                  <TableCell>{reimbursement.category}</TableCell>
-                  <TableCell className="font-mono">${reimbursement.amount.toLocaleString()}</TableCell>
-                  <TableCell>
-                    {getTypeBadge(reimbursement.type)}
-                  </TableCell>
-                  <TableCell>{reimbursement.date}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(reimbursement.status)}
-                      {getStatusBadge(reimbursement.status)}
-                    </div>
-                  </TableCell>
-                  <TableCell>{reimbursement.building}</TableCell>
-                  <TableCell>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="h-7 px-2 hover:shadow-md transition-shadow"
-                      onClick={() => handleViewDetails(reimbursement)}
-                    >
-                      <Eye className="h-3 w-3 mr-1" />
-                      View
-                    </Button>
-                  </TableCell>
-                  {(userRole === "hr" || userRole === "admin" || userRole === "manager") && (
-                    <TableCell>
-                      <div className="flex gap-2">
-                        {reimbursement.status === "pending" && (
-                           <>
-                             <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 px-2 hover:shadow-md transition-shadow">
-                               Approve
-                             </Button>
-                             <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 h-7 px-2 hover:shadow-md transition-shadow">
-                               Reject
-                             </Button>
-                           </>
-                        )}
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <ExpenseDescriptionDialog
-        isOpen={showDescriptionDialog}
-        onClose={() => {
-          setShowDescriptionDialog(false);
-          setCurrentExpenseForDescription(null);
-        }}
-        onSave={handleDescriptionSave}
-        expense={currentExpenseForDescription}
-      />
-
-      {/* View Details Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Reimbursement Details</DialogTitle>
-          </DialogHeader>
-          {selectedReimbursement && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Name</label>
-                  <p className="font-medium">{selectedReimbursement.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Amount</label>
-                  <p className="font-mono text-lg">${selectedReimbursement.amount.toLocaleString()}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Type</label>
-                  <div>{getTypeBadge(selectedReimbursement.type)}</div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Status</label>
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(selectedReimbursement.status)}
-                    {getStatusBadge(selectedReimbursement.status)}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">User</label>
-                  <p>{selectedReimbursement.user}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Building</label>
-                  <p>{selectedReimbursement.building}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Category</label>
-                  <p>{selectedReimbursement.category}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Date</label>
-                  <p>{selectedReimbursement.date}</p>
-                </div>
-              </div>
-
-              {selectedReimbursement.description && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Description</label>
-                  <p className="text-sm">{selectedReimbursement.description}</p>
-                </div>
-              )}
-
-              {((selectedReimbursement.media && selectedReimbursement.media.length > 0)
-               && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Attachments</label>
-                  <div className="space-y-3 mt-2">
-                    {/* Documents */}
-                    {selectedReimbursement.media && selectedReimbursement.media.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Media</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          {selectedReimbursement.media.map((file, index) => (
-                            <div key={index} className="p-2 border rounded flex items-center gap-2">
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="bg-muted/20">
+                        <TableCell colSpan={10} className="p-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium flex items-center gap-2">
                               <FileText className="h-4 w-4" />
-                              <span className="text-sm truncate">{file.name}</span>
+                              Media
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="file"
+                                accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,image/*"
+                                multiple
+                                onChange={handleMediaUpload}
+                                className="h-8"
+                                id="media-upload"
+                              />
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => document.getElementById('media-upload')?.click()}
+                                className="h-8 px-2"
+                              >
+                                <Upload className="h-3 w-3" />
+                              </Button>
                             </div>
-                          ))}
+                            {uploadedMedia.length > 0 && (
+                              <div className="space-y-1">
+                                {uploadedMedia.map((file, index) => (
+                                  <div key={index} className="flex items-center justify-between text-xs bg-background p-1 rounded border">
+                                    <span className="truncate">{file.name}</span>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeMedia(index)}
+                                      className="h-4 w-4 p-0"
+                                    >
+                                      <X className="h-2 w-2" />
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  )}
+                  {filteredReimbursements.map((reimbursement) => (
+                    <TableRow key={reimbursement.id}>
+                      <TableCell className="font-medium">{reimbursement.name}</TableCell>
+                      <TableCell>{reimbursement.user}</TableCell>
+                      <TableCell>{reimbursement.category}</TableCell>
+                      <TableCell className="font-mono">
+                        ${reimbursement.amount.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        {getTypeBadge(reimbursement.type)}
+                      </TableCell>
+                      <TableCell>{reimbursement.date}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(reimbursement.status)}
+                          {getStatusBadge(reimbursement.status)}
                         </div>
-                      </div>
-                    )}
+                      </TableCell>
+                      <TableCell>{reimbursement.building}</TableCell>
+                      <TableCell>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-7 px-2"
+                          onClick={() => handleViewDetails(reimbursement)}
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </Button>
+                      </TableCell>
+                      {(userRole === "hr" || userRole === "admin" || userRole === "manager") && (
+                        <TableCell>
+                          <div className="flex gap-2">
+                            {reimbursement.status === "pending" && (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700 h-7 px-2"
+                                  onClick={() => handleStatusUpdate(reimbursement.id, "approved")}
+                                >
+                                  Approve
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="text-red-600 hover:text-red-700 h-7 px-2"
+                                  onClick={() => handleStatusUpdate(reimbursement.id, "rejected")}
+                                >
+                                  Reject
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <ExpenseDescriptionDialog
+          isOpen={showDescriptionDialog}
+          onClose={() => {
+            setShowDescriptionDialog(false);
+            setCurrentExpenseForDescription(null);
+          }}
+          onSave={handleDescriptionSave}
+          expense={currentExpenseForDescription}
+        />
+
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Reimbursement Details</DialogTitle>
+            </DialogHeader>
+            {selectedReimbursement && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Name</label>
+                    <p className="font-medium">{selectedReimbursement.name}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Amount</label>
+                    <p className="font-mono text-lg">${selectedReimbursement.amount.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Type</label>
+                    <div>{getTypeBadge(selectedReimbursement.type)}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Status</label>
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(selectedReimbursement.status)}
+                      {getStatusBadge(selectedReimbursement.status)}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">User</label>
+                    <p>{selectedReimbursement.user}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Building</label>
+                    <p>{selectedReimbursement.building}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Category</label>
+                    <p>{selectedReimbursement.category}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Date</label>
+                    <p>{selectedReimbursement.date}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+
+                {selectedReimbursement.description && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Description</label>
+                    <p className="text-sm">{selectedReimbursement.description}</p>
+                  </div>
+                )}
+
+                {selectedReimbursement.media && selectedReimbursement.media.length > 0 && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Attachments</label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {selectedReimbursement.media.map((file, index) => (
+                        <div key={index} className="p-2 border rounded flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          <span className="text-sm truncate">{file.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
