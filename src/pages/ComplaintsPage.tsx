@@ -75,27 +75,48 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
-        }
+        },
+        mode: 'cors',
+        credentials: 'include'
       });
 
+      const errorText = await response.text();
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorMessage;
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || errorJson.title || 'Failed to fetch complaints';
+        } catch {
+          errorMessage = errorText || `HTTP error! status: ${response.status}`;
+        }
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = JSON.parse(errorText);
+      } catch {
+        throw new Error('Invalid JSON response from server');
+      }
+
       if (Array.isArray(data)) {
         setItems(data);
       } else if (data.items && Array.isArray(data.items)) {
         setItems(data.items);
+      } else if (data.data && Array.isArray(data.data)) {
+        setItems(data.data);
       } else {
         console.error('Unexpected data format:', data);
-        throw new Error('Invalid data format received');
+        throw new Error('Invalid data format received from server');
       }
     } catch (error) {
       console.error('Fetch error:', error);
       toast({
         title: "Error",
-        description: `Failed to fetch complaints: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: error instanceof Error 
+          ? error.message 
+          : "Failed to connect to the complaints server. Please check your connection.",
         variant: "destructive",
       });
     } finally {
