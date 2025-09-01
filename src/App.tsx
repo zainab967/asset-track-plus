@@ -41,7 +41,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Navigate to="/ledger" replace />} />
+                <Route path="/" element={<Navigate to={currentUser.role === "Employee" ? "/expenses" : "/ledger"} replace />} />
                 <Route path="/ledger" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
                     <LedgerPage />

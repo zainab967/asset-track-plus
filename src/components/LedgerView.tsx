@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
 import { FinancialAnalyticsDashboard } from "./FinancialAnalyticsDashboard";
+import { RecentActivity } from "./RecentActivity";
 import { useExpenses } from "@/contexts/ExpenseContext";
 
 interface BuildingSummary {
@@ -113,8 +114,15 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
           </Card>
         ))}
       </div>
-      {/* Financial Analytics Dashboard */}
-      <FinancialAnalyticsDashboard />
+      {/* Financial Analytics & Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <FinancialAnalyticsDashboard />
+        </div>
+        <div className="lg:col-span-1">
+          <RecentActivity />
+        </div>
+      </div>
     </div>
   );
 }
