@@ -94,38 +94,39 @@ export function RecentActivity() {
   };
 
   return (
-    <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow">
-      <CardHeader className="space-y-1 pb-4">
-        <CardTitle className="text-xl font-semibold flex items-center gap-2">
-          <Clock className="h-5 w-5 text-primary" />
-          Recent Activity
+    <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow h-fit">
+      <CardHeader className="space-y-1 pb-3 sm:pb-4">
+        <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+          <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+          <span className="truncate">Recent Activity</span>
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Latest actions across your organization
         </p>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 sm:space-y-3 p-3 sm:p-6">
         {activities.map((activity) => (
           <Button
             key={activity.id}
             variant="ghost"
-            className="w-full h-auto p-3 justify-start hover:bg-muted/50 transition-colors"
+            className="w-full h-auto p-2 sm:p-3 justify-start hover:bg-muted/50 transition-colors"
             onClick={() => handleActivityClick(activity.route)}
           >
-            <div className="flex items-start gap-3 w-full text-left">
-              <div className="flex-shrink-0 mt-1">
-                <Badge variant={getActivityBadgeVariant(activity.type)} className="h-6 w-6 p-0 flex items-center justify-center">
+            <div className="flex items-start gap-2 sm:gap-3 w-full text-left">
+              <div className="flex-shrink-0 mt-0.5 sm:mt-1">
+                <Badge variant={getActivityBadgeVariant(activity.type)} className="h-5 w-5 sm:h-6 sm:w-6 p-0 flex items-center justify-center">
                   {getActivityIcon(activity.type)}
                 </Badge>
               </div>
               
-              <div className="flex-1 min-w-0 space-y-1">
-                <p className="text-sm font-medium text-foreground">
-                  <span className="font-semibold text-primary">{activity.user}</span> {activity.action}
+              <div className="flex-1 min-w-0 space-y-0.5 sm:space-y-1 overflow-hidden">
+                <p className="text-xs sm:text-sm font-medium text-foreground leading-tight line-clamp-2">
+                  <span className="font-semibold text-primary">{activity.user}</span>{" "}
+                  <span className="break-words">{activity.action}</span>
                 </p>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {activity.timestamp}
+                <p className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                  <Clock className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{activity.timestamp}</span>
                 </p>
               </div>
             </div>
@@ -135,7 +136,7 @@ export function RecentActivity() {
         <Button 
           variant="outline" 
           size="sm"
-          className="w-full mt-4 hover:shadow-md hover:shadow-primary/20 transition-shadow"
+          className="w-full mt-3 sm:mt-4 hover:shadow-md hover:shadow-primary/20 transition-shadow text-xs sm:text-sm"
           onClick={() => navigate("/complaints")}
         >
           View All Activities
