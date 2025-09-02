@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Clock, CheckCircle, XCircle, Save, X, Upload, FileText, Image, Eye } from "lucide-react";
+import { Search, Clock, CheckCircle, XCircle, Save, X, Upload, FileText, Image, Eye, Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ExpenseDescriptionDialog } from "@/components/ExpenseDescriptionDialog";
 import { useToast } from "@/hooks/use-toast";
-import { API_ENDPOINTS } from "@/config/api";
+import { useAuth } from "@/hooks/useAuth";
+import { API_ENDPOINTS, API_CONFIG } from "@/config/api";
+import { SubmitReimbursementDialog } from "@/components/SubmitReimbursementDialog";
 
 interface Reimbursement {
   id: string;
@@ -29,7 +31,8 @@ interface ReimbursementPageProps {
   userRole?: "employee" | "hr" | "admin" | "manager";
 }
 
-export default function ReimbursementPage({ userRole = "admin" }: ReimbursementPageProps) {
+export default function ReimbursementPage({ userRole = "employee" }: ReimbursementPageProps) {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [buildingFilter, setBuildingFilter] = useState<string>("all");
@@ -42,6 +45,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   const [selectedReimbursement, setSelectedReimbursement] = useState<Reimbursement | null>(null);
   const [reimbursements, setReimbursements] = useState<Reimbursement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const { toast } = useToast();
 
   // Dummy data for testing
@@ -112,20 +116,30 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
     // Simulate API call with dummy data
     setIsLoading(true);
     setTimeout(() => {
-      setReimbursements(dummyReimbursements);
+      const filteredClaims = filterReimbursements(dummyReimbursements);
+      setReimbursements(filteredClaims);
       setIsLoading(false);
     }, 1000);
-  }, []);
+  }, [user?.name]);
+
+  // Filter reimbursements based on user role and current user
+  const filterReimbursements = (claims: Reimbursement[]) => {
+    if (!user) return [];
+    if (userRole === "admin" || userRole === "hr") {
+      return claims; // Admin and HR can see all claims
+    }
+    // Other users can only see their own claims
+    return claims.filter(claim => claim.user.toLowerCase() === user.name.toLowerCase());
+  };
 
   const fetchReimbursements = async () => {
     try {
       setIsLoading(true);
       const response = await fetch(API_ENDPOINTS.REIMBURSEMENTS, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: API_CONFIG.headers,
+        mode: API_CONFIG.mode,
+        credentials: API_CONFIG.credentials
       });
       
       if (!response.ok) {
@@ -133,14 +147,20 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
       }
       
       const data = await response.json();
+      let claims: Reimbursement[] = [];
+      
       if (Array.isArray(data)) {
-        setReimbursements(data);
+        claims = data;
       } else if (data.items && Array.isArray(data.items)) {
-        setReimbursements(data.items);
+        claims = data.items;
       } else {
         console.error('Unexpected data format:', data);
         throw new Error('Invalid data format received');
       }
+
+      // Apply user-based filtering
+      const filteredClaims = filterReimbursements(claims);
+      setReimbursements(filteredClaims);
     } catch (error) {
       console.error('Fetch error:', error);
       toast({
@@ -153,34 +173,77 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
     }
   };
 
+  // Filter reimbursements based on user role, search term, and filters
+  const filteredReimbursements = reimbursements.filter(reimbursement => {
+    // First check if user has permission to see this reimbursement
+    const isAdminOrHR = userRole === "admin" || userRole === "hr";
+    const isOwnReimbursement = reimbursement.user.toLowerCase() === user?.name.toLowerCase();
+    
+    if (!isAdminOrHR && !isOwnReimbursement) {
+      return false;
+    }
+
+    // Then apply other filters
+    const matchesSearch = 
+      reimbursement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reimbursement.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || reimbursement.status === statusFilter;
+    const matchesBuilding = buildingFilter === "all" || reimbursement.building === buildingFilter;
+
+    return matchesSearch && matchesStatus && matchesBuilding;
+  });
+
   const handleStatusUpdate = async (id: string, newStatus: "approved" | "rejected") => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.REIMBURSEMENT_BY_ID(id)}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          errorData?.message || 
-          `Failed to update status (HTTP ${response.status})`
+      if (newStatus === "rejected") {
+        // For rejected reimbursements, delete them
+        const response = await fetch(`${API_ENDPOINTS.REIMBURSEMENTS}/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json'
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to delete reimbursement (HTTP ${response.status})`);
+        }
+
+        // Remove from local state
+        setReimbursements(prev => prev.filter(r => r.id !== id));
+        
+        toast({
+          title: "Success",
+          description: "Reimbursement rejected and removed",
+        });
+      } else {
+        // For approved reimbursements, update status
+        const response = await fetch(`${API_ENDPOINTS.REIMBURSEMENTS}/${id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.message || 
+            `Failed to update status (HTTP ${response.status})`
+          );
+        }
+
+        const updatedReimbursement = await response.json();
+        setReimbursements(prev => 
+          prev.map(r => r.id === id ? { ...r, status: newStatus } : r)
         );
+
+        toast({
+          title: "Success",
+          description: "Reimbursement approved successfully",
+        });
       }
-
-      const updatedReimbursement = await response.json();
-      setReimbursements(prev => 
-        prev.map(r => r.id === id ? { ...r, status: newStatus } : r)
-      );
-
-      toast({
-        title: "Success",
-        description: `Reimbursement ${newStatus} successfully`,
-      });
     } catch (error) {
       console.error('Status update error:', error);
       toast({
@@ -226,15 +289,6 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
       });
     }
   };
-
-  const filteredReimbursements = reimbursements
-    .filter(reimbursement => {
-      const matchesSearch = reimbursement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reimbursement.user.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === "all" || reimbursement.status === statusFilter;
-      const matchesBuilding = buildingFilter === "all" || reimbursement.building === buildingFilter;
-      return matchesSearch && matchesStatus && matchesBuilding;
-    });
 
   const recurringReimbursements = [
     { name: "Monthly internet allowance", category: "Utilities", amount: 80, building: "All", type: "other" },
@@ -618,7 +672,7 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                       </TableRow>
                     </>
                   )}
-                  {filteredReimbursements.map((reimbursement) => (
+                  {!isLoading && filteredReimbursements.map((reimbursement) => (
                     <TableRow key={reimbursement.id}>
                       <TableCell className="font-medium">{reimbursement.name}</TableCell>
                       <TableCell>{reimbursement.user}</TableCell>
@@ -655,18 +709,21 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
                               <>
                                 <Button 
                                   size="sm" 
-                                  className="bg-green-600 hover:bg-green-700 h-7 px-2"
+                                  variant="ghost"
+                                  className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
                                   onClick={() => handleStatusUpdate(reimbursement.id, "approved")}
+                                  title="Approve"
                                 >
-                                  Approve
+                                  <CheckCircle className="h-5 w-5" />
                                 </Button>
                                 <Button 
                                   size="sm" 
-                                  variant="outline" 
-                                  className="text-red-600 hover:text-red-700 h-7 px-2"
+                                  variant="ghost"
+                                  className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                                   onClick={() => handleStatusUpdate(reimbursement.id, "rejected")}
+                                  title="Reject"
                                 >
-                                  Reject
+                                  <XCircle className="h-5 w-5" />
                                 </Button>
                               </>
                             )}
@@ -689,6 +746,39 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
           }}
           onSave={handleDescriptionSave}
           expense={currentExpenseForDescription}
+        />
+
+        <SubmitReimbursementDialog 
+          isOpen={showSubmitDialog}
+          onClose={() => setShowSubmitDialog(false)}
+          onSubmit={async (data) => {
+            try {
+              const formData = new FormData();
+              formData.append('name', data.name);
+              formData.append('amount', data.amount.toString());
+              formData.append('category', data.category);
+              formData.append('type', data.type);
+              formData.append('building', data.building);
+              formData.append('description', data.description || '');
+              formData.append('date', new Date().toISOString().split('T')[0]);
+              formData.append('user', user?.name || 'Current User');
+              
+              if (data.media) {
+                data.media.forEach((file, index) => {
+                  formData.append(`media${index}`, file);
+                });
+              }
+
+              await handleSubmitReimbursement(formData);
+              setShowSubmitDialog(false);
+            } catch (error) {
+              toast({
+                title: "Error",
+                description: "Failed to submit reimbursement",
+                variant: "destructive"
+              });
+            }
+          }}
         />
 
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>

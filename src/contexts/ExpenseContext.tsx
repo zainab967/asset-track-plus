@@ -10,6 +10,7 @@ export interface Expense {
   status: "pending" | "approved" | "rejected";
   type: "one-time" | "recurring";
   category: string;
+  chargedTo?: string;
 }
 
 interface ExpenseContextType {

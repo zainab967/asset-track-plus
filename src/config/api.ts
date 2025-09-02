@@ -17,12 +17,12 @@ export const API_ENDPOINTS = {
   LOGOUT: `${API_BASE_URL}/auth/logout`,
   
   // Expenses
-  EXPENSES: `${API_BASE_URL}/Expense`,  // Changed to match C# controller
+  EXPENSES: `${API_BASE_URL}/Expense`,
   EXPENSE_BY_ID: (id: string) => `${API_BASE_URL}/Expense/${id}`,
   
   // Reimbursements
-  REIMBURSEMENTS: `${API_BASE_URL}/Asset/reimbursements`,  // Changed to match C# controller
-  REIMBURSEMENT_BY_ID: (id: string) => `${API_BASE_URL}/Asset/reimbursements/${id}`,
+  REIMBURSEMENTS: `${API_BASE_URL}/Reimbursements`,
+  REIMBURSEMENT_BY_ID: (id: string) => `${API_BASE_URL}/Reimbursements/${id}`,
   
   // Complaints & Suggestions
   FEEDBACK: `${API_BASE_URL}/ComplaintsSuggestions`,  // Changed to match C# controller

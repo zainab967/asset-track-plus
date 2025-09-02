@@ -36,11 +36,14 @@ interface ComplaintSuggestion {
   attachedmedia?: File[];
 }
 
+import { useAuth, User } from "@/hooks/useAuth";
+
 interface ComplaintsPageProps {
   userRole?: string;
 }
 
-export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPageProps) {
+export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPageProps) {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -311,11 +314,13 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
   };
 
   const filteredItems = items.filter(item => {
+    // Apply filters
     const matchesSearch = 
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === "all" || item.type === typeFilter;
     const matchesStatus = statusFilter === "all" || item.status === statusFilter;
+    
     return matchesSearch && matchesType && matchesStatus;
   });
 
@@ -486,7 +491,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {userRole === 'admin' && item.status !== 'resolved' && (
+                            {(user?.role === 'Admin' || user?.role === 'HR') && item.status !== 'resolved' && (
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -523,6 +528,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
               formData.append('type', newItem.type);
               formData.append('category', newItem.category);
               formData.append('department', newItem.department);
+              formData.append('submittedBy', user?.name || 'Unknown User');
               uploadedMedia.forEach((file, index) => {
                 formData.append(`media${index}`, file);
               });
@@ -717,7 +723,7 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
                   </div>
                 )}
 
-                {userRole === 'admin' && selectedItem.status !== 'resolved' && (
+                {(user?.role === 'Admin' || user?.role === 'HR') && selectedItem.status !== 'resolved' && (
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"

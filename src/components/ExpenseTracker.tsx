@@ -106,7 +106,9 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       building: "",
       date: new Date().toISOString().split('T')[0],
       status: "pending",
-      category: ""
+      category: "",
+      type: "one-time",
+      chargedTo: ""
     });
   };
 
@@ -332,9 +334,10 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                     <TableHead className="w-[150px]">Building</TableHead>
                     <TableHead className="w-[120px]">Amount</TableHead>
                     <TableHead className="w-[120px]">Category</TableHead>
+                    <TableHead className="w-[150px]">Charged To</TableHead>
                     <TableHead className="w-[120px]">Date</TableHead>
                     <TableHead className="w-[120px]">Status</TableHead>
-                    <TableHead className="w-[150px]">Actions</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -404,6 +407,20 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                           </SelectContent>
                         </Select>
                       </TableCell>
+                      <TableCell>
+                        <Select 
+                          value={newExpense.chargedTo || ""} 
+                          onValueChange={(value) => setNewExpense(prev => ({ ...prev, chargedTo: value }))}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Charged To" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="One Hub Etihad">One Hub Etihad</SelectItem>
+                            <SelectItem value="Team Web">Team Web</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {newExpense.date}
                       </TableCell>
@@ -431,30 +448,34 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                         ${expense.amount.toLocaleString()}
                       </TableCell>
                       <TableCell>{expense.category}</TableCell>
+                      <TableCell>{expense.chargedTo || '-'}</TableCell>
                       <TableCell>{expense.date}</TableCell>
                       <TableCell>{getStatusBadge(expense.status)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {expense.status === "pending" && (userRole === "hr" || userRole === "admin") && (
                             <>
-                              <Button
-                                size="sm"
-                                className="h-7 px-2 bg-green-600 hover:bg-green-700"
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
                                 onClick={() => {
                                   // Handle approve
                                 }}
+                                title="Approve"
                               >
-                                Approve
+                                <CheckCircle className="h-5 w-5" />
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-2 text-red-600 hover:text-red-700"
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                                 onClick={() => {
                                   // Handle reject
                                 }}
+                                title="Reject"
                               >
-                                Reject
+                                <XCircle className="h-5 w-5" />
                               </Button>
                             </>
                           )}
