@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { cn } from "@/lib/utils";
 
 const analyticsData = [
   { month: 'Jan', revenue: 45000, expenses: 32000, reserves: 13000, teams: 2 },
@@ -28,7 +29,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export function FinancialAnalyticsDashboard() {
+interface FinancialAnalyticsDashboardProps {
+  className?: string;
+}
+
+export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDashboardProps = {}) {
   const [activeTab, setActiveTab] = useState("revenue");
 
   const getChartData = () => {

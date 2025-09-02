@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, MessageSquare, Receipt, Package, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface Activity {
   id: string;
@@ -13,7 +14,11 @@ interface Activity {
   route: string;
 }
 
-export function RecentActivity() {
+interface RecentActivityProps {
+  className?: string;
+}
+
+export function RecentActivity({ className }: RecentActivityProps = {}) {
   const navigate = useNavigate();
 
   const activities: Activity[] = [
@@ -94,7 +99,7 @@ export function RecentActivity() {
   };
 
   return (
-    <Card className="hover:shadow-md hover:shadow-primary/20 transition-shadow h-fit">
+    <Card className={cn("hover:shadow-md hover:shadow-primary/20 transition-shadow h-full", className)}>
       <CardHeader className="space-y-1 pb-3 sm:pb-4">
         <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
           <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />

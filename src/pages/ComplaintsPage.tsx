@@ -48,10 +48,116 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ComplaintSuggestion | null>(null);
-  const [editingItem, setEditingItem] = useState<ComplaintSuggestion | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<ComplaintSuggestion[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  // Dummy data for testing
+  const dummyComplaints: ComplaintSuggestion[] = [
+    {
+      id: "C1001",
+      title: "AC Not Working",
+      description: "The air conditioning in the main conference room has stopped working properly. Temperature is too high for meetings.",
+      type: "complaint",
+      category: "Facilities",
+      priority: "high",
+      status: "in-progress",
+      createdAt: "2025-08-30T09:00:00Z",
+      department: "Operations",
+      assignedTo: "Maintenance Team",
+      submittedBy: "Sara Ahmed",
+      building: "Main Office",
+      date: "2025-08-30",
+      responses: [
+        {
+          id: "R1",
+          text: "Maintenance team has been notified. Will check today.",
+          createdAt: "2025-08-30T10:00:00Z",
+          user: "Facility Manager"
+        }
+      ]
+    },
+    {
+      id: "C1002",
+      title: "Suggestion for Team Building",
+      description: "Monthly team building activities would help improve team collaboration and morale.",
+      type: "suggestion",
+      category: "HR",
+      priority: "medium",
+      status: "open",
+      createdAt: "2025-08-29T14:00:00Z",
+      department: "HR",
+      assignedTo: "HR Manager",
+      submittedBy: "Ali Hassan",
+      building: "Main Office",
+      date: "2025-08-29",
+      responses: []
+    },
+    {
+      id: "C1003",
+      title: "Printer Not Working",
+      description: "The printer on the 2nd floor is showing paper jam error but there's no paper jam.",
+      type: "complaint",
+      category: "IT Equipment",
+      priority: "medium",
+      status: "resolved",
+      createdAt: "2025-08-28T11:00:00Z",
+      department: "IT",
+      assignedTo: "IT Support",
+      submittedBy: "Zainab Khan",
+      building: "Tech Center",
+      date: "2025-08-28",
+      responses: [
+        {
+          id: "R2",
+          text: "Issue has been resolved. Printer cartridge was empty.",
+          createdAt: "2025-08-28T13:00:00Z",
+          user: "IT Support"
+        }
+      ]
+    },
+    {
+      id: "C1004",
+      title: "Cafeteria Menu Suggestion",
+      description: "Can we include more vegetarian options in the cafeteria menu?",
+      type: "suggestion",
+      category: "Facilities",
+      priority: "low",
+      status: "in-progress",
+      createdAt: "2025-08-27T10:00:00Z",
+      department: "Operations",
+      assignedTo: "Cafeteria Manager",
+      submittedBy: "Fatima Ali",
+      building: "Main Office",
+      date: "2025-08-27",
+      responses: [
+        {
+          id: "R3",
+          text: "Thank you for the suggestion. We are reviewing menu options.",
+          createdAt: "2025-08-27T11:00:00Z",
+          user: "Cafeteria Manager"
+        }
+      ]
+    },
+    {
+      id: "C1005",
+      title: "Internet Connectivity Issues",
+      description: "Frequent internet disconnections in Meeting Room 3",
+      type: "complaint",
+      category: "IT",
+      priority: "high",
+      status: "open",
+      createdAt: "2025-08-26T15:00:00Z",
+      department: "IT",
+      assignedTo: "Network Team",
+      submittedBy: "Omar Khan",
+      building: "Tech Center",
+      date: "2025-08-26",
+      responses: []
+    }
+  ];
+
+  const [editingItem, setEditingItem] = useState<ComplaintSuggestion | null>(null);
 
   const [newItem, setNewItem] = useState({
     title: "",
@@ -64,9 +170,17 @@ export default function ComplaintsPage({ userRole = "admin" }: ComplaintsPagePro
   const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
 
   useEffect(() => {
-    fetchComplaints();
+    // For development/testing, use dummy data
+    // In production, uncomment fetchComplaints() and comment out the dummy data loading
+    setIsLoading(true);
+    setTimeout(() => {
+      setItems(dummyComplaints);
+      setIsLoading(false);
+    }, 1000);
+    // fetchComplaints();
   }, []);
 
+  // Uncomment this function when ready to use real API
   const fetchComplaints = async () => {
     try {
       setIsLoading(true);

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { BarChart3, Receipt, Package } from "lucide-react";
 
-export type Module = "ledger" | "expense" | "asset";
+export type Module = "dashboard" | "ledger" | "expense" | "asset";
 
 interface ModuleToggleProps {
   activeModule: Module;
@@ -11,6 +11,13 @@ interface ModuleToggleProps {
 
 export function ModuleToggle({ activeModule, onModuleChange, userRole }: ModuleToggleProps) {
   const modules = [
+    {
+      id: "dashboard" as Module,
+      name: "Dashboard",
+      icon: BarChart3,
+      description: "Overview & Analytics",
+      allowedRoles: ["Admin", "Manager", "HR"]
+    },
     {
       id: "ledger" as Module,
       name: "Ledger View",

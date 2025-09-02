@@ -44,8 +44,77 @@ export default function ReimbursementPage({ userRole = "admin" }: ReimbursementP
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Dummy data for testing
+  const dummyReimbursements: Reimbursement[] = [
+    {
+      id: "R1001",
+      name: "Monthly Internet Expense",
+      amount: 2500,
+      user: "Zainab Ahmed",
+      category: "Utilities",
+      date: "2025-08-28",
+      status: "approved",
+      type: "equipment",
+      building: "Main Office",
+      description: "Monthly internet bill reimbursement for work from home setup"
+    },
+    {
+      id: "R1002",
+      name: "Medical Checkup",
+      amount: 15000,
+      user: "Ali Hassan",
+      category: "Healthcare",
+      date: "2025-08-25",
+      status: "pending",
+      type: "medical",
+      building: "Branch Office",
+      description: "Annual medical checkup at approved hospital"
+    },
+    {
+      id: "R1003",
+      name: "Business Trip - Lahore",
+      amount: 45000,
+      user: "Fatima Khan",
+      category: "Travel",
+      date: "2025-08-20",
+      status: "approved",
+      type: "travel",
+      building: "Main Office",
+      description: "Client meeting and workshop expenses in Lahore"
+    },
+    {
+      id: "R1004",
+      name: "Office Chair",
+      amount: 35000,
+      user: "Omar Malik",
+      category: "Equipment",
+      date: "2025-08-15",
+      status: "rejected",
+      type: "equipment",
+      building: "Tech Center",
+      description: "Ergonomic office chair for work from home setup"
+    },
+    {
+      id: "R1005",
+      name: "Team Lunch",
+      amount: 12000,
+      user: "Sara Imran",
+      category: "Other",
+      date: "2025-08-30",
+      status: "pending",
+      type: "other",
+      building: "Main Office",
+      description: "Team lunch for project completion celebration"
+    }
+  ];
+
   useEffect(() => {
-    fetchReimbursements();
+    // Simulate API call with dummy data
+    setIsLoading(true);
+    setTimeout(() => {
+      setReimbursements(dummyReimbursements);
+      setIsLoading(false);
+    }, 1000);
   }, []);
 
   const fetchReimbursements = async () => {

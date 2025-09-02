@@ -4,6 +4,7 @@ import { ModuleToggle, Module } from "@/components/ModuleToggle";
 import { LedgerView } from "@/components/LedgerView";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { AssetManager } from "@/components/AssetManager";
+import { DashboardOverview } from "@/components/dashboard/Overview";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Index = () => {
@@ -21,6 +22,8 @@ const Index = () => {
 
   const renderActiveModule = () => {
     switch (activeModule) {
+      case "dashboard":
+        return <DashboardOverview />;
       case "ledger":
         return <LedgerView onNavigateToExpenses={handleNavigateToExpenses} />;
       case "expense":
@@ -35,7 +38,7 @@ const Index = () => {
         console.log('Index.tsx - Asset module render:', { role: currentUser.role, mappedRole, userName });
         return <AssetManager userRole={mappedRole} currentUser={userName} />;
       default:
-        return <LedgerView onNavigateToExpenses={handleNavigateToExpenses} />;
+        return <DashboardOverview />;
     }
   };
 
