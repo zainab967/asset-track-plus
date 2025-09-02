@@ -1,8 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, MessageSquare, Receipt, Package, TrendingUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { UserNameDisplay } from "./UserNameDisplay";
 import { cn } from "@/lib/utils";
 
 interface Activity {
@@ -16,9 +17,10 @@ interface Activity {
 
 interface RecentActivityProps {
   className?: string;
+  userRole?: string;
 }
 
-export function RecentActivity({ className }: RecentActivityProps = {}) {
+export function RecentActivity({ className, userRole = "employee" }: RecentActivityProps = {}) {
   const navigate = useNavigate();
 
   const activities: Activity[] = [
@@ -126,7 +128,12 @@ export function RecentActivity({ className }: RecentActivityProps = {}) {
               
               <div className="flex-1 min-w-0 space-y-0.5 sm:space-y-1 overflow-hidden">
                 <p className="text-xs sm:text-sm font-medium text-foreground leading-tight line-clamp-2">
-                  <span className="font-semibold text-primary">{activity.user}</span>{" "}
+                  <UserNameDisplay 
+                    userName={activity.user} 
+                    currentUserRole={userRole}
+                    className="font-semibold text-primary"
+                  />
+                  {" "}
                   <span className="break-words">{activity.action}</span>
                 </p>
                 <p className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">

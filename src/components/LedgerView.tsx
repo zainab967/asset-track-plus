@@ -15,9 +15,10 @@ interface BuildingSummary {
 
 interface LedgerViewProps {
   onNavigateToExpenses: (building: string) => void;
+  currentUser?: { role: string; name: string };
 }
 
-export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
+export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProps) {
   const { expenses } = useExpenses();
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -120,7 +121,7 @@ export function LedgerView({ onNavigateToExpenses }: LedgerViewProps) {
           <FinancialAnalyticsDashboard />
         </div>
         <div className="xl:col-span-1 order-2">
-          <RecentActivity />
+          <RecentActivity userRole={currentUser?.role || "employee"} />
         </div>
       </div>
     </div>

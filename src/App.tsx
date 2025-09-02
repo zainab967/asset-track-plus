@@ -12,6 +12,7 @@ import ExpensePage from "./pages/ExpensePage";
 import AssetPage from "./pages/AssetPage";
 import ReimbursementPage from "./pages/ReimbursementPage";
 import ComplaintsPage from "./pages/ComplaintsPage";
+import UserProfilePage from "./pages/UserProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,7 +45,7 @@ const App = () => {
                 <Route path="/" element={<Navigate to={currentUser.role === "Employee" ? "/expenses" : "/ledger"} replace />} />
                 <Route path="/ledger" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
-                    <LedgerPage />
+                    <LedgerPage currentUser={currentUser} />
                   </AppLayout>
                 } />
                 <Route path="/expenses" element={
@@ -65,6 +66,16 @@ const App = () => {
                 <Route path="/complaints" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
                     <ComplaintsPage userRole={currentUser.role.toLowerCase()} />
+                  </AppLayout>
+                } />
+                <Route path="/profile" element={
+                  <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
+                    <UserProfilePage userRole={currentUser.role.toLowerCase()} />
+                  </AppLayout>
+                } />
+                <Route path="/profile/:userId" element={
+                  <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
+                    <UserProfilePage userRole={currentUser.role.toLowerCase()} />
                   </AppLayout>
                 } />
                 <Route path="*" element={<NotFound />} />

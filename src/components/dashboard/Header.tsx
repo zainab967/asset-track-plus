@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useNavigate } from "react-router-dom";
 
 interface AppHeaderProps {
   currentUser: {
@@ -13,6 +14,7 @@ interface AppHeaderProps {
 }
 
 export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
+  const navigate = useNavigate();
   return (
     <header className="border-b-0 flex-1 bg-primary">
       <div className="flex items-center justify-between px-6 py-2">
@@ -41,13 +43,17 @@ export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
             )}
           </Button>
           
-          <div className="flex items-center gap-3 text-base text-primary-foreground">
+          <Button 
+            variant="ghost" 
+            className="flex items-center gap-3 text-base text-primary-foreground hover:bg-primary-foreground/10 h-auto py-2"
+            onClick={() => navigate('/profile')}
+          >
             <User className="h-5 w-5" />
             <div>
               <p className="font-medium">{currentUser.name}</p>
               <p className="text-primary-foreground/70 text-sm">{currentUser.role}</p>
             </div>
-          </div>
+          </Button>
         </div>
       </div>
     </header>
