@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,18 +24,18 @@ export function SubmitExpenseDialog() {
   };
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button className="bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" />
-          Expense Actions
+          Add Expense
         </Button>
-      </DrawerTrigger>
-      <DrawerContent className="h-full w-[400px] ml-auto right-0 left-auto rounded-l-lg">
-        <DrawerHeader>
-          <DrawerTitle>Submit New Expense</DrawerTitle>
-        </DrawerHeader>
-        <div className="flex-1 overflow-y-auto p-6">
+      </SheetTrigger>
+      <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+        <SheetHeader>
+          <SheetTitle>Submit New Expense</SheetTitle>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto py-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="employeeName">Employee Name</Label>
@@ -137,7 +137,7 @@ export function SubmitExpenseDialog() {
             </div>
           </form>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }
