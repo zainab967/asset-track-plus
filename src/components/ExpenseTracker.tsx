@@ -26,7 +26,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   const { expenses, addExpense, setExpenses } = useExpenses();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [buildingFilter, setBuildingFilter] = useState<string>(selectedDepartment || "all");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -182,9 +181,9 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     const matchesSearch = expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       expense.user.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || expense.status === statusFilter;
-    const matchesBuilding = buildingFilter === "all" || expense.building === buildingFilter;
     const matchesDate = !selectedDate || expense.date === selectedDate.toISOString().split('T')[0];
-    return matchesSearch && matchesStatus && matchesBuilding && matchesDate;
+    const matchesBuilding = !selectedDepartment || expense.building === selectedDepartment;
+    return matchesSearch && matchesStatus && matchesDate && matchesBuilding;
   });
 
   const getStatusBadge = (status: string) => {
@@ -243,16 +242,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                   </SelectContent>
                 </Select>
 
-                <Select value={buildingFilter} onValueChange={setBuildingFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Building" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Buildings</SelectItem>
-                    <SelectItem value="Etihad Office">Etihad Office</SelectItem>
-                    <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
-                  </SelectContent>
-                </Select>
 
                 <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                   <PopoverTrigger asChild>

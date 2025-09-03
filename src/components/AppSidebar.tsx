@@ -33,12 +33,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
       icon: BarChart3,
       allowedRoles: ["Admin", "Manager", "HR"]
     },
-    {
-      title: "Expense Tracker", 
-      url: "/expenses",
-      icon: Receipt,
-      allowedRoles: ["Admin", "Manager", "HR"]
-    },
+
     {
       title: "Assets",
       url: "/assets", 

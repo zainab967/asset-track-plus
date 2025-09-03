@@ -34,7 +34,7 @@ interface FinancialAnalyticsDashboardProps {
 }
 
 export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDashboardProps = {}) {
-  const [activeTab, setActiveTab] = useState("revenue");
+  const [activeTab, setActiveTab] = useState("reserves");
 
   const getChartData = () => {
     switch (activeTab) {
@@ -45,7 +45,7 @@ export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDas
       case "trends":
         return analyticsData.map(item => ({ ...item, primary: item.revenue - item.expenses, secondary: item.revenue }));
       default:
-        return analyticsData.map(item => ({ ...item, primary: item.revenue, secondary: item.expenses }));
+        return analyticsData.map(item => ({ ...item, primary: item.reserves, secondary: item.expenses }));
     }
   };
 
@@ -90,13 +90,7 @@ export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDas
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-muted/30 p-1 rounded-lg">
-            <TabsTrigger 
-              value="revenue" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md transition-all"
-            >
-              Revenue
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-muted/30 p-1 rounded-lg">
             <TabsTrigger 
               value="reserves" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md transition-all"

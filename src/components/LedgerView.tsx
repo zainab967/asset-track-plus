@@ -85,7 +85,11 @@ export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProp
       {/* Building Summaries */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {departments.map((building) => (
-          <Card key={building.name} className="w-full hover:shadow-md hover:shadow-primary/20 transition-shadow cursor-pointer">
+          <Card 
+            key={building.name} 
+            className="w-full hover:shadow-md hover:shadow-primary/20 transition-shadow cursor-pointer"
+            onClick={() => onNavigateToExpenses(building.name)}
+          >
             <CardHeader className="space-y-1 pb-3 p-4 sm:p-6">
               <CardTitle className="text-base sm:text-lg font-medium flex items-center justify-between gap-2">
                 <span className="truncate">{building.name}</span>
@@ -117,11 +121,11 @@ export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProp
       </div>
       {/* Financial Analytics & Recent Activity */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-        <div className="xl:col-span-2 order-1">
-          <FinancialAnalyticsDashboard />
-        </div>
-        <div className="xl:col-span-1 order-2">
+        <div className="xl:col-span-1 order-1 xl:order-1">
           <RecentActivity userRole={currentUser?.role || "employee"} />
+        </div>
+        <div className="xl:col-span-2 order-2 xl:order-2">
+          <FinancialAnalyticsDashboard />
         </div>
       </div>
     </div>
