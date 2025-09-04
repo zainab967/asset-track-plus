@@ -3,12 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Wrench, AlertTriangle, CheckCircle, Package, Eye, History } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Search, Plus, Wrench, AlertTriangle, CheckCircle, Package, Eye, MessageSquare } from "lucide-react";
 import { AddAssetDialog } from "./AddAssetDialog";
 import { AssetActionDialog } from "./AssetActionDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Asset {
   id: string;
@@ -37,7 +40,7 @@ interface AssetManagerProps {
 }
 
 export function AssetManager({ userRole = "admin", currentUser = "Current User" }: AssetManagerProps) {
-  // Sample data
+  // Sample data with responses
   const assets: Asset[] = [
     {
       id: "1",
@@ -49,7 +52,24 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       status: "assigned",
       value: 2499,
       purchaseDate: "2023-06-15",
-      condition: "excellent"
+      condition: "excellent",
+      description: "High-performance laptop for development work",
+      responses: [
+        {
+          id: "r1",
+          text: "Asset assigned to John Doe for development project",
+          createdAt: "2023-06-15T10:00:00Z",
+          user: "IT Manager",
+          role: "Admin"
+        },
+        {
+          id: "r2", 
+          text: "Regular maintenance completed, all systems running optimally",
+          createdAt: "2023-08-15T14:30:00Z",
+          user: "Tech Support",
+          role: "Maintenance"
+        }
+      ]
     }
   ];
 
@@ -59,6 +79,37 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   const [activeTab, setActiveTab] = useState(userRole === "employee" ? "my-assets" : "assigned");
   const [viewMode, setViewMode] = useState<"cards" | "list">("list");
   const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [showResponseDialog, setShowResponseDialog] = useState(false);
+  const [responseText, setResponseText] = useState("");
+  const { toast } = useToast();
+
+  const handleAddResponse = () => {
+    if (!responseText.trim() || !selectedAsset) return;
+    
+    const newResponse = {
+      id: Date.now().toString(),
+      text: responseText,
+      createdAt: new Date().toISOString(),
+      user: currentUser,
+      role: userRole
+    };
+
+    // Update the asset with new response
+    // In a real app, this would be an API call
+    setSelectedAsset(prev => prev ? {
+      ...prev,
+      responses: [...(prev.responses || []), newResponse]
+    } : null);
+
+    setResponseText("");
+    setShowResponseDialog(false);
+    toast({
+      title: "Success",
+      description: "Response added successfully"
+    });
+  };
 
   // Utility functions
   const getStatusIcon = (status: string) => {
@@ -218,7 +269,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
           <div className="flex items-center justify-between">
             <CardTitle>Asset Inventory</CardTitle>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overall">All Assets</TabsTrigger>
                 <TabsTrigger value="assigned">Assigned</TabsTrigger>
                 <TabsTrigger value="unassigned">Available</TabsTrigger>
@@ -244,6 +295,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                   <TableHead className="w-[100px]">Condition</TableHead>
                   <TableHead className="w-[120px]">Value</TableHead>
                   <TableHead className="w-[120px]">Purchase Date</TableHead>
+                  <TableHead className="w-[100px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -267,11 +319,25 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                     </TableCell>
                     <TableCell className="font-mono">${asset.value.toLocaleString()}</TableCell>
                     <TableCell>{new Date(asset.purchaseDate).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 justify-end">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setSelectedAsset(asset);
+                            setShowDetailsDialog(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {filteredAssets.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                       No assets found matching your criteria
                     </TableCell>
                   </TableRow>
@@ -281,6 +347,130 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
           </div>
         </CardContent>
       </Card>
+
+      {/* Asset Details Dialog */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Asset Details - {selectedAsset?.assetid}</DialogTitle>
+          </DialogHeader>
+          
+          {selectedAsset && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Name</label>
+                  <p className="text-sm">{selectedAsset.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Category</label>
+                  <p className="text-sm">{selectedAsset.category}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Assigned To</label>
+                  <p className="text-sm">{selectedAsset.assignedTo || "Unassigned"}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Building</label>
+                  <p className="text-sm">{selectedAsset.building}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Status</label>
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(selectedAsset.status)}
+                    <span className="capitalize text-sm">{selectedAsset.status}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Condition</label>
+                  <p className={`text-sm ${getConditionColor(selectedAsset.condition)}`}>
+                    {selectedAsset.condition}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Value</label>
+                  <p className="text-sm font-mono">${selectedAsset.value.toLocaleString()}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Purchase Date</label>
+                  <p className="text-sm">{new Date(selectedAsset.purchaseDate).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              {selectedAsset.description && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Description</label>
+                  <p className="text-sm mt-1">{selectedAsset.description}</p>
+                </div>
+              )}
+
+              {/* Responses Section */}
+              <div className="border-t pt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-medium">Responses & Updates</h4>
+                  {userRole !== "employee" && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setShowResponseDialog(true)}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Add Response
+                    </Button>
+                  )}
+                </div>
+                
+                {selectedAsset.responses && selectedAsset.responses.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedAsset.responses.map((response) => (
+                      <div key={response.id} className="bg-muted/50 rounded-lg p-3">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-sm font-medium">{response.user}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(response.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="text-sm">{response.text}</p>
+                        {response.role && (
+                          <Badge variant="outline" className="mt-2 text-xs">
+                            {response.role}
+                          </Badge>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No responses yet</p>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Response Dialog */}
+      <Dialog open={showResponseDialog} onOpenChange={setShowResponseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Response</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              placeholder="Enter your response..."
+              value={responseText}
+              onChange={(e) => setResponseText(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResponseDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddResponse}>
+              Add Response
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
