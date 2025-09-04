@@ -43,20 +43,7 @@ export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProp
   const totalBalance = departments.reduce((sum, dept) => sum + dept.balance, 0);
   return (
     <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6 xl:p-8">
-      {/* Company Overview */}
-      <Card className="border-l-4 border-l-primary hover:shadow-md hover:shadow-primary/20 transition-shadow">
-        <CardHeader className="space-y-1 p-4">
-          <CardTitle className="text-xl font-semibold">
-            Company Financial Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 p-4 pt-0">
-          <div className="text-2xl font-bold text-primary">
-            ${totalBalance.toLocaleString()}
-          </div>
-          <p className="text-sm text-muted-foreground">Total approved expenses across all departments</p>
-        </CardContent>
-      </Card>
+      <h2 className="text-3xl font-bold tracking-tight">Ledger Overview</h2>
 
       {/* Building Summaries */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">

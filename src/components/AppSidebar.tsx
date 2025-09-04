@@ -63,9 +63,9 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-gradient-to-b from-primary/5 to-primary/10">
-      <SidebarHeader className="p-4 border-b border-primary/20">
+      <SidebarHeader className="p-2 border-b border-primary/20">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-gradient-primary flex items-center justify-center shadow-lg">
+          <div className="h-8 w-8 rounded-lg bg-gradient-primary flex items-center justify-center shadow-lg">
             <div className="relative">
               <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
                 <span className="text-xs font-bold text-primary">$</span>
@@ -109,9 +109,13 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
                     <SidebarMenuButton asChild isActive={active}>
                        <NavLink 
                          to={item.url} 
-                         className="flex items-center gap-2 px-2 py-1.5 mx-0.5 rounded-md transition-all duration-200 overflow-hidden hover:shadow-md"
+                         className={`flex items-center gap-2 py-1.5 rounded-md transition-all duration-200 overflow-hidden hover:shadow-md ${
+                           state === "expanded" ? "px-2 mx-0.5" : "justify-center w-full"
+                         }`}
                        >
-                         <Icon className={"h-4 w-4 flex-shrink-0 " + (active ? "text-primary" : "text-sidebar-foreground/70")} />
+                         <Icon className={`flex-shrink-0 ${active ? "text-primary" : "text-sidebar-foreground/70"} ${
+                           state === "expanded" ? "h-4 w-4" : "h-5 w-5"
+                         }`} />
                          {state === "expanded" && (
                            <span className="font-medium transition-shadow duration-200 truncate max-w-full">
                              {item.title}
