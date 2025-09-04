@@ -305,11 +305,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
         {/* Expenses Table */}
         <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Recent Expenses</CardTitle>
-            </div>
-          </CardHeader>
           <CardContent className="p-0">
             <div className="relative w-full overflow-auto">
               <Table>
