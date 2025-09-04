@@ -5,5 +5,11 @@ interface AssetPageProps {
 }
 
 export default function AssetPage({ userRole = "admin" }: AssetPageProps) {
-  return <AssetManager userRole={userRole} />;
+  return (
+    <div className="flex-1">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 animate-fade-in">
+        <AssetManager userRole={userRole} />
+      </div>
+    </div>
+  );
 }
