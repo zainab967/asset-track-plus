@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Filter, Plus, Clock, CheckCircle, XCircle, Save, X, Eye } from "lucide-react";
-import { SubmitExpenseDialog } from "./SubmitExpenseDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Plus, Clock, CheckCircle, XCircle, Eye } from "lucide-react";
 import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
-import { ExpenseDescriptionDialog } from "./ExpenseDescriptionDialog";
+import { AddExpenseSheet } from "./AddExpenseSheet";
 import { useToast } from "@/hooks/use-toast";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -30,9 +29,8 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newExpense, setNewExpense] = useState<Partial<Expense>>({});
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<any>(null);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -97,30 +95,9 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
   const handleAddNew = () => {
     setIsAddingNew(true);
-    setNewExpense({
-      id: Date.now().toString(),
-      name: "",
-      amount: 0,
-      user: "Current User",
-      building: "",
-      date: new Date().toISOString().split('T')[0],
-      status: "pending",
-      category: "",
-      type: "one-time",
-      chargedTo: ""
-    });
   };
 
-  const handleSaveNew = async () => {
-    if (!newExpense.name || !newExpense.category || !newExpense.building || !newExpense.amount) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  const handleSaveNew = async (newExpense: Partial<Expense>) => {
     try {
       const response = await fetch(API_ENDPOINTS.EXPENSES, {
         method: 'POST',
@@ -137,7 +114,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       const savedExpense = await response.json();
       setExpenses(prev => [...prev, savedExpense]);
       setIsAddingNew(false);
-      setNewExpense({});
 
       toast({
         title: "Success",
@@ -154,30 +130,9 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
   const handleCancelNew = () => {
     setIsAddingNew(false);
-    setNewExpense({});
   };
 
-  const recurringExpenses = [
-    { name: "Monthly software licenses", category: "Software", amount: 2400, building: "Etihad Office" },
-    { name: "Office supplies", category: "Supplies", amount: 150, building: "Abdalian Office" },
-    { name: "Team lunch", category: "Food", amount: 200, building: "Etihad Office" }
-  ];
-
-  const handleSelectRecurring = (value: string) => {
-    const idx = parseInt(value);
-    const recurring = recurringExpenses[idx];
-    if (recurring) {
-      setNewExpense(prev => ({
-        ...prev,
-        name: recurring.name,
-        category: recurring.category,
-        amount: recurring.amount,
-        building: recurring.building
-      }));
-    }
-  };
-
-  const filteredExpenses = expenses.filter(expense => {
+  const filteredExpenses = (expenses || []).filter(expense => {
     const matchesSearch = expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       expense.user.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || expense.status === statusFilter;
@@ -321,101 +276,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isAddingNew && (
-                    <TableRow className="bg-muted/30">
-                      <TableCell>
-                        <Input
-                          value={newExpense.name || ""}
-                          onChange={(e) => setNewExpense(prev => ({ ...prev, name: e.target.value }))}
-                          placeholder="Expense name"
-                          className="h-8"
-                        />
-                        <Select onValueChange={handleSelectRecurring}>
-                          <SelectTrigger className="h-6 text-xs mt-1">
-                            <SelectValue placeholder="Or select recurring" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {recurringExpenses.map((recurring, idx) => (
-                              <SelectItem key={idx} value={idx.toString()}>
-                                {recurring.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Select 
-                          value={newExpense.building || ""} 
-                          onValueChange={(value) => setNewExpense(prev => ({ ...prev, building: value }))}
-                        >
-                          <SelectTrigger className="h-8">
-                            <SelectValue placeholder="Building" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Etihad Office">Etihad Office</SelectItem>
-                            <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={newExpense.amount || ""}
-                          onChange={(e) => setNewExpense(prev => ({ ...prev, amount: Number(e.target.value) }))}
-                          placeholder="0"
-                          className="h-8 w-24"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Select 
-                          value={newExpense.category || ""} 
-                          onValueChange={(value) => setNewExpense(prev => ({ ...prev, category: value }))}
-                        >
-                          <SelectTrigger className="h-8">
-                            <SelectValue placeholder="Category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Software">Software</SelectItem>
-                            <SelectItem value="Hardware">Hardware</SelectItem>
-                            <SelectItem value="Office">Office</SelectItem>
-                            <SelectItem value="Travel">Travel</SelectItem>
-                            <SelectItem value="Food">Food</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Select 
-                          value={newExpense.chargedTo || ""} 
-                          onValueChange={(value) => setNewExpense(prev => ({ ...prev, chargedTo: value }))}
-                        >
-                          <SelectTrigger className="h-8">
-                            <SelectValue placeholder="Charged To" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="One Hub Etihad">One Hub Etihad</SelectItem>
-                            <SelectItem value="Team Web">Team Web</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {newExpense.date}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">Pending</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 justify-end">
-                          <Button size="sm" onClick={handleSaveNew} className="h-7 w-7 p-0">
-                            <Save className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={handleCancelNew} className="h-7 w-7 p-0">
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
+
                   {filteredExpenses.map((expense) => (
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium">{expense.name}</TableCell>
@@ -481,6 +342,11 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
         expense={selectedExpense}
         isOpen={showDetailsDialog}
         onClose={() => setShowDetailsDialog(false)}
+      />
+      <AddExpenseSheet 
+        isOpen={isAddingNew}
+        onClose={() => setIsAddingNew(false)}
+        onSubmit={handleSaveNew}
       />
     </div>
   );
