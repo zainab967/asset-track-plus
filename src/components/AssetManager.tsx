@@ -263,90 +263,87 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
         </CardContent>
       </Card>
 
-      {/* Assets Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Asset Inventory</CardTitle>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overall">All Assets</TabsTrigger>
-                <TabsTrigger value="assigned">Assigned</TabsTrigger>
-                <TabsTrigger value="unassigned">Available</TabsTrigger>
-                <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-                {userRole === "employee" && (
-                  <TabsTrigger value="my-assets">My Assets</TabsTrigger>
-                )}
-              </TabsList>
-            </Tabs>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="relative w-full overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[120px]">Asset ID</TableHead>
-                  <TableHead className="w-[200px]">Name</TableHead>
-                  <TableHead className="w-[120px]">Category</TableHead>
-                  <TableHead className="w-[150px]">Assigned To</TableHead>
-                  <TableHead className="w-[130px]">Building</TableHead>
-                  <TableHead className="w-[120px]">Status</TableHead>
-                  <TableHead className="w-[100px]">Condition</TableHead>
-                  <TableHead className="w-[120px]">Value</TableHead>
-                  <TableHead className="w-[120px]">Purchase Date</TableHead>
-                  <TableHead className="w-[100px] text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAssets.map((asset) => (
-                  <TableRow key={asset.id} className="hover:bg-muted/50 transition-colors">
-                    <TableCell className="font-mono text-sm font-medium">{asset.assetid}</TableCell>
-                    <TableCell className="font-medium">{asset.name}</TableCell>
-                    <TableCell>{asset.category}</TableCell>
-                    <TableCell>{asset.assignedTo || "—"}</TableCell>
-                    <TableCell>{asset.building}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(asset.status)}
-                        <span className="capitalize">{asset.status}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className={getConditionColor(asset.condition)}>
-                        {asset.condition}
-                      </span>
-                    </TableCell>
-                    <TableCell className="font-mono">${asset.value.toLocaleString()}</TableCell>
-                    <TableCell>{new Date(asset.purchaseDate).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 justify-end">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setSelectedAsset(asset);
-                            setShowDetailsDialog(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredAssets.length === 0 && (
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-5">
+          <TabsTrigger value="overall">All Assets</TabsTrigger>
+          <TabsTrigger value="assigned">Assigned</TabsTrigger>
+          <TabsTrigger value="unassigned">Available</TabsTrigger>
+          <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+          {userRole === "employee" && (
+            <TabsTrigger value="my-assets">My Assets</TabsTrigger>
+          )}
+        </TabsList>
+
+        {/* Assets Table */}
+        <Card className="mt-4">
+          <CardContent className="p-0">
+            <div className="relative w-full overflow-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
-                      No assets found matching your criteria
-                    </TableCell>
+                    <TableHead className="w-[120px]">Asset ID</TableHead>
+                    <TableHead className="w-[200px]">Name</TableHead>
+                    <TableHead className="w-[120px]">Category</TableHead>
+                    <TableHead className="w-[150px]">Assigned To</TableHead>
+                    <TableHead className="w-[130px]">Building</TableHead>
+                    <TableHead className="w-[120px]">Status</TableHead>
+                    <TableHead className="w-[100px]">Condition</TableHead>
+                    <TableHead className="w-[120px]">Value</TableHead>
+                    <TableHead className="w-[120px]">Purchase Date</TableHead>
+                    <TableHead className="w-[100px] text-right">Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filteredAssets.map((asset) => (
+                    <TableRow key={asset.id} className="hover:bg-muted/50 transition-colors">
+                      <TableCell className="font-mono text-sm font-medium">{asset.assetid}</TableCell>
+                      <TableCell className="font-medium">{asset.name}</TableCell>
+                      <TableCell>{asset.category}</TableCell>
+                      <TableCell>{asset.assignedTo || "—"}</TableCell>
+                      <TableCell>{asset.building}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(asset.status)}
+                          <span className="capitalize">{asset.status}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className={getConditionColor(asset.condition)}>
+                          {asset.condition}
+                        </span>
+                      </TableCell>
+                      <TableCell className="font-mono">${asset.value.toLocaleString()}</TableCell>
+                      <TableCell>{new Date(asset.purchaseDate).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setSelectedAsset(asset);
+                              setShowDetailsDialog(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredAssets.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                        No assets found matching your criteria
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </Tabs>
 
       {/* Asset Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
