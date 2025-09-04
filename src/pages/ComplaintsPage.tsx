@@ -435,9 +435,6 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>All Items</CardTitle>
-          </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
               <div className="flex justify-center items-center p-4">
@@ -445,7 +442,7 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
               </div>
             ) : (
               <div className="relative w-full overflow-auto">
-                <Table>
+                <Table className="animate-in fade-in-50">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[300px]">Title</TableHead>
@@ -460,7 +457,7 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
                   </TableHeader>
                   <TableBody>
                     {filteredItems.map((item) => (
-                      <TableRow key={item.id}>
+                      <TableRow key={item.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell>{item.title}</TableCell>
                         <TableCell>
                           <Badge variant={item.type === 'complaint' ? 'destructive' : 'default'}>
@@ -483,10 +480,9 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
                           </span>
                         </TableCell>
                         <TableCell>{item.building}</TableCell>
-                        <TableCell>{item.submittedBy}</TableCell>
-                        <TableCell>{item.date}</TableCell>
+                        <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 justify-end">
                             <Button
                               size="sm"
                               variant="ghost"
@@ -494,6 +490,7 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
                                 setSelectedItem(item);
                                 setIsDetailsDialogOpen(true);
                               }}
+                              className="h-7 w-7 p-0"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -505,6 +502,7 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
                                   setEditingItem(item);
                                   setIsEditDialogOpen(true);
                                 }}
+                                className="h-7 w-7 p-0"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -690,6 +688,14 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Building</label>
                     <p>{selectedItem.building}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Submitted By</label>
+                    <p>{selectedItem.submittedBy}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Submission Date</label>
+                    <p>{new Date(selectedItem.date).toLocaleDateString()}</p>
                   </div>
                 </div>
 

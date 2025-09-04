@@ -511,9 +511,6 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
 
         {/* Reimbursements Table */}
         <Card>
-          <CardHeader>
-            <CardTitle>Reimbursement Requests</CardTitle>
-          </CardHeader>
           <CardContent className="p-0">
             <div className="relative w-full overflow-auto">
               <Table>

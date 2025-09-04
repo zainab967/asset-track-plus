@@ -76,7 +76,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [buildingFilter, setBuildingFilter] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState(userRole === "employee" ? "my-assets" : "assigned");
+  const [activeTab, setActiveTab] = useState("overall");
   const [viewMode, setViewMode] = useState<"cards" | "list">("list");
   const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
@@ -261,14 +261,12 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
           <TabsTrigger value="overall">All Assets</TabsTrigger>
           <TabsTrigger value="assigned">Assigned</TabsTrigger>
           <TabsTrigger value="unassigned">Available</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-          {userRole === "employee" && (
-            <TabsTrigger value="my-assets">My Assets</TabsTrigger>
-          )}
+          <TabsTrigger value="my-assets">My Assets</TabsTrigger>
         </TabsList>
 
         {/* Assets Table */}
