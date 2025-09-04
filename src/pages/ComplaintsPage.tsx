@@ -314,14 +314,18 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
   };
 
   const filteredItems = items.filter(item => {
-    // Apply filters
+    // Apply search filter
     const matchesSearch = 
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = typeFilter === "all" || item.type === typeFilter;
-    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
+
+    // Apply combined type/status filter
+    const selectedFilter = statusFilter === "all" ? typeFilter : statusFilter;
+    const matches = selectedFilter === "all" || 
+      item.type === selectedFilter || 
+      item.status === selectedFilter;
     
-    return matchesSearch && matchesType && matchesStatus;
+    return matchesSearch && matches;
   });
 
   const handleMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -379,11 +383,8 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
   return (
     <div className="flex-1">
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <div className="flex items-center justify-between space-y-2">
+        <div className="space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Complaints & Suggestions</h2>
-          <Button onClick={() => setIsSubmitDialogOpen(true)} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Submit New
-          </Button>
         </div>
 
         <Card>
@@ -399,29 +400,35 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
                 />
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by type" />
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <Select 
+                  value={statusFilter === "all" ? typeFilter : statusFilter} 
+                  onValueChange={(value) => {
+                    if (value === "complaint" || value === "suggestion") {
+                      setTypeFilter(value);
+                      setStatusFilter("all");
+                    } else {
+                      setTypeFilter("all");
+                      setStatusFilter(value);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Filter items" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="all">All Items</SelectItem>
                     <SelectItem value="complaint">Complaints</SelectItem>
                     <SelectItem value="suggestion">Suggestions</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="open">Open</SelectItem>
                     <SelectItem value="in-progress">In Progress</SelectItem>
                     <SelectItem value="resolved">Resolved</SelectItem>
                   </SelectContent>
                 </Select>
+
+                <Button onClick={() => setIsSubmitDialogOpen(true)} className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" /> Submit New
+                </Button>
               </div>
             </div>
           </CardContent>

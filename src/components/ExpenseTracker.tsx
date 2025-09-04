@@ -242,56 +242,62 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                   </SelectContent>
                 </Select>
 
-
-                <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-[180px] pl-3 text-left font-normal">
-                      {selectedDate ? (
-                        selectedDate.toLocaleDateString()
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <div className="border-b border-border/20 p-3">
-                      <div className="flex items-center justify-between">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={handlePrevMonth}
-                          className="h-7 w-7"
-                        >
-                          <span>&lt;</span>
-                        </Button>
-                        <span className="text-sm font-medium">
-                          {currentMonth.toLocaleString("default", { 
-                            month: "long",
-                            year: "numeric"
-                          })}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={handleNextMonth}
-                          className="h-7 w-7"
-                        >
-                          <span>&gt;</span>
-                        </Button>
+                <div className="flex items-center gap-2">
+                  <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="icon" className="h-9 w-9">
+                        <Calendar className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <div className="border-b border-border/20 p-3">
+                        <div className="flex items-center justify-between">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handlePrevMonth}
+                            className="h-7 w-7"
+                          >
+                            <span>&lt;</span>
+                          </Button>
+                          <span className="text-sm font-medium">
+                            {currentMonth.toLocaleString("default", { 
+                              month: "long",
+                              year: "numeric"
+                            })}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleNextMonth}
+                            className="h-7 w-7"
+                          >
+                            <span>&gt;</span>
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <ReactDatePicker
-                      selected={selectedDate}
-                      onChange={(date: Date) => {
-                        setSelectedDate(date);
-                        setShowDatePicker(false);
-                      }}
-                      inline
-                      calendarClassName="shadow-none border-none"
-                    />
-                  </PopoverContent>
-                </Popover>
+                      <ReactDatePicker
+                        selected={selectedDate}
+                        onChange={(date: Date) => {
+                          setSelectedDate(date);
+                          setShowDatePicker(false);
+                        }}
+                        inline
+                        calendarClassName="shadow-none border-none"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <Button 
+                    onClick={handleAddNew} 
+                    size="sm" 
+                    className="flex items-center gap-2"
+                    disabled={isAddingNew}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Expense
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -302,15 +308,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Recent Expenses</CardTitle>
-              <Button 
-                onClick={handleAddNew} 
-                size="sm" 
-                className="flex items-center gap-2"
-                disabled={isAddingNew}
-              >
-                <Plus className="h-4 w-4" />
-                Add Expense
-              </Button>
             </div>
           </CardHeader>
           <CardContent className="p-0">

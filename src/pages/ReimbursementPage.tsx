@@ -438,7 +438,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
     <div className="flex-1">
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         {/* Header */}
-        <div className="flex items-center justify-between space-y-2">
+        <div className="space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Reimbursement Management</h2>
           {pendingClaims > 0 && (
             <p className="text-yellow-600 font-medium">
@@ -450,7 +450,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
         {/* Filters */}
         <Card>
           <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
@@ -460,29 +460,51 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                   className="pl-10"
                 />
               </div>
-              
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
 
-              <Select value={buildingFilter} onValueChange={setBuildingFilter}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="Building" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Buildings</SelectItem>
-                  <SelectItem value="Etihad Office">Etihad Office</SelectItem>
-                  <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                {userRole === "admin" ? (
+                  <>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={buildingFilter} onValueChange={setBuildingFilter}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filter by building" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Buildings</SelectItem>
+                        <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+                        <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </>
+                ) : (
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+
+                <Button onClick={() => setShowSubmitDialog(true)} className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" /> Submit New
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -490,18 +512,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
         {/* Reimbursements Table */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Reimbursement Requests</CardTitle>
-              <Button 
-                onClick={handleAddNew} 
-                size="sm" 
-                className="flex items-center gap-2"
-                disabled={isAddingNew}
-              >
-                <Plus className="h-4 w-4" />
-                Add Request
-              </Button>
-            </div>
+            <CardTitle>Reimbursement Requests</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="relative w-full overflow-auto">

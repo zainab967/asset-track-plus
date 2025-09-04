@@ -18,7 +18,7 @@ interface AssetActionDialogProps {
 
 export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: AssetActionDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [actionType, setActionType] = useState(mode === "admin" ? "log" : "maintenance");
+  const [actionType, setActionType] = useState("maintenance");
   const [assetStatus, setAssetStatus] = useState("assigned");
   const [requestType, setRequestType] = useState("permanent");
   const { toast } = useToast();
@@ -47,7 +47,7 @@ export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: 
         <DialogTrigger asChild>
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
-            {mode === "admin" ? "Log New Asset" : "Asset Actions"}
+            Asset Actions
           </Button>
         </DialogTrigger>
       )}
@@ -55,18 +55,21 @@ export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: 
         <DialogHeader>
           <DialogTitle>Asset Management</DialogTitle>
           <DialogDescription>
-            {mode === "admin" 
-              ? "Log new assets in the system"
-              : "Submit asset maintenance requests or request new assets"}
+            {"Manage assets and submit requests"}
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Action Type Selection */}
-          {mode === "user" && (
-            <div className="space-y-3">
+          <div className="space-y-3">
               <Label>Action Type</Label>
               <RadioGroup value={actionType} onValueChange={setActionType}>
+                {userRole !== "employee" && (
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="log" id="log" />
+                    <Label htmlFor="log">Log New Asset</Label>
+                  </div>
+                )}
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="maintenance" id="maintenance" />
                   <Label htmlFor="maintenance">Asset Maintenance</Label>
@@ -77,7 +80,6 @@ export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: 
                 </div>
               </RadioGroup>
             </div>
-          )}
 
           {/* Common Fields */}
           <div className="grid grid-cols-2 gap-4">

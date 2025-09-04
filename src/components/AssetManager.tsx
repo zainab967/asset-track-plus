@@ -248,14 +248,10 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
               </Select>
 
               <div className="flex items-center gap-2">
-                {userRole === "admin" && (
-                  <>
-                    <AddAssetDialog />
-                    <AssetActionDialog userRole={userRole} mode="admin" />
-                  </>
-                )}
-                {userRole !== "admin" && (
+                {userRole === "employee" ? (
                   <AssetActionDialog userRole={userRole} mode="user" />
+                ) : (
+                  <AssetActionDialog userRole={userRole} mode="admin" />
                 )}
               </div>
             </div>
