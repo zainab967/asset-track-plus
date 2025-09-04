@@ -13,11 +13,12 @@ interface AssetActionDialogProps {
   userRole?: string;
   isOpen?: boolean;
   onClose?: () => void;
+  mode?: "admin" | "user";
 }
 
-export function AssetActionDialog({ userRole, isOpen, onClose }: AssetActionDialogProps) {
+export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: AssetActionDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [actionType, setActionType] = useState("maintenance");
+  const [actionType, setActionType] = useState(mode === "admin" ? "log" : "maintenance");
   const [assetStatus, setAssetStatus] = useState("assigned");
   const [requestType, setRequestType] = useState("permanent");
   const { toast } = useToast();
@@ -46,7 +47,7 @@ export function AssetActionDialog({ userRole, isOpen, onClose }: AssetActionDial
         <DialogTrigger asChild>
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
-            Asset Actions
+            {mode === "admin" ? "Log New Asset" : "Asset Actions"}
           </Button>
         </DialogTrigger>
       )}
@@ -54,31 +55,29 @@ export function AssetActionDialog({ userRole, isOpen, onClose }: AssetActionDial
         <DialogHeader>
           <DialogTitle>Asset Management</DialogTitle>
           <DialogDescription>
-            Submit asset maintenance, requests, or log new assets.
+            {mode === "admin" 
+              ? "Log new assets in the system"
+              : "Submit asset maintenance requests or request new assets"}
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Action Type Selection */}
-          <div className="space-y-3">
-            <Label>Action Type</Label>
-            <RadioGroup value={actionType} onValueChange={setActionType}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="maintenance" id="maintenance" />
-                <Label htmlFor="maintenance">Asset Maintenance</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="request" id="request" />
-                <Label htmlFor="request">Asset Request</Label>
-              </div>
-              {userRole !== "employee" && (
+          {mode === "user" && (
+            <div className="space-y-3">
+              <Label>Action Type</Label>
+              <RadioGroup value={actionType} onValueChange={setActionType}>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="log" id="log" />
-                  <Label htmlFor="log">Log Asset</Label>
+                  <RadioGroupItem value="maintenance" id="maintenance" />
+                  <Label htmlFor="maintenance">Asset Maintenance</Label>
                 </div>
-              )}
-            </RadioGroup>
-          </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="request" id="request" />
+                  <Label htmlFor="request">Asset Request</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
 
           {/* Common Fields */}
           <div className="grid grid-cols-2 gap-4">
@@ -101,140 +100,132 @@ export function AssetActionDialog({ userRole, isOpen, onClose }: AssetActionDial
                 </Select>
               </div>
             )}
+
+            {actionType === "request" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="request-type">Request Type</Label>
+                  <Select value={requestType} onValueChange={setRequestType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="permanent">Permanent</SelectItem>
+                      <SelectItem value="temporary">Temporary</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {requestType === "temporary" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">Duration (days)</Label>
+                    <Input type="number" id="duration" min="1" max="30" required />
+                  </div>
+                )}
+              </>
+            )}
+
+            {actionType === "maintenance" && (
+              <div className="space-y-2">
+                <Label htmlFor="maintenance-type">Maintenance Type</Label>
+                <Select required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="repair">Repair</SelectItem>
+                    <SelectItem value="inspection">Inspection</SelectItem>
+                    <SelectItem value="upgrade">Upgrade</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {mode === "admin" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Select required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="laptop">Laptop</SelectItem>
+                      <SelectItem value="desktop">Desktop</SelectItem>
+                      <SelectItem value="printer">Printer</SelectItem>
+                      <SelectItem value="furniture">Furniture</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select value={assetStatus} onValueChange={setAssetStatus}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="assigned">Assigned</SelectItem>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                      <SelectItem value="maintenance">Maintenance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="value">Value ($)</Label>
+                  <Input type="number" id="value" min="0" step="0.01" required />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="purchase-date">Purchase Date</Label>
+                  <Input type="date" id="purchase-date" required />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="condition">Condition</Label>
+                  <Select required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="excellent">Excellent</SelectItem>
+                      <SelectItem value="good">Good</SelectItem>
+                      <SelectItem value="fair">Fair</SelectItem>
+                      <SelectItem value="poor">Poor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
           </div>
 
+          {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="assetName">Asset Name</Label>
-            <Input id="assetName" placeholder="Name of the asset" required />
+            <Label htmlFor="description">Description</Label>
+            <Textarea 
+              id="description"
+              placeholder={actionType === "maintenance" ? "Describe the maintenance needed..." : "Describe your request..."}
+              required
+            />
           </div>
 
-          {/* Action-specific fields */}
-          {actionType === "maintenance" && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea 
-                  id="description" 
-                  placeholder="Describe the maintenance needed..."
-                  className="min-h-[80px]"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="document">Attach Picture or Document</Label>
-                <div className="flex items-center gap-2">
-                  <Input id="document" type="file" accept="image/*,.pdf,.doc,.docx" />
-                  <Upload className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="neededBack">When is it needed back?</Label>
-                <Input id="neededBack" type="date" required />
-              </div>
-            </>
-          )}
+          {/* Attachments */}
+          <div className="space-y-2">
+            <Label>Attachments (Optional)</Label>
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="outline" className="gap-2">
+                <Upload className="h-4 w-4" />
+                Upload Files
+              </Button>
+            </div>
+          </div>
 
-          {actionType === "request" && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="reason">Reason</Label>
-                <Textarea 
-                  id="reason" 
-                  placeholder="Why do you need this asset?"
-                  className="min-h-[80px]"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="timeNeeded">Time Asset is Needed</Label>
-                <Input id="timeNeeded" type="datetime-local" required />
-              </div>
-              
-              <div className="space-y-3">
-                <Label>Request Type</Label>
-                <RadioGroup value={requestType} onValueChange={setRequestType}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="permanent" id="permanent" />
-                    <Label htmlFor="permanent">Permanent</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="temporary" id="temporary" />
-                    <Label htmlFor="temporary">Temporary</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              
-              {requestType === "temporary" && (
-                <div className="space-y-2">
-                  <Label htmlFor="returnDate">Return Date</Label>
-                  <Input id="returnDate" type="date" required />
-                </div>
-              )}
-            </>
-          )}
-
-          {actionType === "log" && (
-            <>
-              <div className="space-y-3">
-                <Label>Asset Status</Label>
-                <RadioGroup value={assetStatus} onValueChange={setAssetStatus}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="assigned" id="assigned" />
-                    <Label htmlFor="assigned">Assigned</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="unassigned" id="unassigned" />
-                    <Label htmlFor="unassigned">Unassigned</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              
-              {assetStatus === "assigned" && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="assignedName">Assigned To (Name)</Label>
-                    <Input id="assignedName" placeholder="Employee name" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="assignedDept">Department</Label>
-                    <Select required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select department" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="engineering">Engineering</SelectItem>
-                        <SelectItem value="marketing">Marketing</SelectItem>
-                        <SelectItem value="sales">Sales</SelectItem>
-                        <SelectItem value="hr">HR</SelectItem>
-                        <SelectItem value="operations">Operations</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              )}
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price</Label>
-                  <Input id="price" type="number" placeholder="0.00" step="0.01" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
-                  <Input id="date" type="date" required />
-                </div>
-              </div>
-            </>
-          )}
-
+          {/* Submit Button */}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              Submit {actionType === "maintenance" ? "Maintenance" : actionType === "request" ? "Request" : "Asset"}
+            <Button type="submit" className="w-full">
+              {mode === "admin" ? "Add Asset" : `Submit ${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Request`}
             </Button>
           </DialogFooter>
         </form>

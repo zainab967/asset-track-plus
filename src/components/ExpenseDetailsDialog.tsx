@@ -1,24 +1,16 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Calendar, User, Building, DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, User, Building, DollarSign } from "lucide-react";
+import { Expense } from "@/contexts/ExpenseContext";
 
 interface ExpenseDetailsDialogProps {
-  expense: {
-    id: string;
-    name: string;
-    amount: number;
-    user: string;
-    building: string;
-    date: string;
-    status: string;
-    type: string;
-    category: string;
-    details?: string;
-  };
+  expense: Expense | null;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function ExpenseDetailsDialog({ expense }: ExpenseDetailsDialogProps) {
+export function ExpenseDetailsDialog({ expense, isOpen, onClose }: ExpenseDetailsDialogProps) {
   const getStatusBadge = (status: string) => {
     const variants = {
       Pending: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
@@ -28,13 +20,10 @@ export function ExpenseDetailsDialog({ expense }: ExpenseDetailsDialogProps) {
     return variants[status as keyof typeof variants] || "bg-gray-100 text-gray-800";
   };
 
+  if (!expense) return null;
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <MessageSquare className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Expense Details</DialogTitle>
@@ -95,20 +84,20 @@ export function ExpenseDetailsDialog({ expense }: ExpenseDetailsDialogProps) {
             <p className="text-sm text-muted-foreground mb-2">Description</p>
             <div className="bg-muted/50 p-3 rounded-md">
               <p className="text-sm">
-                {expense.details || "Business travel expenses for client meeting in New York. Includes flight, hotel accommodation for 2 nights, and meals during the trip. All receipts are attached for verification."}
+                {expense.description || "Business travel expenses for client meeting in New York. Includes flight, hotel accommodation for 2 nights, and meals during the trip. All receipts are attached for verification."}
               </p>
             </div>
           </div>
           
-          {expense.status === "Pending" && (
-            <div className="flex gap-2 pt-4">
+          {expense.status === "pending" && (
+            <DialogFooter className="gap-2">
               <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700">
                 Reject
               </Button>
               <Button className="flex-1 bg-green-600 hover:bg-green-700">
                 Approve
               </Button>
-            </div>
+            </DialogFooter>
           )}
         </div>
       </DialogContent>

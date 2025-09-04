@@ -447,9 +447,8 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
                       <TableHead className="w-[120px]">Priority</TableHead>
                       <TableHead className="w-[120px]">Status</TableHead>
                       <TableHead className="w-[150px]">Building</TableHead>
-                      <TableHead className="w-[150px]">Submitted By</TableHead>
                       <TableHead className="w-[120px]">Date</TableHead>
-                      <TableHead className="w-[100px]">Actions</TableHead>
+                      <TableHead className="w-[100px] text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

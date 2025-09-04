@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Wrench, AlertTriangle, CheckCircle, Package } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Search, Plus, Wrench, AlertTriangle, CheckCircle, Package, Eye, History } from "lucide-react";
 import { AddAssetDialog } from "./AddAssetDialog";
 import { AssetActionDialog } from "./AssetActionDialog";
 
@@ -20,6 +21,14 @@ interface Asset {
   value: number;
   purchaseDate: string;
   condition: "excellent" | "good" | "fair" | "poor";
+  description?: string;
+  responses?: {
+    id: string;
+    text: string;
+    createdAt: string;
+    user: string;
+    role: string;
+  }[];
 }
 
 interface AssetManagerProps {
@@ -42,7 +51,6 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       purchaseDate: "2023-06-15",
       condition: "excellent"
     }
-    // Add more sample assets here
   ];
 
   // State management
@@ -80,9 +88,15 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   };
 
   const filteredAssets = assets.filter(asset => {
-    const matchesSearch = asset.assetid.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         asset.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (asset.assignedTo && asset.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
+    const searchFields = [
+      asset.assetid,
+      asset.name,
+      asset.category,
+      asset.assignedTo,
+      asset.building
+    ].map(field => field?.toLowerCase() || "");
+    
+    const matchesSearch = searchTerm === "" || searchFields.some(field => field.includes(searchTerm.toLowerCase()));
     const matchesDepartment = buildingFilter === "all" || asset.building === buildingFilter;
     
     let matchesSort = true;
@@ -101,329 +115,145 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
   });
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1">
-          <h2 className="text-3xl font-bold">
-            {userRole === "employee" ? "My Assets" : userRole === "hr" ? "HR Asset Management" : "Assets"}
-          </h2>
-          <p className="text-base text-muted-foreground">
-            {userRole === "employee" ? "View your assigned assets and request new ones" : "Manage and track all assets"}
-          </p>
-        </div>
-      </div>
-
-      {/* Top Row: My Assets and Stats Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Left Side: My Assets Card */}
-        <Card className="h-full">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                My Assets
-              </CardTitle>
-              <AssetActionDialog userRole={userRole} />
-            </div>
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-4">
-              {assets.filter(a => a.assignedTo === currentUser).length > 0 ? (
-                assets.filter(a => a.assignedTo === currentUser).map((asset) => (
-                  <div key={asset.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(asset.status)}
-                      <div>
-                        <p className="font-medium">{asset.assetid}</p>
-                        <p className="text-sm text-muted-foreground">{asset.category}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-mono">${asset.value.toLocaleString()}</p>
-                      <p className={`text-xs capitalize ${getConditionColor(asset.condition)}`}>{asset.condition}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No assets assigned to you yet</p>
-                  <p className="text-sm">Check the Available tab to request assets</p>
-                </div>
-              )}
-            </div>
+          <CardContent>
+            <div className="text-2xl font-bold">{assets.length}</div>
           </CardContent>
         </Card>
 
-        {/* Right Side: Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Assigned Assets</p>
-                  <p className="text-2xl font-bold text-green-600">{assetCounts.assigned}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Available Assets</p>
-                  <p className="text-2xl font-bold text-blue-600">{assetCounts.unassigned}</p>
-                </div>
-                <Package className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Needs Maintenance</p>
-                  <p className="text-2xl font-bold text-orange-600">{assetCounts.maintenance}</p>
-                </div>
-                <AlertTriangle className="h-8 w-8 text-orange-600" />
-              </div>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Assigned Assets</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{assetCounts.assigned}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Under Maintenance</CardTitle>
+            <Wrench className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{assetCounts.maintenance}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Unassigned Assets</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{assetCounts.unassigned}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Actions and Filters */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-1 items-center space-x-2">
+          <div className="flex-1 md:max-w-md">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search assets..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 pr-4"
+              />
+            </div>
+          </div>
+          <Select value={buildingFilter} onValueChange={setBuildingFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All Buildings" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Buildings</SelectItem>
+              <SelectItem value="Etihad Office">Etihad Office</SelectItem>
+              <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          {userRole === "admin" && (
+            <>
+              <AddAssetDialog />
+              <AssetActionDialog userRole={userRole} mode="admin" />
+            </>
+          )}
+          {userRole !== "admin" && (
+            <AssetActionDialog userRole={userRole} mode="user" />
+          )}
         </div>
       </div>
 
-      {/* Full-width Search Bar */}
-      <Card className="w-full">
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search assets, categories, or assignees..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="overall">All Assets</TabsTrigger>
+          <TabsTrigger value="assigned">Assigned</TabsTrigger>
+          <TabsTrigger value="unassigned">Unassigned</TabsTrigger>
+          <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+          {userRole === "employee" && (
+            <TabsTrigger value="my-assets">My Assets</TabsTrigger>
+          )}
+        </TabsList>
 
-            <Select value={buildingFilter} onValueChange={setBuildingFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by building" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Buildings</SelectItem>
-                <SelectItem value="Etihad Office">Etihad Office</SelectItem>
-                <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select 
-              value={sortBy} 
-              onValueChange={(value: "all" | "assigned" | "unassigned" | "maintenance") => setSortBy(value)}
-            >
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Assets</SelectItem>
-                <SelectItem value="assigned">Assigned</SelectItem>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === "cards" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("cards")}
-              >
-                Cards
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-              >
-                List
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Full-width Asset Table Section */}
-      <div className="w-full">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`grid w-full ${userRole === "employee" ? "grid-cols-5" : "grid-cols-4"}`}>
-            <TabsTrigger value="assigned" className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Assigned ({assetCounts.assigned})
-            </TabsTrigger>
-            <TabsTrigger value="unassigned" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Available ({assetCounts.unassigned})
-            </TabsTrigger>
-            <TabsTrigger value="maintenance" className="flex items-center gap-2">
-              <Wrench className="h-4 w-4" />
-              Maintenance ({assetCounts.maintenance})
-            </TabsTrigger>
-            {userRole === "employee" && (
-              <TabsTrigger value="my-assets" className="flex items-center gap-2">
-                <span className="h-4 w-4" />
-                My Assets
-              </TabsTrigger>
-            )}
-            <TabsTrigger value="overall" className="flex items-center gap-2">
-              <span className="h-4 w-4" />
-              Overall
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value={activeTab} className="mt-6">
-            {viewMode === "cards" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <TabsContent value={activeTab} className="space-y-4">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Asset ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Assigned To</TableHead>
+                  <TableHead>Building</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Condition</TableHead>
+                  <TableHead>Value</TableHead>
+                  <TableHead>Purchase Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredAssets.map((asset) => (
-                  <Card key={asset.id} className="hover:shadow-md transition-all duration-200">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg">{asset.name}</CardTitle>
-                          <p className="text-sm text-muted-foreground">{asset.category}</p>
-                        </div>
+                  <TableRow key={asset.id}>
+                    <TableCell className="font-medium">{asset.assetid}</TableCell>
+                    <TableCell>{asset.name}</TableCell>
+                    <TableCell>{asset.category}</TableCell>
+                    <TableCell>{asset.assignedTo || "—"}</TableCell>
+                    <TableCell>{asset.building}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
                         {getStatusIcon(asset.status)}
+                        <span className="capitalize">{asset.status}</span>
                       </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Assigned to:</span>
-                          <span className="font-medium">
-                            {asset.assignedTo || "Unassigned"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Office:</span>
-                          <span>{asset.building}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Value:</span>
-                          <span className="font-mono">${asset.value.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Condition:</span>
-                          <span className={`font-medium capitalize ${getConditionColor(asset.condition)}`}>
-                            {asset.condition}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2 pt-2">
-                        {userRole === "employee" ? (
-                          asset.status === "unassigned" ? (
-                            <Button size="sm" variant="outline" className="flex-1">
-                              Request Asset
-                            </Button>
-                          ) : asset.assignedTo === currentUser ? (
-                            <Button size="sm" variant="outline" className="flex-1">
-                              Report Issue
-                            </Button>
-                          ) : null
-                        ) : (
-                          <>
-                            {asset.status === "maintenance" ? (
-                              <Button size="sm" variant="outline" className="flex-1">
-                                Mark Fixed
-                              </Button>
-                            ) : asset.status === "unassigned" ? (
-                              <Button size="sm" variant="outline" className="flex-1">
-                                Assign
-                              </Button>
-                            ) : (
-                              <Button size="sm" variant="outline" className="flex-1">
-                                Edit
-                              </Button>
-                            )}
-                            {asset.status !== "maintenance" && (
-                              <Button size="sm" variant="outline">
-                                <Wrench className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                    </TableCell>
+                    <TableCell>
+                      <span className={getConditionColor(asset.condition)}>
+                        {asset.condition}
+                      </span>
+                    </TableCell>
+                    <TableCell>${asset.value.toLocaleString()}</TableCell>
+                    <TableCell>{new Date(asset.purchaseDate).toLocaleDateString()}</TableCell>
+                  </TableRow>
                 ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b bg-muted/50">
-                          <th className="text-left p-4 font-medium">Asset ID</th>
-                          <th className="text-left p-4 font-medium">Category</th>
-                          <th className="text-left p-4 font-medium">Assigned To</th>
-                          <th className="text-left p-4 font-medium">Building</th>
-                          <th className="text-left p-4 font-medium">Status</th>
-                          <th className="text-left p-4 font-medium">Value</th>
-                          <th className="text-left p-4 font-medium">Condition</th>
-                          <th className="text-left p-4 font-medium">Purchase Date</th>
-                          {userRole !== "employee" && (
-                            <th className="text-left p-4 font-medium">Actions</th>
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredAssets.map((asset) => (
-                          <tr key={asset.id} className="border-b hover:bg-muted/30">
-                            <td className="p-4 font-medium">{asset.assetid}</td>
-                            <td className="p-4 text-muted-foreground">{asset.category}</td>
-                            <td className="p-4">{asset.assignedTo || "Unassigned"}</td>
-                            <td className="p-4">{asset.building}</td>
-                            <td className="p-4">
-                              <div className="flex items-center gap-2">
-                                {getStatusIcon(asset.status)}
-                                <span className="capitalize">{asset.status}</span>
-                              </div>
-                            </td>
-                            <td className="p-4 font-mono">${asset.value.toLocaleString()}</td>
-                            <td className="p-4">
-                              <Badge variant="outline" className={getConditionColor(asset.condition)}>
-                                {asset.condition}
-                              </Badge>
-                            </td>
-                            <td className="p-4">{asset.purchaseDate}</td>
-                            {userRole !== "employee" && (
-                              <td className="p-4">
-                                <div className="flex gap-2">
-                                  {asset.status === "maintenance" ? (
-                                    <Button size="sm" variant="outline">Mark Fixed</Button>
-                                  ) : asset.status === "unassigned" ? (
-                                    <Button size="sm" variant="outline">Assign</Button>
-                                  ) : (
-                                    <Button size="sm" variant="outline">Edit</Button>
-                                  )}
-                                </div>
-                              </td>
-                            )}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

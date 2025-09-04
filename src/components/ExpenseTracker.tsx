@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Filter, Plus, Clock, CheckCircle, XCircle, Save, X } from "lucide-react";
+import { Search, Filter, Plus, Clock, CheckCircle, XCircle, Save, X, Eye } from "lucide-react";
 import { SubmitExpenseDialog } from "./SubmitExpenseDialog";
 import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
 import { ExpenseDescriptionDialog } from "./ExpenseDescriptionDialog";
@@ -31,8 +31,8 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newExpense, setNewExpense] = useState<Partial<Expense>>({});
-  const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
-  const [currentExpenseForDescription, setCurrentExpenseForDescription] = useState<any>(null);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -319,14 +319,13 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[250px]">Name</TableHead>
-                    <TableHead className="w-[150px]">User</TableHead>
                     <TableHead className="w-[150px]">Building</TableHead>
                     <TableHead className="w-[120px]">Amount</TableHead>
                     <TableHead className="w-[120px]">Category</TableHead>
                     <TableHead className="w-[150px]">Charged To</TableHead>
                     <TableHead className="w-[120px]">Date</TableHead>
                     <TableHead className="w-[120px]">Status</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
+                    <TableHead className="w-[100px] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -351,9 +350,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                             ))}
                           </SelectContent>
                         </Select>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {newExpense.user}
                       </TableCell>
                       <TableCell>
                         <Select 
@@ -417,7 +413,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                         <Badge variant="secondary">Pending</Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
+                        <div className="flex items-center gap-2 justify-end">
                           <Button size="sm" onClick={handleSaveNew} className="h-7 w-7 p-0">
                             <Save className="h-3 w-3" />
                           </Button>
@@ -431,7 +427,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                   {filteredExpenses.map((expense) => (
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium">{expense.name}</TableCell>
-                      <TableCell>{expense.user}</TableCell>
                       <TableCell>{expense.building}</TableCell>
                       <TableCell className="font-mono">
                         ${expense.amount.toLocaleString()}
@@ -441,7 +436,19 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                       <TableCell>{expense.date}</TableCell>
                       <TableCell>{getStatusBadge(expense.status)}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 p-0"
+                            onClick={() => {
+                              setSelectedExpense(expense);
+                              setShowDetailsDialog(true);
+                            }}
+                            title="View Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
                           {expense.status === "pending" && (userRole === "hr" || userRole === "admin") && (
                             <>
                               <Button 
@@ -478,6 +485,11 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
           </CardContent>
         </Card>
       </div>
+      <ExpenseDetailsDialog 
+        expense={selectedExpense}
+        isOpen={showDetailsDialog}
+        onClose={() => setShowDetailsDialog(false)}
+      />
     </div>
   );
 }

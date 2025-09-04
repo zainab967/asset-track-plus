@@ -509,17 +509,13 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>User</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Building</TableHead>
-                    <TableHead>Details</TableHead>
-                    {(userRole === "hr" || userRole === "admin" || userRole === "manager") && 
-                      <TableHead>Action</TableHead>
-                    }
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -675,7 +671,6 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                   {!isLoading && filteredReimbursements.map((reimbursement) => (
                     <TableRow key={reimbursement.id}>
                       <TableCell className="font-medium">{reimbursement.name}</TableCell>
-                      <TableCell>{reimbursement.user}</TableCell>
                       <TableCell>{reimbursement.category}</TableCell>
                       <TableCell className="font-mono">
                         ${reimbursement.amount.toLocaleString()}
@@ -692,15 +687,18 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                       </TableCell>
                       <TableCell>{reimbursement.building}</TableCell>
                       <TableCell>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="h-7 px-2"
-                          onClick={() => handleViewDetails(reimbursement)}
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          View
-                        </Button>
+                        <div className="flex items-center gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleViewDetails(reimbursement)}
+                            title="View Details"
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            View
+                          </Button>
+                        </div>
                       </TableCell>
                       {(userRole === "hr" || userRole === "admin" || userRole === "manager") && (
                         <TableCell>

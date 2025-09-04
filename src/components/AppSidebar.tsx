@@ -28,7 +28,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
 
   const navigationItems = [
     {
-      title: "Ledger View",
+      title: "Ledger",
       url: "/ledger",
       icon: BarChart3,
       allowedRoles: ["Admin", "Manager", "HR"]
@@ -77,7 +77,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
           </div>
           {state === "expanded" && (
             <div className="flex-1">
-              <h2 className="font-bold text-lg text-primary">AIIMTRACK</h2>
+              <h2 className="font-bold text-lg text-primary">LedgeX</h2>
               <Select value={userRole} onValueChange={onRoleChange}>
                 <SelectTrigger className="w-full h-6 text-xs bg-transparent border-0 p-0 hover:bg-primary/10 focus:ring-0">
                   <SelectValue className="text-xs text-sidebar-foreground/80" />

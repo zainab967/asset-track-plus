@@ -11,6 +11,7 @@ export interface Expense {
   type: "one-time" | "recurring";
   category: string;
   chargedTo?: string;
+  description?: string;
 }
 
 interface ExpenseContextType {
