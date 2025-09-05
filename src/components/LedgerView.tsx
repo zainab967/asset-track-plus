@@ -144,59 +144,36 @@ export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProp
         </div>
 
         {/* KPI Cards and Charts - Takes up 1/3 of the space */}
-        <div className="space-y-4">
+        <div className="flex flex-col h-[600px] space-y-4">
           {/* KPI Cards stacked vertically */}
-          {kpiCards.map((kpi, index) => {
-            const IconComponent = kpi.icon;
-            return (
-              <Card 
-                key={index}
-                className="cursor-pointer hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 hover-scale fade-in bg-gradient-to-br from-background to-muted/30"
-                onClick={kpi.onClick}
-              >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {kpi.title}
-                  </CardTitle>
-                  <IconComponent className="h-4 w-4 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold text-foreground">{kpi.value}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {kpi.trend}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-
-          {/* Expense Trend Chart */}
-          <Card className="fade-in">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                <TrendingUp className="h-4 w-4 mr-2 text-primary" />
-                6-Month Trend
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ResponsiveContainer width="100%" height={120}>
-                <LineChart data={last6Months}>
-                  <XAxis dataKey="month" hide />
-                  <YAxis hide />
-                  <Line 
-                    type="monotone" 
-                    dataKey="amount" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <div className="flex-1 space-y-4">
+            {kpiCards.map((kpi, index) => {
+              const IconComponent = kpi.icon;
+              return (
+                <Card 
+                  key={index}
+                  className="cursor-pointer hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 hover-scale fade-in bg-gradient-to-br from-background to-muted/30 flex-1"
+                  onClick={kpi.onClick}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {kpi.title}
+                    </CardTitle>
+                    <IconComponent className="h-4 w-4 text-primary" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-xl font-bold text-foreground">{kpi.value}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {kpi.trend}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
 
           {/* Category Breakdown */}
-          <Card className="fade-in">
+          <Card className="fade-in flex-shrink-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
                 <PieChart className="h-4 w-4 mr-2 text-primary" />
