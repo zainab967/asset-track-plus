@@ -436,16 +436,12 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
 
   return (
     <div className="flex-1">
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        {/* Header */}
-        <div className="space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Reimbursement Management</h2>
-          {pendingClaims > 0 && (
-            <p className="text-yellow-600 font-medium">
-              {pendingClaims} pending reimbursement requests require attention
-            </p>
-          )}
-        </div>
+      <div className="flex-1 space-y-3 p-3 md:p-6 pt-4">
+        {pendingClaims > 0 && (
+          <p className="text-yellow-600 font-medium text-sm">
+            {pendingClaims} pending reimbursement requests 
+          </p>
+        )}
 
         {/* Filters */}
         <Card>
@@ -703,8 +699,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                             onClick={() => handleViewDetails(reimbursement)}
                             title="View Details"
                           >
-                            <Eye className="h-3 w-3 mr-1" />
-                            View
+                            <Eye className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>

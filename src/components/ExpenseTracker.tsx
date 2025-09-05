@@ -159,16 +159,11 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     <div className="flex-1">
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-3xl font-bold tracking-tight">Expense Tracker</h2>
-            {pendingClaims > 0 && (
-              <p className="text-yellow-600 font-medium">
-                {pendingClaims} pending claims require attention
-              </p>
-            )}
-          </div>
-        </div>
+        {pendingClaims > 0 && (
+          <p className="text-yellow-600 font-medium">
+            {pendingClaims} pending claims require attention
+          </p>
+        )}
 
         {/* Filters */}
         <Card>

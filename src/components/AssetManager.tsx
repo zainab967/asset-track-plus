@@ -169,55 +169,9 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-3xl font-bold tracking-tight">Asset Management</h2>
-          <p className="text-muted-foreground">
-            Manage and track all company assets across locations
-          </p>
-        </div>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover-glow transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{assets.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover-glow transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned Assets</CardTitle>
-            <CheckCircle className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{assetCounts.assigned}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover-glow transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Under Maintenance</CardTitle>
-            <Wrench className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{assetCounts.maintenance}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover-glow transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unassigned Assets</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{assetCounts.unassigned}</div>
-          </CardContent>
-        </Card>
+        <p className="text-muted-foreground">
+          Manage and track all company assets across locations
+        </p>
       </div>
 
       {/* Filters */}
@@ -262,10 +216,10 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
-          <TabsTrigger value="overall">All Assets</TabsTrigger>
-          <TabsTrigger value="assigned">Assigned</TabsTrigger>
-          <TabsTrigger value="unassigned">Available</TabsTrigger>
-          <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+          <TabsTrigger value="overall">All Assets ({assets.length})</TabsTrigger>
+          <TabsTrigger value="assigned">Assigned ({assetCounts.assigned})</TabsTrigger>
+          <TabsTrigger value="unassigned">Available ({assetCounts.unassigned})</TabsTrigger>
+          <TabsTrigger value="maintenance">Maintenance ({assetCounts.maintenance})</TabsTrigger>
           <TabsTrigger value="my-assets">My Assets</TabsTrigger>
         </TabsList>
 
