@@ -181,32 +181,36 @@ export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProp
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <ResponsiveContainer width="100%" height={120}>
-                <RechartsPieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={20}
-                    outerRadius={50}
-                    dataKey="value"
-                  >
-                    {pieData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                </RechartsPieChart>
-              </ResponsiveContainer>
-              <div className="grid grid-cols-2 gap-1 text-xs mt-2">
-                {pieData.slice(0, 4).map((item, index) => (
-                  <div key={item.name} className="flex items-center">
-                    <div 
-                      className="w-2 h-2 rounded-full mr-1" 
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    />
-                    <span className="truncate">{item.name}</span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between h-[100px]">
+                <div className="w-[140px]">
+                  <ResponsiveContainer width="100%" height={100}>
+                    <RechartsPieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={16}
+                        outerRadius={32}
+                        dataKey="value"
+                      >
+                        {pieData.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                    </RechartsPieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-col gap-2 text-xs">
+                  {pieData.slice(0, 4).map((item, index) => (
+                    <div key={item.name} className="flex items-center whitespace-nowrap">
+                      <div 
+                        className="w-2 h-2 rounded-full mr-2" 
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="text-muted-foreground">{item.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
