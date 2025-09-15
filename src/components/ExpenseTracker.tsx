@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Clock, CheckCircle, XCircle, Eye } from "lucide-react";
+import { Search, Plus, Clock, CheckCircle, XCircle, Eye, Download } from "lucide-react";
 import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
 import { AddExpenseSheet } from "./AddExpenseSheet";
 import { useToast } from "@/hooks/use-toast";
@@ -132,6 +132,52 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     setIsAddingNew(false);
   };
 
+  const handleExportCSV = () => {
+    if (filteredExpenses.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No expenses to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Define CSV headers
+    const headers = ['Name', 'User', 'Building', 'Amount', 'Category', 'Charged To', 'Date', 'Status', 'Type'];
+    
+    // Convert expenses to CSV format
+    const csvContent = [
+      headers.join(','),
+      ...filteredExpenses.map(expense => [
+        `"${expense.name}"`,
+        `"${expense.user}"`,
+        `"${expense.building}"`,
+        expense.amount,
+        `"${expense.category}"`,
+        `"${expense.chargedTo || ''}"`,
+        expense.date,
+        expense.status,
+        `"${expense.type || ''}"`
+      ].join(','))
+    ].join('\n');
+
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `expenses_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Success",
+      description: `Exported ${filteredExpenses.length} expenses to CSV`,
+    });
+  };
+
   const filteredExpenses = (expenses || []).filter(expense => {
     const matchesSearch = expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       expense.user.toLowerCase().includes(searchTerm.toLowerCase());
@@ -238,6 +284,17 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                     </PopoverContent>
                   </Popover>
 
+                  <Button 
+                    onClick={handleExportCSV} 
+                    size="sm" 
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    disabled={filteredExpenses.length === 0}
+                  >
+                    <Download className="h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  
                   <Button 
                     onClick={handleAddNew} 
                     size="sm" 
