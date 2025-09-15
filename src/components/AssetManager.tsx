@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { formatCurrency } from "@/lib/currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -261,7 +262,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                           {asset.condition}
                         </span>
                       </TableCell>
-                      <TableCell className="font-mono">${asset.value.toLocaleString()}</TableCell>
+                      <TableCell className="font-mono">{formatCurrency(asset.value)}</TableCell>
                       <TableCell>{new Date(asset.purchaseDate).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 justify-end">
@@ -334,7 +335,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Value</label>
-                  <p className="text-sm font-mono">${selectedAsset.value.toLocaleString()}</p>
+                  <p className="text-sm font-mono">{formatCurrency(selectedAsset.value)}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Purchase Date</label>

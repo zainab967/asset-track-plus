@@ -1,7 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, Building, DollarSign } from "lucide-react";
+import { Calendar, User, Building } from "lucide-react";
+import { PKRIcon } from "@/components/ui/pkr-icon";
+import { formatCurrency } from "@/lib/currency";
 import { Expense } from "@/contexts/ExpenseContext";
 
 interface ExpenseDetailsDialogProps {
@@ -38,10 +40,10 @@ export function ExpenseDetailsDialog({ expense, isOpen, onClose }: ExpenseDetail
           
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <PKRIcon className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">Amount</p>
-                <p className="font-medium">${expense.amount.toFixed(2)}</p>
+                <p className="font-medium">{formatCurrency(expense.amount)}</p>
               </div>
             </div>
             

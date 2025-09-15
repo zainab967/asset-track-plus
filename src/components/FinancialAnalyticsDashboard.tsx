@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 
 const analyticsData = [
   { month: 'Jan', revenue: 45000, expenses: 32000, reserves: 13000, teams: 2 },
@@ -20,7 +21,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="text-sm font-medium text-foreground mb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {entry.name}: ${entry.value.toLocaleString()}
+            {entry.name}: {formatCurrency(entry.value)}
           </p>
         ))}
       </div>
@@ -142,7 +143,7 @@ export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDas
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+                tickFormatter={(value) => `PKR ${(value / 1000).toFixed(0)}K`}
                 className="text-xs"
               />
               
@@ -174,13 +175,13 @@ export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDas
           <div className="text-center space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Current Month</p>
             <p className="text-lg font-semibold" style={{ color: chartConfig.primary.color }}>
-              ${chartData[chartData.length - 1]?.primary.toLocaleString()}
+              {formatCurrency(chartData[chartData.length - 1]?.primary)}
             </p>
           </div>
           <div className="text-center space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">vs Expenses</p>
             <p className="text-lg font-semibold" style={{ color: chartConfig.secondary.color }}>
-              ${chartData[chartData.length - 1]?.secondary.toLocaleString()}
+              {formatCurrency(chartData[chartData.length - 1]?.secondary)}
             </p>
           </div>
           <div className="text-center space-y-1">
@@ -192,7 +193,7 @@ export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDas
           <div className="text-center space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Net</p>
             <p className="text-lg font-semibold text-primary">
-              ${(chartData[chartData.length - 1]?.primary - chartData[chartData.length - 1]?.secondary).toLocaleString()}
+              {formatCurrency(chartData[chartData.length - 1]?.primary - chartData[chartData.length - 1]?.secondary)}
             </p>
           </div>
         </div>

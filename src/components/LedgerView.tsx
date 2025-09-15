@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, DollarSign, Clock, AlertCircle, TrendingUp, PieChart } from "lucide-react";
+import { ArrowRight, Clock, AlertCircle, TrendingUp, PieChart } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
+import { PKRIcon } from "@/components/ui/pkr-icon";
 import { RecentActivity } from "./RecentActivity";
 import { useExpenses } from "@/contexts/ExpenseContext";
 import { useNavigate } from "react-router-dom";
@@ -36,8 +38,8 @@ export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProp
   const kpiCards = [
     {
       title: "Total Expenses This Month",
-      value: `$${totalExpensesThisMonth.toLocaleString()}`,
-      icon: DollarSign,
+      value: formatCurrency(totalExpensesThisMonth),
+      icon: PKRIcon,
       onClick: () => navigate("/expenses"),
       trend: "+12% from last month"
     },
@@ -118,7 +120,7 @@ export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProp
               <CardTitle className="text-base font-medium flex items-center justify-between">
                 <span className="truncate">{building.name}</span>
                 <span className="text-xl font-bold">
-                  ${building.balance.toLocaleString()}
+                  {formatCurrency(building.balance)}
                 </span>
               </CardTitle>
             </CardHeader>

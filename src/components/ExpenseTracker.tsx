@@ -18,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Calendar } from "lucide-react";
 import { useExpenses, Expense } from "@/contexts/ExpenseContext";
 import { API_ENDPOINTS } from "@/config/api";
+import { formatCurrency } from "@/lib/currency";
 
 interface ExpenseTrackerProps {
   selectedDepartment?: string;
@@ -427,7 +428,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                       <TableCell className="font-medium">{expense.name}</TableCell>
                       <TableCell>{expense.building}</TableCell>
                       <TableCell className="font-mono">
-                        ${expense.amount.toLocaleString()}
+                        {formatCurrency(expense.amount)}
                       </TableCell>
                       <TableCell>{expense.category}</TableCell>
                       <TableCell>{expense.chargedTo || '-'}</TableCell>
