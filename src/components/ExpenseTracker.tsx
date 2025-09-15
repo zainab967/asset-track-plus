@@ -9,7 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Plus, Clock, CheckCircle, XCircle, Eye, Download } from "lucide-react";
 import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
 import { AddExpenseSheet } from "./AddExpenseSheet";
+import { RejectExpenseDialog } from "./RejectExpenseDialog";
 import { useToast } from "@/hooks/use-toast";
+import { updateExpenseStatus } from "@/services/expenses";
+import { createNotification } from "@/services/notifications";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Calendar } from "lucide-react";
@@ -30,8 +33,10 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -176,6 +181,94 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       title: "Success",
       description: `Exported ${filteredExpenses.length} expenses to CSV`,
     });
+  };
+
+  const handleApproveExpense = async (expense: Expense) => {
+    try {
+      setIsProcessing(true);
+      
+      // Update expense status
+      const updatedExpense = await updateExpenseStatus(expense.id, 'approved');
+      
+      // Update local state
+      setExpenses(prev => prev.map(exp => 
+        exp.id === expense.id ? { ...exp, status: 'approved' } : exp
+      ));
+
+      // Create notification for the employee
+      await createNotification({
+        user_id: expense.user, // Using 'user' property from the context
+        title: "Expense Approved",
+        message: `Your expense "${expense.name}" for $${expense.amount} has been approved.`,
+        type: 'success',
+        related_entity_type: 'expense',
+        related_entity_id: expense.id
+      });
+
+      toast({
+        title: "Success",
+        description: "Expense approved successfully",
+      });
+    } catch (error) {
+      console.error('Approval error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to approve expense",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRejectExpense = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setShowRejectDialog(true);
+  };
+
+  const handleConfirmReject = async (reason: string) => {
+    if (!selectedExpense) return;
+
+    try {
+      setIsProcessing(true);
+      
+      // Update expense status with rejection reason
+      await updateExpenseStatus(selectedExpense.id, 'rejected', reason);
+      
+      // Update local state
+      setExpenses(prev => prev.map(exp => 
+        exp.id === selectedExpense.id 
+          ? { ...exp, status: 'rejected', rejection_reason: reason } 
+          : exp
+      ));
+
+      // Create notification for the employee
+      await createNotification({
+        user_id: selectedExpense.user, // Using 'user' property from the context
+        title: "Expense Rejected",
+        message: `Your expense "${selectedExpense.name}" for $${selectedExpense.amount} has been rejected. Reason: ${reason}`,
+        type: 'error',
+        related_entity_type: 'expense',
+        related_entity_id: selectedExpense.id
+      });
+
+      toast({
+        title: "Success",
+        description: "Expense rejected and employee notified",
+      });
+
+      setShowRejectDialog(false);
+      setSelectedExpense(null);
+    } catch (error) {
+      console.error('Rejection error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reject expense",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const filteredExpenses = (expenses || []).filter(expense => {
@@ -360,9 +453,8 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                                 size="sm" 
                                 variant="ghost"
                                 className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                onClick={() => {
-                                  // Handle approve
-                                }}
+                                onClick={() => handleApproveExpense(expense)}
+                                disabled={isProcessing}
                                 title="Approve"
                               >
                                 <CheckCircle className="h-5 w-5" />
@@ -371,9 +463,8 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                                 size="sm" 
                                 variant="ghost"
                                 className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => {
-                                  // Handle reject
-                                }}
+                                onClick={() => handleRejectExpense(expense)}
+                                disabled={isProcessing}
                                 title="Reject"
                               >
                                 <XCircle className="h-5 w-5" />
@@ -399,6 +490,16 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
         isOpen={isAddingNew}
         onClose={() => setIsAddingNew(false)}
         onSubmit={handleSaveNew}
+      />
+      <RejectExpenseDialog
+        isOpen={showRejectDialog}
+        onClose={() => {
+          setShowRejectDialog(false);
+          setSelectedExpense(null);
+        }}
+        onConfirm={handleConfirmReject}
+        expenseName={selectedExpense?.name || ""}
+        isLoading={isProcessing}
       />
     </div>
   );
