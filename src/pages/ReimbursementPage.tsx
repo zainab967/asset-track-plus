@@ -14,7 +14,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { API_ENDPOINTS, API_CONFIG } from "@/config/api";
 import { SubmitReimbursementDialog } from "@/components/SubmitReimbursementDialog";
 import { RejectReimbursementDialog } from "@/components/RejectReimbursementDialog";
+import { ReimbursementApprovalDialog } from "@/components/ReimbursementApprovalDialog";
 import { useReimbursementStatus } from "@/hooks/useReimbursementStatus";
+import { updateReimbursementStatus } from "@/services/reimbursements";
+import { createExpense } from "@/services/expenses";
 
 interface Reimbursement {
   id: string;
@@ -48,9 +51,74 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
   const [selectedReimbursement, setSelectedReimbursement] = useState<Reimbursement | null>(null);
   const [reimbursements, setReimbursements] = useState<Reimbursement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { handleStatusChange, showRejectDialog, setShowRejectDialog } = useReimbursementStatus(reimbursements, setReimbursements);
+  // Custom approval handling, separate from useReimbursementStatus
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+
+  const handleStatusChange = async (id: string, status: "approved" | "rejected") => {
+    try {
+      setIsProcessing(true);
+      const updatedReimbursement = await updateReimbursementStatus(id, status);
+      const updatedList = reimbursements.map((r) =>
+        r.id === id ? updatedReimbursement : r
+      );
+      setReimbursements(updatedList);
+      toast({
+        title: `Reimbursement ${status}`,
+        description: `The reimbursement has been ${status} successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${status} reimbursement. Please try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleApprovalConfirm = async (reimbursementId: string, chargedTo: string) => {
+    if (!selectedReimbursement) return;
+
+    try {
+      setIsProcessing(true);
+      // Update reimbursement status
+      await handleStatusChange(reimbursementId, "approved");
+      
+      // Create corresponding expense entry
+      const expenseData = {
+        name: selectedReimbursement.name,
+        amount: selectedReimbursement.amount,
+        description: selectedReimbursement.description || "",
+        category: selectedReimbursement.category,
+        building: selectedReimbursement.building,
+        userId: selectedReimbursement.user,
+        status: "pending" as const,
+        department: chargedTo,
+        date: new Date().toISOString()
+      };
+
+      await createExpense(expenseData);
+      setShowApprovalDialog(false);
+      
+      toast({
+        title: "Expense Created",
+        description: "Expense entry has been created for the approved reimbursement.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process approval and create expense. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   // Dummy data for testing
   const dummyReimbursements: Reimbursement[] = [
@@ -128,12 +196,14 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
 
   // Filter reimbursements based on user role and current user
   const filterReimbursements = (claims: Reimbursement[]) => {
-    if (!user) return [];
+    // During development, show all claims if there's no user
+    if (!user) return claims;
+    
     if (userRole === "admin" || userRole === "hr") {
       return claims; // Admin and HR can see all claims
     }
     // Other users can only see their own claims
-    return claims.filter(claim => claim.user.toLowerCase() === user.name.toLowerCase());
+    return claims.filter(claim => claim.user.toLowerCase() === (user?.name || '').toLowerCase());
   };
 
   const fetchReimbursements = async () => {
@@ -219,34 +289,13 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
           title: "Success",
           description: "Reimbursement rejected and removed",
         });
-      } else {
-        // For approved reimbursements, update status
-        const response = await fetch(`${API_ENDPOINTS.REIMBURSEMENTS}/${id}/status`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ status: newStatus }),
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(
-            errorData?.message || 
-            `Failed to update status (HTTP ${response.status})`
-          );
+      } else if (newStatus === "approved") {
+        // For approvals, show the charge to dialog
+        const reimbursement = reimbursements.find(r => r.id === id);
+        if (reimbursement) {
+          setSelectedReimbursement(reimbursement);
+          setShowApprovalDialog(true);
         }
-
-        const updatedReimbursement = await response.json();
-        setReimbursements(prev => 
-          prev.map(r => r.id === id ? { ...r, status: newStatus } : r)
-        );
-
-        toast({
-          title: "Success",
-          description: "Reimbursement approved successfully",
-        });
       }
     } catch (error) {
       console.error('Status update error:', error);
@@ -255,6 +304,69 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
         description: error instanceof Error ? error.message : "Failed to update reimbursement status",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleApproveWithCharge = async (reimbursementId: string, chargedTo: string) => {
+    try {
+      // First update the reimbursement status
+      const statusResponse = await fetch(`${API_ENDPOINTS.REIMBURSEMENTS}/${reimbursementId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ status: 'approved', chargedTo }),
+      });
+
+      if (!statusResponse.ok) {
+        throw new Error(`Failed to update reimbursement status (HTTP ${statusResponse.status})`);
+      }
+
+      // Create corresponding expense entry
+      const reimbursement = reimbursements.find(r => r.id === reimbursementId);
+      if (!reimbursement) throw new Error('Reimbursement not found');
+
+      const expenseResponse = await fetch(API_ENDPOINTS.EXPENSES, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: reimbursement.name,
+          amount: reimbursement.amount,
+          category: reimbursement.category,
+          description: reimbursement.description,
+          date: new Date().toISOString(),
+          type: reimbursement.type,
+          chargedTo: chargedTo,
+          reimbursementId: reimbursementId,
+          status: 'completed'
+        }),
+      });
+
+      if (!expenseResponse.ok) {
+        throw new Error(`Failed to create expense entry (HTTP ${expenseResponse.status})`);
+      }
+
+      // Update local state
+      setReimbursements(prev => 
+        prev.map(r => r.id === reimbursementId ? { ...r, status: 'approved', chargedTo } : r)
+      );
+
+      toast({
+        title: "Success",
+        description: "Reimbursement approved and expense entry created",
+      });
+    } catch (error) {
+      console.error('Approval error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to process approval",
+        variant: "destructive",
+      });
+      throw error; // Re-throw to be handled by the dialog
     }
   };
 
@@ -702,7 +814,10 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                                 size="sm" 
                                 variant="ghost"
                                 className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                onClick={() => handleStatusChange(reimbursement.id, "approved")}
+                                onClick={() => {
+                                  setSelectedReimbursement(reimbursement);
+                                  setShowApprovalDialog(true);
+                                }}
                                 title="Approve"
                               >
                                 <CheckCircle className="h-5 w-5" />
@@ -861,13 +976,24 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
           }}
           onConfirm={(reason) => {
             if (selectedReimbursement) {
-              handleStatusChange(selectedReimbursement.id, "rejected", reason);
+              handleStatusChange(selectedReimbursement.id, "rejected");
             }
             setShowRejectDialog(false);
             setSelectedReimbursement(null);
           }}
           reimbursementName={selectedReimbursement?.name || ""}
         />
+
+        {showApprovalDialog && selectedReimbursement && (
+          <ReimbursementApprovalDialog
+            open={showApprovalDialog}
+            onOpenChange={setShowApprovalDialog}
+            reimbursementId={selectedReimbursement.id}
+            amount={selectedReimbursement.amount}
+            description={selectedReimbursement.description || ""}
+            onApprove={handleApprovalConfirm}
+          />
+        )}
       </div>
     </div>
   );

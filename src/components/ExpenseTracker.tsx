@@ -6,13 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Clock, CheckCircle, XCircle, Eye, Download } from "lucide-react";
+import { Search, Plus, Clock, Eye, Download, Trash2 } from "lucide-react";
 import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
 import { AddExpenseSheet } from "./AddExpenseSheet";
-import { RejectExpenseDialog } from "./RejectExpenseDialog";
 import { useToast } from "@/hooks/use-toast";
-import { updateExpenseStatus } from "@/services/expenses";
-import { createNotification } from "@/services/notifications";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Calendar } from "lucide-react";
@@ -138,6 +135,41 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     setIsAddingNew(false);
   };
 
+  const handleDeleteExpense = async (expenseId: string) => {
+    try {
+      setIsProcessing(true);
+      
+      const response = await fetch(`${API_ENDPOINTS.EXPENSES}/${expenseId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete expense');
+      }
+
+      // Remove from local state
+      setExpenses(prev => prev.filter(exp => exp.id !== expenseId));
+
+      toast({
+        title: "Success",
+        description: "Expense deleted successfully",
+      });
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete expense",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleExportCSV = () => {
     if (filteredExpenses.length === 0) {
       toast({
@@ -184,93 +216,9 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     });
   };
 
-  const handleApproveExpense = async (expense: Expense) => {
-    try {
-      setIsProcessing(true);
-      
-      // Update expense status
-      const updatedExpense = await updateExpenseStatus(expense.id, 'approved');
-      
-      // Update local state
-      setExpenses(prev => prev.map(exp => 
-        exp.id === expense.id ? { ...exp, status: 'approved' } : exp
-      ));
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
 
-      // Create notification for the employee
-      await createNotification({
-        userId: expense.user, // Using 'user' property from the context
-        title: "Expense Approved",
-        message: `Your expense "${expense.name}" for $${expense.amount} has been approved.`,
-        type: 'success',
-        relatedEntityType: 'expense',
-        relatedEntityId: expense.id
-      });
-
-      toast({
-        title: "Success",
-        description: "Expense approved successfully",
-      });
-    } catch (error) {
-      console.error('Approval error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to approve expense",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleRejectExpense = (expense: Expense) => {
-    setSelectedExpense(expense);
-    setShowRejectDialog(true);
-  };
-
-  const handleConfirmReject = async (reason: string) => {
-    if (!selectedExpense) return;
-
-    try {
-      setIsProcessing(true);
-      
-      // Update expense status with rejection reason
-      await updateExpenseStatus(selectedExpense.id, 'rejected', reason);
-      
-      // Update local state
-      setExpenses(prev => prev.map(exp => 
-        exp.id === selectedExpense.id 
-          ? { ...exp, status: 'rejected', rejection_reason: reason } 
-          : exp
-      ));
-
-      // Create notification for the employee
-      await createNotification({
-        userId: selectedExpense.user, // Using 'user' property from the context
-        title: "Expense Rejected",
-        message: `Your expense "${selectedExpense.name}" for $${selectedExpense.amount} has been rejected. Reason: ${reason}`,
-        type: 'error',
-        relatedEntityType: 'expense',
-        relatedEntityId: selectedExpense.id
-      });
-
-      toast({
-        title: "Success",
-        description: "Expense rejected and employee notified",
-      });
-
-      setShowRejectDialog(false);
-      setSelectedExpense(null);
-    } catch (error) {
-      console.error('Rejection error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to reject expense",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  // Delete function replaces approve/reject functionality
 
   const filteredExpenses = (expenses || []).filter(expense => {
     const matchesSearch = expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -447,29 +395,17 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          {expense.status === "pending" && (userRole === "hr" || userRole === "admin") && (
-                            <>
-                              <Button 
-                                size="sm" 
-                                variant="ghost"
-                                className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                onClick={() => handleApproveExpense(expense)}
-                                disabled={isProcessing}
-                                title="Approve"
-                              >
-                                <CheckCircle className="h-5 w-5" />
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="ghost"
-                                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => handleRejectExpense(expense)}
-                                disabled={isProcessing}
-                                title="Reject"
-                              >
-                                <XCircle className="h-5 w-5" />
-                              </Button>
-                            </>
+                          {userRole === "admin" && (
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handleDeleteExpense(expense.id)}
+                              disabled={isProcessing}
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           )}
                         </div>
                       </TableCell>
@@ -490,16 +426,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
         isOpen={isAddingNew}
         onClose={() => setIsAddingNew(false)}
         onSubmit={handleSaveNew}
-      />
-      <RejectExpenseDialog
-        isOpen={showRejectDialog}
-        onClose={() => {
-          setShowRejectDialog(false);
-          setSelectedExpense(null);
-        }}
-        onConfirm={handleConfirmReject}
-        expenseName={selectedExpense?.name || ""}
-        isLoading={isProcessing}
       />
     </div>
   );

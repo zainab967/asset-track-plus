@@ -63,18 +63,7 @@ export function SubmitExpenseDialog() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="chargedTo">Charged To</Label>
-              <Select required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select charged to" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="one-hub-etihad">One Hub Etihad</SelectItem>
-                  <SelectItem value="team-web">Team Web</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Charged To field removed from employee view */}
             
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
