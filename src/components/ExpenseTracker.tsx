@@ -198,12 +198,12 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
       // Create notification for the employee
       await createNotification({
-        user_id: expense.user, // Using 'user' property from the context
+        userId: expense.user, // Using 'user' property from the context
         title: "Expense Approved",
         message: `Your expense "${expense.name}" for $${expense.amount} has been approved.`,
         type: 'success',
-        related_entity_type: 'expense',
-        related_entity_id: expense.id
+        relatedEntityType: 'expense',
+        relatedEntityId: expense.id
       });
 
       toast({
@@ -245,12 +245,12 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
       // Create notification for the employee
       await createNotification({
-        user_id: selectedExpense.user, // Using 'user' property from the context
+        userId: selectedExpense.user, // Using 'user' property from the context
         title: "Expense Rejected",
         message: `Your expense "${selectedExpense.name}" for $${selectedExpense.amount} has been rejected. Reason: ${reason}`,
         type: 'error',
-        related_entity_type: 'expense',
-        related_entity_id: selectedExpense.id
+        relatedEntityType: 'expense',
+        relatedEntityId: selectedExpense.id
       });
 
       toast({

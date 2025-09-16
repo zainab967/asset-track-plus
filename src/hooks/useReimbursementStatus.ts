@@ -10,7 +10,7 @@ interface UseReimbursementStatus {
   handleStatusChange: (id: string, newStatus: "approved" | "rejected", rejectionReason?: string) => Promise<void>;
 }
 
-export function useReimbursementStatus(reimbursements: any[], setReimbursements: (reimbursements: any[]) => void): UseReimbursementStatus {
+export function useReimbursementStatus(reimbursements: any[], setReimbursements: React.Dispatch<React.SetStateAction<any[]>>): UseReimbursementStatus {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [selectedReimbursement, setSelectedReimbursement] = useState<any | null>(null);
   const { toast } = useToast();
@@ -38,7 +38,7 @@ export function useReimbursementStatus(reimbursements: any[], setReimbursements:
       }
 
       // Update local state
-      setReimbursements((prev: any[]) =>
+      setReimbursements(prev =>
         prev.map(r => r.id === id ? { ...r, status: newStatus } : r)
       );
 

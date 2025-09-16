@@ -1,72 +1,70 @@
-import { supabase } from "@/integrations/supabase/client";
+import { API_ENDPOINTS, API_CONFIG } from "@/config/api";
 
 export interface Notification {
   id: string;
-  user_id: string;
+  userId: string;
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
-  is_read: boolean;
-  related_entity_type?: string;
-  related_entity_id?: string;
-  created_at: string;
-  updated_at: string;
+  isRead: boolean;
+  relatedEntityType?: string;
+  relatedEntityId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export async function createNotification(data: {
-  user_id: string;
+  userId: string;
   title: string;
   message: string;
   type?: 'info' | 'success' | 'warning' | 'error';
-  related_entity_type?: string;
-  related_entity_id?: string;
-}) {
-  const { data: notification, error } = await supabase
-    .from('notifications')
-    .insert([data])
-    .select()
-    .single();
+  relatedEntityType?: string;
+  relatedEntityId?: string;
+}): Promise<Notification> {
+  const response = await fetch(API_ENDPOINTS.NOTIFICATIONS, {
+    method: 'POST',
+    ...API_CONFIG,
+    body: JSON.stringify(data)
+  });
 
-  if (error) {
-    throw new Error(`Failed to create notification: ${error.message}`);
+  if (!response.ok) {
+    throw new Error(`Failed to create notification: ${response.statusText}`);
   }
 
-  return notification;
+  return response.json();
 }
 
-export async function getUserNotifications(userId: string) {
-  const { data: notifications, error } = await supabase
-    .from('notifications')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+export async function getUserNotifications(userId: string): Promise<Notification[]> {
+  const response = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/user/${userId}`, {
+    method: 'GET',
+    ...API_CONFIG
+  });
 
-  if (error) {
-    throw new Error(`Failed to fetch notifications: ${error.message}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch notifications: ${response.statusText}`);
   }
 
-  return notifications;
+  return response.json();
 }
 
-export async function markNotificationAsRead(notificationId: string) {
-  const { error } = await supabase
-    .from('notifications')
-    .update({ is_read: true })
-    .eq('id', notificationId);
+export async function markNotificationAsRead(notificationId: string): Promise<void> {
+  const response = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/${notificationId}/read`, {
+    method: 'PUT',
+    ...API_CONFIG
+  });
 
-  if (error) {
-    throw new Error(`Failed to mark notification as read: ${error.message}`);
+  if (!response.ok) {
+    throw new Error(`Failed to mark notification as read: ${response.statusText}`);
   }
 }
 
-export async function markAllNotificationsAsRead(userId: string) {
-  const { error } = await supabase
-    .from('notifications')
-    .update({ is_read: true })
-    .eq('user_id', userId)
-    .eq('is_read', false);
+export async function markAllNotificationsAsRead(userId: string): Promise<void> {
+  const response = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}/user/${userId}/read-all`, {
+    method: 'PUT',
+    ...API_CONFIG
+  });
 
-  if (error) {
-    throw new Error(`Failed to mark all notifications as read: ${error.message}`);
+  if (!response.ok) {
+    throw new Error(`Failed to mark all notifications as read: ${response.statusText}`);
   }
 }

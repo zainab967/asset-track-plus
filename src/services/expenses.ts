@@ -1,68 +1,67 @@
-import { supabase } from "@/integrations/supabase/client";
+import { API_ENDPOINTS, API_CONFIG } from "@/config/api";
 
 export interface Expense {
   id: string;
-  user_id: string;
+  userId: string;
   name: string;
   amount: number;
   building: string;
   category: string;
-  charged_to?: string;
+  chargedTo?: string;
   date: string;
   status: 'pending' | 'approved' | 'rejected';
   type?: string;
-  rejection_reason?: string;
-  created_at: string;
-  updated_at: string;
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export async function getAllExpenses() {
-  const { data: expenses, error } = await supabase
-    .from('expenses')
-    .select('*')
-    .order('created_at', { ascending: false });
+export async function getAllExpenses(): Promise<Expense[]> {
+  const response = await fetch(API_ENDPOINTS.EXPENSES, {
+    method: 'GET',
+    ...API_CONFIG
+  });
 
-  if (error) {
-    throw new Error(`Failed to fetch expenses: ${error.message}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch expenses: ${response.statusText}`);
   }
 
-  return expenses;
+  return response.json();
 }
 
-export async function createExpense(data: Omit<Expense, 'id' | 'created_at' | 'updated_at'>) {
-  const { data: expense, error } = await supabase
-    .from('expenses')
-    .insert([data])
-    .select()
-    .single();
+export async function createExpense(data: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>): Promise<Expense> {
+  const response = await fetch(API_ENDPOINTS.EXPENSES, {
+    method: 'POST',
+    ...API_CONFIG,
+    body: JSON.stringify(data)
+  });
 
-  if (error) {
-    throw new Error(`Failed to create expense: ${error.message}`);
+  if (!response.ok) {
+    throw new Error(`Failed to create expense: ${response.statusText}`);
   }
 
-  return expense;
+  return response.json();
 }
 
 export async function updateExpenseStatus(
   expenseId: string, 
   status: 'approved' | 'rejected',
   rejectionReason?: string
-) {
+): Promise<Expense> {
   const updateData: any = { status };
   if (status === 'rejected' && rejectionReason) {
-    updateData.rejection_reason = rejectionReason;
+    updateData.rejectionReason = rejectionReason;
   }
 
-  const { data: expense, error } = await supabase
-    .from('expenses')
-    .update(updateData)
-    .eq('id', expenseId)
-    .select()
-    .single();
+  const response = await fetch(`${API_ENDPOINTS.EXPENSE_BY_ID(expenseId)}/status`, {
+    method: 'PUT',
+    ...API_CONFIG,
+    body: JSON.stringify(updateData)
+  });
 
-  if (error) {
-    throw new Error(`Failed to update expense status: ${error.message}`);
+  if (!response.ok) {
+    throw new Error(`Failed to update expense status: ${response.statusText}`);
   }
 
-  return expense;
+  return response.json();
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS, API_CONFIG } from "@/config/api";
 
 export interface User {
   id: string;
@@ -13,35 +14,55 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Demo user - in production this would check actual auth state
-    const demoUser: User = {
-      id: "demo-user",
-      name: "Admin User",
-      email: "admin@company.com",
-      role: "Admin",
-      department: "IT"
-    };
-    
-    setUser(demoUser);
-    setLoading(false);
+    // Check if user is already logged in
+    checkAuthStatus();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // Demo implementation
-    const demoUser: User = {
-      id: "demo-user",
-      name: "Demo User",
-      email,
-      role: "Employee",
-      department: "General"
-    };
-    
-    setUser(demoUser);
-    return demoUser;
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.LOGIN}/status`, {
+        method: 'GET',
+        ...API_CONFIG
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      }
+    } catch (error) {
+      console.log('Not authenticated');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
+  const login = async (email: string, password: string): Promise<User> => {
+    const response = await fetch(API_ENDPOINTS.LOGIN, {
+      method: 'POST',
+      ...API_CONFIG,
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      throw new Error('Login failed');
+    }
+
+    const userData = await response.json();
+    setUser(userData);
+    return userData;
+  };
+
+  const logout = async () => {
+    try {
+      await fetch(API_ENDPOINTS.LOGOUT, {
+        method: 'POST',
+        ...API_CONFIG
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+    }
   };
 
   const updateUserRole = (role: User["role"]) => {
