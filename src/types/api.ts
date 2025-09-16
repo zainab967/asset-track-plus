@@ -192,3 +192,42 @@ export interface CreateComplaintSuggestionDto {
     priority: Priority;
     departmentId: string;
 }
+
+export interface AssetAssignmentDto {
+    id: string;
+    assetId: string;
+    assetName: string;
+    userId: string;
+    userName: string;
+    assignedDate: string;
+    returnedDate?: string;
+    notes?: string;
+    isActive: boolean;
+}
+
+export interface AssetMaintenanceLogDto {
+    id: string;
+    assetId: string;
+    maintenanceType: MaintenanceType;
+    description: string;
+    cost: number;
+    performedBy: string;
+    performedByUser: string;
+    performedDate: string;
+    nextScheduledDate?: string;
+    notes?: string;
+    createdAt: string;
+}
+
+export interface AssetLogDto {
+    id: string;
+    name: string;
+    currentUser?: string;
+    assignDate?: string;
+    purchaseDate: string;
+    purchasePrice: number;
+    status: AssetStatus;
+    location: string;
+    assignments: AssetAssignmentDto[];
+    maintenanceLogs: AssetMaintenanceLogDto[];
+}

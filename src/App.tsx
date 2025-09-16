@@ -10,6 +10,7 @@ import { ExpenseProvider } from "@/contexts/ExpenseContext";
 import LedgerPage from "./pages/LedgerPage";
 import ExpensePage from "./pages/ExpensePage";
 import AssetPage from "./pages/AssetPage";
+import AssetLogsPage from "./pages/AssetLogsPage";
 import ReimbursementPage from "./pages/ReimbursementPage";
 import ComplaintsPage from "./pages/ComplaintsPage";
 import UserProfilePage from "./pages/UserProfilePage";
@@ -56,6 +57,11 @@ const App = () => {
                 <Route path="/assets" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
                     <AssetPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
+                  </AppLayout>
+                } />
+                <Route path="/assets/logs" element={
+                  <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
+                    <AssetLogsPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
                   </AppLayout>
                 } />
                 <Route path="/reimbursements" element={

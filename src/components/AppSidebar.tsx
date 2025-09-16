@@ -1,5 +1,6 @@
-import { BarChart3, Receipt, Package, MessageSquare, ChevronDown, CreditCard } from "lucide-react";
+import { BarChart3, Receipt, Package, MessageSquare, ChevronDown, CreditCard, FileText, ChevronRight } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useState } from "react";
 
 import {
   Sidebar,
@@ -10,9 +11,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // Logo will be created with CSS
 
@@ -25,6 +34,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+  const [assetsExpanded, setAssetsExpanded] = useState(currentPath.startsWith('/assets'));
 
   const navigationItems = [
     {
@@ -32,13 +42,6 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
       url: "/ledger",
       icon: BarChart3,
       allowedRoles: ["Admin", "Manager", "HR"]
-    },
-
-    {
-      title: "Assets",
-      url: "/assets", 
-      icon: Package,
-      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
     },
     {
       title: "Reimbursements",
@@ -54,7 +57,24 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
     }
   ];
 
+  const assetsItems = [
+    {
+      title: "Assets",
+      url: "/assets",
+      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
+    },
+    {
+      title: "Asset Logs",
+      url: "/assets/logs",
+      allowedRoles: ["Admin", "Manager", "HR"]
+    }
+  ];
+
   const accessibleItems = navigationItems.filter(item => 
+    item.allowedRoles.some(role => userRole.includes(role))
+  );
+
+  const accessibleAssetsItems = assetsItems.filter(item => 
     item.allowedRoles.some(role => userRole.includes(role))
   );
 
@@ -126,6 +146,53 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
                   </SidebarMenuItem>
                 );
               })}
+
+              {/* Assets Section */}
+              {accessibleAssetsItems.length > 0 && (
+                <Collapsible 
+                  open={assetsExpanded} 
+                  onOpenChange={setAssetsExpanded}
+                  className="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton 
+                        className={`flex items-center gap-2 py-1.5 rounded-md transition-all duration-200 overflow-hidden hover:shadow-md ${
+                          state === "expanded" ? "px-2 mx-0.5" : "justify-center w-full"
+                        }`}
+                      >
+                        <Package className={`flex-shrink-0 ${currentPath.startsWith('/assets') ? "text-primary" : "text-sidebar-foreground/70"} ${
+                          state === "expanded" ? "h-4 w-4" : "h-5 w-5"
+                        }`} />
+                        {state === "expanded" && (
+                          <>
+                            <span className="font-medium transition-shadow duration-200 truncate max-w-full">
+                              Assets
+                            </span>
+                            <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                          </>
+                        )}
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {accessibleAssetsItems.map((item) => {
+                          const active = isActive(item.url);
+                          return (
+                            <SidebarMenuSubItem key={item.title}>
+                              <SidebarMenuSubButton asChild isActive={active}>
+                                <NavLink to={item.url}>
+                                  <span>{item.title}</span>
+                                </NavLink>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
