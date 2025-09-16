@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/currency";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Clock, CheckCircle, XCircle, Save, X, Upload, FileText, Image, Eye, Plus } from "lucide-react";
@@ -12,6 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { API_ENDPOINTS, API_CONFIG } from "@/config/api";
 import { SubmitReimbursementDialog } from "@/components/SubmitReimbursementDialog";
+import { RejectReimbursementDialog } from "@/components/RejectReimbursementDialog";
+import { useReimbursementStatus } from "@/hooks/useReimbursementStatus";
 
 interface Reimbursement {
   id: string;
@@ -45,6 +48,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
   const [selectedReimbursement, setSelectedReimbursement] = useState<Reimbursement | null>(null);
   const [reimbursements, setReimbursements] = useState<Reimbursement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { handleStatusChange, showRejectDialog, setShowRejectDialog } = useReimbursementStatus(reimbursements, setReimbursements);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const { toast } = useToast();
 
@@ -677,7 +681,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                       <TableCell className="font-medium">{reimbursement.name}</TableCell>
                       <TableCell>{reimbursement.category}</TableCell>
                       <TableCell className="font-mono">
-                        ${reimbursement.amount.toLocaleString()}
+                        {formatCurrency(reimbursement.amount)}
                       </TableCell>
                       <TableCell>
                         {getTypeBadge(reimbursement.type)}
@@ -692,6 +696,31 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                       <TableCell>{reimbursement.building}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 justify-end">
+                          {userRole === "admin" && reimbursement.status === "pending" && (
+                            <>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                onClick={() => handleStatusChange(reimbursement.id, "approved")}
+                                title="Approve"
+                              >
+                                <CheckCircle className="h-5 w-5" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => {
+                                  setSelectedReimbursement(reimbursement);
+                                  setShowRejectDialog(true);
+                                }}
+                                title="Reject"
+                              >
+                                <XCircle className="h-5 w-5" />
+                              </Button>
+                            </>
+                          )}
                           <Button
                             size="sm"
                             variant="ghost"
@@ -703,34 +732,6 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                           </Button>
                         </div>
                       </TableCell>
-                      {(userRole === "hr" || userRole === "admin" || userRole === "manager") && (
-                        <TableCell>
-                          <div className="flex gap-2">
-                            {reimbursement.status === "pending" && (
-                              <>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                  onClick={() => handleStatusUpdate(reimbursement.id, "approved")}
-                                  title="Approve"
-                                >
-                                  <CheckCircle className="h-5 w-5" />
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  onClick={() => handleStatusUpdate(reimbursement.id, "rejected")}
-                                  title="Reject"
-                                >
-                                  <XCircle className="h-5 w-5" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </TableCell>
-                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -796,7 +797,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Amount</label>
-                    <p className="font-mono text-lg">${selectedReimbursement.amount.toLocaleString()}</p>
+                    <p className="font-mono text-lg">{formatCurrency(selectedReimbursement.amount)}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Type</label>
@@ -851,6 +852,22 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
             )}
           </DialogContent>
         </Dialog>
+
+        <RejectReimbursementDialog
+          isOpen={showRejectDialog}
+          onClose={() => {
+            setShowRejectDialog(false);
+            setSelectedReimbursement(null);
+          }}
+          onConfirm={(reason) => {
+            if (selectedReimbursement) {
+              handleStatusChange(selectedReimbursement.id, "rejected", reason);
+            }
+            setShowRejectDialog(false);
+            setSelectedReimbursement(null);
+          }}
+          reimbursementName={selectedReimbursement?.name || ""}
+        />
       </div>
     </div>
   );

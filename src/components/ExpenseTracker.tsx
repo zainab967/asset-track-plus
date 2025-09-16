@@ -380,13 +380,12 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
 
                   <Button 
                     onClick={handleExportCSV} 
-                    size="sm" 
+                    size="icon"
                     variant="outline"
-                    className="flex items-center gap-2"
+                    title="Export CSV"
                     disabled={filteredExpenses.length === 0}
                   >
                     <Download className="h-4 w-4" />
-                    Export CSV
                   </Button>
                   
                   <Button 

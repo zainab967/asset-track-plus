@@ -31,4 +31,7 @@ export const API_ENDPOINTS = {
   // Assets
   ASSETS: `${API_BASE_URL}/assets`,
   ASSET_BY_ID: (id: string) => `${API_BASE_URL}/assets/${id}`,
+
+  // Notifications
+  NOTIFICATIONS: `${API_BASE_URL}/notifications`,
 };

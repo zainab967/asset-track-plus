@@ -66,9 +66,9 @@ export function SubmitReimbursementDialog({
   };
 
   const recurringReimbursements = [
-    { name: "Monthly internet allowance", category: "Utilities", amount: 80, building: "All", type: "other" },
-    { name: "Quarterly health checkup", category: "Healthcare", amount: 300, building: "All", type: "medical" },
-    { name: "Work from home setup", category: "Equipment", amount: 500, building: "Etihad Office", type: "equipment" }
+    { name: "Monthly internet allowance", category: "Utilities", amount: 8000, building: "All", type: "other" },
+    { name: "Quarterly health checkup", category: "Healthcare", amount: 30000, building: "All", type: "medical" },
+    { name: "Work from home setup", category: "Equipment", amount: 50000, building: "Etihad Office", type: "equipment" }
   ];
 
   const handleSelectRecurring = (value: string) => {
@@ -159,13 +159,13 @@ export function SubmitReimbursementDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount">Amount (PKR)</Label>
               <Input
                 id="amount"
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
+                placeholder="Enter amount in PKR"
               />
             </div>
           </div>
