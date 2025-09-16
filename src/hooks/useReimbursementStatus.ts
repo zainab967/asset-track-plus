@@ -38,7 +38,7 @@ export function useReimbursementStatus(reimbursements: any[], setReimbursements:
       }
 
       // Update local state
-      setReimbursements(prev =>
+      setReimbursements((prev: any[]) =>
         prev.map(r => r.id === id ? { ...r, status: newStatus } : r)
       );
 
