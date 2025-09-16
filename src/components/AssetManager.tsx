@@ -46,38 +46,100 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
     {
       id: "1",
       name: "MacBook Pro 16\"",
-      assetid: "l-3232",
+      assetid: "LAP-3232",
       category: "Laptop",
-      assignedTo: "John Doe",
+      assignedTo: currentUser,
       building: "Etihad Office",
       status: "assigned",
       value: 2499,
       purchaseDate: "2023-06-15",
       condition: "excellent",
-      description: "High-performance laptop for development work",
-      responses: [
-        {
-          id: "r1",
-          text: "Asset assigned to John Doe for development project",
-          createdAt: "2023-06-15T10:00:00Z",
-          user: "IT Manager",
-          role: "Admin"
-        },
-        {
-          id: "r2", 
-          text: "Regular maintenance completed, all systems running optimally",
-          createdAt: "2023-08-15T14:30:00Z",
-          user: "Tech Support",
-          role: "Maintenance"
-        }
-      ]
+      description: "High-performance laptop for development work"
+    },
+    {
+      id: "2",
+      name: "Dell XPS 15",
+      assetid: "LAP-3233",
+      category: "Laptop",
+      assignedTo: "Sarah Wilson",
+      building: "Etihad Office",
+      status: "assigned",
+      value: 1899,
+      purchaseDate: "2023-07-20",
+      condition: "good",
+      description: "Development workstation"
+    },
+    {
+      id: "3",
+      name: "iPhone 14 Pro",
+      assetid: "MOB-1001",
+      category: "Mobile",
+      assignedTo: null,
+      building: "Etihad Office",
+      status: "unassigned",
+      value: 999,
+      purchaseDate: "2023-09-01",
+      condition: "excellent",
+      description: "Company mobile device"
+    },
+    {
+      id: "4",
+      name: "HP LaserJet Pro",
+      assetid: "PRN-401",
+      category: "Printer",
+      assignedTo: null,
+      building: "Abdalian Office",
+      status: "maintenance",
+      value: 449,
+      purchaseDate: "2023-04-10",
+      condition: "fair",
+      description: "Office printer - paper jam issue"
+    },
+    {
+      id: "5",
+      name: "iPad Pro 12.9\"",
+      assetid: "TAB-2001",
+      category: "Tablet",
+      assignedTo: currentUser,
+      building: "Etihad Office",
+      status: "assigned",
+      value: 1099,
+      purchaseDate: "2023-08-01",
+      condition: "excellent",
+      description: "Design and presentation tablet"
+    },
+    {
+      id: "6",
+      name: "Dell UltraSharp Monitor",
+      assetid: "MON-5001",
+      category: "Monitor",
+      assignedTo: null,
+      building: "Etihad Office",
+      status: "unassigned",
+      value: 699,
+      purchaseDate: "2023-07-15",
+      condition: "good",
+      description: "27-inch 4K monitor"
+    },
+    {
+      id: "7",
+      name: "Surface Studio",
+      assetid: "PC-6001",
+      category: "Desktop",
+      assignedTo: null,
+      building: "Abdalian Office",
+      status: "maintenance",
+      value: 3499,
+      purchaseDate: "2023-03-20",
+      condition: "fair",
+      description: "Graphics workstation - GPU issues"
     }
   ];
 
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [buildingFilter, setBuildingFilter] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState("overall");
+  const [activeTab, setActiveTab] = useState("assigned");
   const [viewMode, setViewMode] = useState<"cards" | "list">("list");
   const [sortBy, setSortBy] = useState<"all" | "assigned" | "unassigned" | "maintenance">("all");
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
@@ -216,15 +278,13 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
-          <TabsTrigger value="overall">All Assets ({assets.length})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
           <TabsTrigger value="assigned">Assigned ({assetCounts.assigned})</TabsTrigger>
           <TabsTrigger value="unassigned">Available ({assetCounts.unassigned})</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance ({assetCounts.maintenance})</TabsTrigger>
           <TabsTrigger value="my-assets">My Assets</TabsTrigger>
         </TabsList>
 
-        {/* Assets Table */}
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="relative w-full overflow-auto">
@@ -244,46 +304,74 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAssets.map((asset) => (
-                    <TableRow key={asset.id} className="hover:bg-muted/50 transition-colors">
-                      <TableCell className="font-mono text-sm font-medium">{asset.assetid}</TableCell>
-                      <TableCell className="font-medium">{asset.name}</TableCell>
-                      <TableCell>{asset.category}</TableCell>
-                      <TableCell>{asset.assignedTo || "—"}</TableCell>
-                      <TableCell>{asset.building}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(asset.status)}
-                          <span className="capitalize">{asset.status}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className={getConditionColor(asset.condition)}>
-                          {asset.condition}
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-mono">{formatCurrency(asset.value)}</TableCell>
-                      <TableCell>{new Date(asset.purchaseDate).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              setSelectedAsset(asset);
-                              setShowDetailsDialog(true);
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {filteredAssets.length === 0 && (
+                  {filteredAssets
+                    .filter(asset => {
+                      switch (activeTab) {
+                        case "assigned":
+                          return asset.status === "assigned" && asset.assignedTo !== currentUser;
+                        case "unassigned":
+                          return asset.status === "unassigned";
+                        case "maintenance":
+                          return asset.status === "maintenance";
+                        case "my-assets":
+                          return asset.assignedTo === currentUser;
+                        default:
+                          return true;
+                      }
+                    })
+                    .map((asset) => (
+                      <TableRow key={asset.id} className="hover:bg-muted/50 transition-colors">
+                        <TableCell className="font-mono text-sm font-medium">{asset.assetid}</TableCell>
+                        <TableCell className="font-medium">{asset.name}</TableCell>
+                        <TableCell>{asset.category}</TableCell>
+                        <TableCell>{asset.assignedTo || "—"}</TableCell>
+                        <TableCell>{asset.building}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(asset.status)}
+                            <span className="capitalize">{asset.status}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className={getConditionColor(asset.condition)}>
+                            {asset.condition}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-mono">{formatCurrency(asset.value)}</TableCell>
+                        <TableCell>{new Date(asset.purchaseDate).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 justify-end">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setSelectedAsset(asset);
+                                setShowDetailsDialog(true);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  {filteredAssets.filter(asset => {
+                    switch (activeTab) {
+                      case "assigned":
+                        return asset.status === "assigned" && asset.assignedTo !== currentUser;
+                      case "unassigned":
+                        return asset.status === "unassigned";
+                      case "maintenance":
+                        return asset.status === "maintenance";
+                      case "my-assets":
+                        return asset.assignedTo === currentUser;
+                      default:
+                        return true;
+                    }
+                  }).length === 0 && (
                     <TableRow>
                       <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
-                        No assets found matching your criteria
+                        No assets found
                       </TableCell>
                     </TableRow>
                   )}

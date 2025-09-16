@@ -59,11 +59,6 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
 
   const assetsItems = [
     {
-      title: "Assets",
-      url: "/assets",
-      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
-    },
-    {
       title: "Asset Logs",
       url: "/assets/logs",
       allowedRoles: ["Admin", "Manager", "HR"]
@@ -156,23 +151,25 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
                 >
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton 
-                        className={`flex items-center gap-2 py-1.5 rounded-md transition-all duration-200 overflow-hidden hover:shadow-md ${
-                          state === "expanded" ? "px-2 mx-0.5" : "justify-center w-full"
-                        }`}
-                      >
-                        <Package className={`flex-shrink-0 ${currentPath.startsWith('/assets') ? "text-primary" : "text-sidebar-foreground/70"} ${
-                          state === "expanded" ? "h-4 w-4" : "h-5 w-5"
-                        }`} />
-                        {state === "expanded" && (
-                          <>
-                            <span className="font-medium transition-shadow duration-200 truncate max-w-full">
-                              Assets
-                            </span>
-                            <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                          </>
-                        )}
-                      </SidebarMenuButton>
+                      <NavLink to="/assets">
+                        <SidebarMenuButton 
+                          className={`flex items-center gap-2 py-1.5 rounded-md transition-all duration-200 overflow-hidden hover:shadow-md ${
+                            state === "expanded" ? "px-2 mx-0.5" : "justify-center w-full"
+                          }`}
+                        >
+                          <Package className={`flex-shrink-0 ${currentPath.startsWith('/assets') ? "text-primary" : "text-sidebar-foreground/70"} ${
+                            state === "expanded" ? "h-4 w-4" : "h-5 w-5"
+                          }`} />
+                          {state === "expanded" && (
+                            <>
+                              <span className="font-medium transition-shadow duration-200 truncate max-w-full">
+                                Assets
+                              </span>
+                              <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </>
+                          )}
+                        </SidebarMenuButton>
+                      </NavLink>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
