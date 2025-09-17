@@ -32,9 +32,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 interface FinancialAnalyticsDashboardProps {
   className?: string;
+  compact?: boolean;
 }
 
-export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDashboardProps = {}) {
+export function FinancialAnalyticsDashboard({ className, compact = false }: FinancialAnalyticsDashboardProps = {}) {
   const [activeTab, setActiveTab] = useState("reserves");
 
   const getChartData = () => {
@@ -79,19 +80,23 @@ export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDas
   const chartConfig = getChartConfig();
 
   return (
-    <Card className="w-full hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
-      <CardHeader className="space-y-4 pb-6">
-        <div className="space-y-2">
-          <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Financial Analytics
-          </CardTitle>
-          <p className="text-muted-foreground text-sm">
-            Comprehensive view of your financial performance
-          </p>
-        </div>
+    <Card className={`w-full hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 ${className}`}>
+      <CardHeader className={compact ? "py-2 px-4" : "space-y-4 pb-6"}>
+        {!compact ? (
+          <div className="space-y-2">
+            <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Financial Analytics
+            </CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Comprehensive view of your financial performance
+            </p>
+          </div>
+        ) : (
+          <CardTitle className="text-sm font-medium">Financial Analytics</CardTitle>
+        )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-muted/30 p-1 rounded-lg">
+          <TabsList className={`grid w-full grid-cols-3 bg-muted/20 ${compact ? 'p-0 text-[10px] h-7' : 'p-1'} rounded-md`}>
             <TabsTrigger 
               value="reserves" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md transition-all"
@@ -115,7 +120,7 @@ export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDas
       </CardHeader>
 
       <CardContent className="pb-6">
-        <div className="h-80 w-full">
+        <div className={compact ? "h-32 w-full" : "h-80 w-full"}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <defs>
@@ -171,32 +176,49 @@ export function FinancialAnalyticsDashboard({ className }: FinancialAnalyticsDas
         </div>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-border">
-          <div className="text-center space-y-1">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Current Month</p>
-            <p className="text-lg font-semibold" style={{ color: chartConfig.primary.color }}>
-              {formatCurrency(chartData[chartData.length - 1]?.primary)}
-            </p>
+        {compact ? (
+          <div className="flex justify-between items-center mt-2 pt-2 border-t border-border">
+            <div className="text-xs">
+              <span className="text-muted-foreground">Current: </span>
+              <span className="font-medium" style={{ color: chartConfig.primary.color }}>
+                {formatCurrency(chartData[chartData.length - 1]?.primary)}
+              </span>
+            </div>
+            <div className="text-xs">
+              <span className="text-success font-medium">
+                +{(((chartData[chartData.length - 1]?.primary - chartData[0]?.primary) / chartData[0]?.primary) * 100).toFixed(1)}%
+              </span>
+              <span className="text-muted-foreground"> growth</span>
+            </div>
           </div>
-          <div className="text-center space-y-1">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">vs Expenses</p>
-            <p className="text-lg font-semibold" style={{ color: chartConfig.secondary.color }}>
-              {formatCurrency(chartData[chartData.length - 1]?.secondary)}
-            </p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-border">
+            <div className="text-center space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Current Month</p>
+              <p className="text-lg font-semibold" style={{ color: chartConfig.primary.color }}>
+                {formatCurrency(chartData[chartData.length - 1]?.primary)}
+              </p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">vs Expenses</p>
+              <p className="text-lg font-semibold" style={{ color: chartConfig.secondary.color }}>
+                {formatCurrency(chartData[chartData.length - 1]?.secondary)}
+              </p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Growth</p>
+              <p className="text-lg font-semibold text-success">
+                +{(((chartData[chartData.length - 1]?.primary - chartData[0]?.primary) / chartData[0]?.primary) * 100).toFixed(1)}%
+              </p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Net</p>
+              <p className="text-lg font-semibold text-primary">
+                {formatCurrency(chartData[chartData.length - 1]?.primary - chartData[chartData.length - 1]?.secondary)}
+              </p>
+            </div>
           </div>
-          <div className="text-center space-y-1">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Growth</p>
-            <p className="text-lg font-semibold text-success">
-              +{(((chartData[chartData.length - 1]?.primary - chartData[0]?.primary) / chartData[0]?.primary) * 100).toFixed(1)}%
-            </p>
-          </div>
-          <div className="text-center space-y-1">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Net</p>
-            <p className="text-lg font-semibold text-primary">
-              {formatCurrency(chartData[chartData.length - 1]?.primary - chartData[chartData.length - 1]?.secondary)}
-            </p>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

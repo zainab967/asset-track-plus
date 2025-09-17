@@ -101,58 +101,52 @@ export function RecentActivity({ className, userRole = "employee" }: RecentActiv
   };
 
   return (
-    <Card className={cn("hover:shadow-md hover:shadow-primary/20 transition-shadow h-full", className)}>
-      <CardHeader className="space-y-1 pb-3 sm:pb-4">
-        <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
-          <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+    <Card className={cn("hover:shadow-md hover:shadow-primary/20 transition-shadow h-full flex flex-col", className)}>
+      <CardHeader className="space-y-0.5 pb-2 flex-shrink-0">
+        <CardTitle className="text-base font-medium flex items-center gap-1">
+          <Clock className="h-4 w-4 text-primary flex-shrink-0" />
           <span className="truncate">Recent Activity</span>
         </CardTitle>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Latest actions across your organization
-        </p>
       </CardHeader>
-      <CardContent className="space-y-2 sm:space-y-3 p-3 sm:p-6">
-        {activities.map((activity) => (
+      <CardContent className="space-y-1 p-3 flex-grow overflow-auto">
+        {activities.slice(0, 3).map((activity) => (
           <Button
             key={activity.id}
             variant="ghost"
-            className="w-full h-auto p-2 sm:p-3 justify-start hover:bg-muted/50 transition-colors"
+            className="w-full h-auto p-2 justify-start hover:bg-muted/50 transition-colors"
             onClick={() => handleActivityClick(activity.route)}
           >
-            <div className="flex items-start gap-2 sm:gap-3 w-full text-left">
-              <div className="flex-shrink-0 mt-0.5 sm:mt-1">
-                <Badge variant={getActivityBadgeVariant(activity.type)} className="h-5 w-5 sm:h-6 sm:w-6 p-0 flex items-center justify-center">
+            <div className="flex items-center gap-2 w-full text-left">
+              <div className="flex-shrink-0">
+                <Badge variant={getActivityBadgeVariant(activity.type)} className="h-5 w-5 p-0 flex items-center justify-center">
                   {getActivityIcon(activity.type)}
                 </Badge>
               </div>
               
-              <div className="flex-1 min-w-0 space-y-0.5 sm:space-y-1 overflow-hidden">
-                <p className="text-xs sm:text-sm font-medium text-foreground leading-tight line-clamp-2">
-                  <UserNameDisplay 
-                    userName={activity.user} 
-                    currentUserRole={userRole}
-                    className="font-semibold text-primary"
-                  />
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <p className="text-xs font-medium text-foreground leading-tight truncate">
+                  <span className="font-semibold text-primary">{activity.user}</span>
                   {" "}
-                  <span className="break-words">{activity.action}</span>
-                </p>
-                <p className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
-                  <Clock className="h-3 w-3 flex-shrink-0" />
-                  <span className="truncate">{activity.timestamp}</span>
+                  <span className="truncate">{activity.action}</span>
                 </p>
               </div>
+              <p className="text-xs text-muted-foreground flex-shrink-0">
+                {activity.timestamp}
+              </p>
             </div>
           </Button>
         ))}
         
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="w-full mt-3 sm:mt-4 hover:shadow-md hover:shadow-primary/20 transition-shadow text-xs sm:text-sm"
-          onClick={() => navigate("/complaints")}
-        >
-          View All Activities
-        </Button>
+        <div className="mt-auto pt-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="w-full text-xs"
+            onClick={() => navigate("/complaints")}
+          >
+            View All
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

@@ -44,12 +44,6 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
       allowedRoles: ["Admin", "Manager", "HR"]
     },
     {
-      title: "Ledger",
-      url: "/ledger",
-      icon: FileText,
-      allowedRoles: ["Admin", "Manager", "HR"]
-    },
-    {
       title: "Reimbursements",
       url: "/reimbursements",
       icon: CreditCard,

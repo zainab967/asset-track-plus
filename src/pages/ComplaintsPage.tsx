@@ -422,9 +422,11 @@ export default function ComplaintsPage({ userRole = "employee" }: ComplaintsPage
                   </SelectContent>
                 </Select>
 
-                <Button onClick={() => setIsSubmitDialogOpen(true)} className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" /> Submit New
-                </Button>
+                {userRole !== "admin" && userRole !== "hr" && userRole !== "manager" && (
+                  <Button onClick={() => setIsSubmitDialogOpen(true)} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" /> Submit New
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>

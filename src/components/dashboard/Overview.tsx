@@ -1,12 +1,12 @@
 import { RecentActivity } from "@/components/RecentActivity";
-import { FinancialAnalyticsDashboard } from "@/components/FinancialAnalyticsDashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, AlertCircle, Calendar, Package, FileText, Wrench } from "lucide-react";
+import { Clock, AlertCircle, Calendar, Package, FileText, Wrench, ArrowRight } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { PKRIcon } from "@/components/ui/pkr-icon";
 import { useExpenses } from "@/contexts/ExpenseContext";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export function DashboardOverview() {
   const { expenses } = useExpenses();
@@ -19,6 +19,27 @@ export function DashboardOverview() {
     const expenseDate = new Date(expense.date);
     return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear;
   });
+  
+  // Calculate dynamic building summaries based on actual expense data
+  const calculateBuildingSummary = (buildingName: string) => {
+    const buildingExpenses = expenses.filter(expense => expense.building === buildingName);
+    const currentMonthBuildingExpenses = buildingExpenses.filter(expense => {
+      const expenseDate = new Date(expense.date);
+      return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear;
+    });
+    
+    const currentTotal = currentMonthBuildingExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+    return {
+      name: buildingName,
+      balance: currentTotal
+    };
+  };
+
+  const departments = [
+    calculateBuildingSummary("Etihad Office"),
+    calculateBuildingSummary("Abdalian Office"),
+  ];
   
   const totalExpensesThisMonth = currentMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   const pendingReimbursements = expenses.filter(expense => expense.status === "pending").length;
@@ -149,26 +170,61 @@ export function DashboardOverview() {
       </div>
 
       {/* Main Dashboard Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column - Recent Activity */}
-        <div className="lg:col-span-2">
-          <RecentActivity className="h-[600px]" />
+      <div className="grid grid-cols-12 gap-6 h-[calc(100vh-250px)]">
+        {/* Left column - Building Cards */}
+        <div className="col-span-12 lg:col-span-4">
+          <Card className="h-full hover:shadow-md hover:shadow-primary/20 transition-shadow fade-in">
+            <CardHeader className="pb-2 flex-shrink-0">
+              <CardTitle className="text-base font-medium">Building Expenses</CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 flex flex-col h-[calc(100%-60px)]">
+              {departments.map((building, index) => (
+                <div 
+                  key={building.name}
+                  className={`flex-1 p-3 rounded-md border border-border/50 cursor-pointer hover:bg-muted/30 transition-colors ${index === 0 ? 'mb-4' : ''} flex flex-col`}
+                  onClick={() => navigate(`/expenses?department=${building.name}`)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="truncate text-sm font-medium">{building.name}</span>
+                    <span className="text-lg font-bold">
+                      {formatCurrency(building.balance)}
+                    </span>
+                  </div>
+                  <div className="mt-auto pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/expenses?department=${building.name}`);
+                      }}
+                      className="w-full text-xs"
+                    >
+                      View Details <ArrowRight className="ml-2 h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
         
-        {/* Right column - Calendar and Analytics */}
-        <div className="space-y-6">
+        {/* Middle column - Recent Activity */}
+        <div className="col-span-12 lg:col-span-5">
+          <RecentActivity className="h-full" />
+        </div>
+        
+        {/* Right column - Calendar */}
+        <div className="col-span-12 lg:col-span-3">
           {/* Upcoming Events Calendar */}
-          <Card className="fade-in">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-medium text-foreground flex items-center">
-                <Calendar className="h-5 w-5 mr-2 text-primary" />
-                Upcoming Events
+          <Card className="fade-in h-full">
+            <CardHeader className="pb-2 flex-shrink-0">
+              <CardTitle className="text-base font-medium flex items-center">
+                <Calendar className="h-4 w-4 mr-2 text-primary" />
+                <span className="truncate">Upcoming Events</span>
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Asset returns, deadlines & maintenance
-              </p>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 flex-grow overflow-auto">
               {upcomingEvents.slice(0, 5).map((event) => {
                 const IconComponent = event.icon;
                 const eventDate = new Date(event.date);
@@ -176,25 +232,16 @@ export function DashboardOverview() {
                 const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                 
                 return (
-                  <div key={event.id} className="flex items-start space-x-3 p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
+                  <div key={event.id} className="flex items-start space-x-2 p-2 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
                     <div className="flex-shrink-0 mt-0.5">
                       <IconComponent className="h-4 w-4 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium text-foreground truncate pr-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-medium text-foreground truncate pr-1">
                           {event.title}
                         </p>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${getEventTypeColor(event.type)} flex-shrink-0`}
-                        >
-                          {getEventTypeLabel(event.type)}
-                        </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-1">
-                        {event.description}
-                      </p>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">
                           {eventDate.toLocaleDateString()}
@@ -211,11 +258,6 @@ export function DashboardOverview() {
               })}
             </CardContent>
           </Card>
-          
-          {/* Financial Analytics - Compact */}
-          <div className="h-[300px]">
-            <FinancialAnalyticsDashboard className="h-full" />
-          </div>
         </div>
       </div>
     </div>

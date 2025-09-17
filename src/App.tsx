@@ -8,7 +8,6 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ExpenseProvider } from "@/contexts/ExpenseContext";
 import DashboardPage from "./pages/DashboardPage";
-import LedgerPage from "./pages/LedgerPage";
 import ExpensePage from "./pages/ExpensePage";
 import AssetPage from "./pages/AssetPage";
 import AssetLogsPage from "./pages/AssetLogsPage";
@@ -50,11 +49,7 @@ const App = () => {
                     <DashboardPage userRole={currentUser.role.toLowerCase()} />
                   </AppLayout>
                 } />
-                <Route path="/ledger" element={
-                  <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
-                    <LedgerPage currentUser={currentUser} />
-                  </AppLayout>
-                } />
+                {/* Ledger page removed - functionality moved to dashboard */}
                 <Route path="/expenses" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
                     <ExpensePage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
