@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, AlertCircle, TrendingUp, PieChart } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { PKRIcon } from "@/components/ui/pkr-icon";
-import { RecentActivity } from "./RecentActivity";
 import { useExpenses } from "@/contexts/ExpenseContext";
 import { useNavigate } from "react-router-dom";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, PieChart as RechartsPieChart, Cell, Pie } from "recharts";
@@ -138,86 +137,59 @@ export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProp
         ))}
       </div>
 
-      {/* Main Dashboard Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity - Takes up 2/3 of the space */}
-        <div className="lg:col-span-2">
-          <RecentActivity userRole={currentUser?.role || "employee"} className="h-[600px]" />
-        </div>
-
-        {/* KPI Cards and Charts - Takes up 1/3 of the space */}
-        <div className="flex flex-col h-[600px] space-y-4">
-          {/* KPI Cards stacked vertically */}
-          <div className="flex-1 space-y-4">
-            {kpiCards.map((kpi, index) => {
-              const IconComponent = kpi.icon;
-              return (
-                <Card 
-                  key={index}
-                  className="cursor-pointer hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 hover-scale fade-in bg-gradient-to-br from-background to-muted/30 flex-1"
-                  onClick={kpi.onClick}
-                >
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      {kpi.title}
-                    </CardTitle>
-                    <IconComponent className="h-4 w-4 text-primary" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xl font-bold text-foreground">{kpi.value}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {kpi.trend}
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Category Breakdown */}
-          <Card className="fade-in flex-shrink-0">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                <PieChart className="h-4 w-4 mr-2 text-primary" />
-                Category Split
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex items-center justify-between h-[100px]">
-                <div className="w-[140px]">
-                  <ResponsiveContainer width="100%" height={100}>
-                    <RechartsPieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={16}
-                        outerRadius={32}
-                        dataKey="value"
-                      >
-                        {pieData.map((_, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                    </RechartsPieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-col gap-2 text-xs">
-                  {pieData.slice(0, 4).map((item, index) => (
-                    <div key={item.name} className="flex items-center whitespace-nowrap">
-                      <div 
-                        className="w-2 h-2 rounded-full mr-2" 
-                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                      />
-                      <span className="text-muted-foreground">{item.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {kpiCards.map((kpi, index) => {
+          const IconComponent = kpi.icon;
+          return (
+            <Card 
+              key={index}
+              className="cursor-pointer hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 hover-scale fade-in bg-gradient-to-br from-background to-muted/30"
+              onClick={kpi.onClick}
+            >
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {kpi.title}
+                </CardTitle>
+                <IconComponent className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">{kpi.value}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {kpi.trend}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
+
+      {/* Monthly Expense Trends */}
+      <Card className="fade-in">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium text-foreground flex items-center">
+            <TrendingUp className="h-5 w-5 mr-2 text-primary" />
+            Monthly Expense Trends
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={last6Months}>
+                <XAxis dataKey="month" className="text-xs" />
+                <YAxis className="text-xs" />
+                <Line 
+                  type="monotone" 
+                  dataKey="amount" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

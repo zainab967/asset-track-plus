@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ExpenseProvider } from "@/contexts/ExpenseContext";
+import DashboardPage from "./pages/DashboardPage";
 import LedgerPage from "./pages/LedgerPage";
 import ExpensePage from "./pages/ExpensePage";
 import AssetPage from "./pages/AssetPage";
@@ -43,7 +44,12 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Navigate to={currentUser.role === "Employee" ? "/expenses" : "/ledger"} replace />} />
+                <Route path="/" element={<Navigate to={currentUser.role === "Employee" ? "/expenses" : "/dashboard"} replace />} />
+                <Route path="/dashboard" element={
+                  <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
+                    <DashboardPage userRole={currentUser.role.toLowerCase()} />
+                  </AppLayout>
+                } />
                 <Route path="/ledger" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
                     <LedgerPage currentUser={currentUser} />

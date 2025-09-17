@@ -38,9 +38,15 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
 
   const navigationItems = [
     {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: BarChart3,
+      allowedRoles: ["Admin", "Manager", "HR"]
+    },
+    {
       title: "Ledger",
       url: "/ledger",
-      icon: BarChart3,
+      icon: FileText,
       allowedRoles: ["Admin", "Manager", "HR"]
     },
     {
