@@ -104,24 +104,6 @@ export function LedgerView({ onNavigateToExpenses, currentUser }: LedgerViewProp
         ))}
       </div>
 
-      {/* Department Summary */}
-      <Card className="fade-in">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium text-foreground">
-            Department Overview
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">Total monthly expenses across all departments</p>
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold text-primary mb-2">
-            {formatCurrency(totalBalance)}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Combined expenses from {departments.length} departments this month
-          </p>
-        </CardContent>
-      </Card>
-
       {/* Monthly Expense Trends */}
       <Card className="fade-in">
         <CardHeader>
