@@ -1,9 +1,15 @@
-import { Search, User, Bell } from "lucide-react";
+import { Search, User, Bell, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface AppHeaderProps {
   currentUser: {
@@ -43,17 +49,30 @@ export function Header({ currentUser, pendingClaims }: AppHeaderProps) {
             )}
           </Button>
           
-          <Button 
-            variant="ghost" 
-            className="flex items-center gap-3 text-base text-primary-foreground hover:bg-primary-foreground/10 h-auto py-2"
-            onClick={() => navigate('/profile')}
-          >
-            <User className="h-5 w-5" />
-            <div>
-              <p className="font-medium">{currentUser.name}</p>
-              <p className="text-primary-foreground/70 text-sm">{currentUser.role}</p>
-            </div>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="flex items-center gap-3 text-base text-primary-foreground hover:bg-primary-foreground/10 h-auto py-2"
+              >
+                <User className="h-5 w-5" />
+                <div>
+                  <p className="font-medium">{currentUser.name}</p>
+                  <p className="text-primary-foreground/70 text-sm">{currentUser.role}</p>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => alert('Sign out functionality would go here')} className="cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sign Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

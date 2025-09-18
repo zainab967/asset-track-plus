@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Package, MessageSquare, DollarSign } from "lucide-react";
+import { User, Package, MessageSquare, CreditCard } from "lucide-react";
 
 interface UserProfilePageProps {
   userRole?: string;
@@ -75,7 +75,7 @@ export default function UserProfilePage({ userRole = "employee" }: UserProfilePa
     }
   ];
 
-  const expenses = [
+  const reimbursements = [
     {
       id: "1",
       name: "Office supplies",
@@ -89,6 +89,13 @@ export default function UserProfilePage({ userRole = "employee" }: UserProfilePa
       amount: 450.00,
       status: "pending",
       date: "2024-01-22"
+    },
+    {
+      id: "3",
+      name: "Training course fees",
+      amount: 350.00,
+      status: "in-progress",
+      date: "2024-01-25"
     }
   ];
 
@@ -144,9 +151,9 @@ export default function UserProfilePage({ userRole = "employee" }: UserProfilePa
             <Package className="h-4 w-4" />
             Current Assets
           </TabsTrigger>
-          <TabsTrigger value="expenses" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Expenses
+          <TabsTrigger value="reimbursements" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            Reimbursements
           </TabsTrigger>
         </TabsList>
 
@@ -215,20 +222,20 @@ export default function UserProfilePage({ userRole = "employee" }: UserProfilePa
           </Card>
         </TabsContent>
 
-        <TabsContent value="expenses">
+        <TabsContent value="reimbursements">
           <Card>
             <CardHeader>
-              <CardTitle>Expense Claims</CardTitle>
+              <CardTitle>Reimbursement Claims</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {expenses.map((expense) => (
-                  <div key={expense.id} className="flex items-center justify-between p-4 border rounded-lg">
+                {reimbursements.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <h4 className="font-medium">{expense.name}</h4>
-                      <p className="text-sm text-muted-foreground">${expense.amount.toFixed(2)} • {expense.date}</p>
+                      <h4 className="font-medium">{item.name}</h4>
+                      <p className="text-sm text-muted-foreground">${item.amount.toFixed(2)} • {item.date}</p>
                     </div>
-                    <Badge className={getStatusColor(expense.status)}>{expense.status}</Badge>
+                    <Badge className={getStatusColor(item.status)}>{item.status}</Badge>
                   </div>
                 ))}
               </div>

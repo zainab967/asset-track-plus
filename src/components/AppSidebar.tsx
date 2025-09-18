@@ -1,6 +1,5 @@
-import { BarChart3, Receipt, Package, MessageSquare, ChevronDown, CreditCard, FileText, ChevronRight } from "lucide-react";
+import { BarChart3, Package, MessageSquare, ChevronDown, CreditCard, FileText } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
-import { useState } from "react";
 
 import {
   Sidebar,
@@ -11,17 +10,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // Logo will be created with CSS
 
@@ -34,7 +25,6 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
-  const [assetsExpanded, setAssetsExpanded] = useState(currentPath.startsWith('/assets'));
 
   const navigationItems = [
     {
@@ -59,9 +49,14 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
 
   const assetsItems = [
     {
+      title: "Asset Management",
+      url: "/assets",
+      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
+    },
+    {
       title: "Asset Logs",
       url: "/assets/logs",
-      allowedRoles: ["Admin", "Manager", "HR"]
+      allowedRoles: ["Admin"]
     }
   ];
 
@@ -141,58 +136,66 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
                   </SidebarMenuItem>
                 );
               })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-              {/* Assets Section - Always visible */}
-              <Collapsible 
-                open={assetsExpanded} 
-                onOpenChange={setAssetsExpanded}
-                className="group/collapsible"
-              >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <NavLink to="/assets">
-                      <SidebarMenuButton 
+        {/* Assets Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Assets</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {/* Asset Management Item */}
+              {accessibleAssetsItems.filter(item => item.title === "Asset Management").map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={active}>
+                      <NavLink 
+                        to={item.url} 
                         className={`flex items-center gap-2 py-1.5 rounded-md transition-all duration-200 overflow-hidden hover:shadow-md ${
-                          state === "expanded" ? "px-2 mx-0.5" : "justify-center w-full"
+                          state === "expanded" ? "px-2 mx-0.5" : "flex justify-center items-center px-0 mx-auto"
                         }`}
                       >
-                        <Package className={`flex-shrink-0 ${currentPath.startsWith('/assets') ? "text-primary" : "text-sidebar-foreground/70"} ${
+                        <Package className={`flex-shrink-0 ${active ? "text-primary" : "text-sidebar-foreground/70"} ${
                           state === "expanded" ? "h-4 w-4" : "h-5 w-5"
                         }`} />
                         {state === "expanded" && (
-                          <>
-                            <span className="font-medium transition-shadow duration-200 truncate max-w-full">
-                              Assets
-                            </span>
-                            {accessibleAssetsItems.length > 0 && (
-                              <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                            )}
-                          </>
+                          <span className="font-medium transition-shadow duration-200 truncate max-w-full">
+                            {item.title}
+                          </span>
                         )}
-                      </SidebarMenuButton>
-                    </NavLink>
-                  </CollapsibleTrigger>
-                  {/* Asset Logs sub-item only shown to authorized roles */}
-                  {accessibleAssetsItems.length > 0 && (
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {accessibleAssetsItems.map((item) => {
-                          const active = isActive(item.url);
-                          return (
-                            <SidebarMenuSubItem key={item.title}>
-                              <SidebarMenuSubButton asChild isActive={active}>
-                                <NavLink to={item.url}>
-                                  <span>{item.title}</span>
-                                </NavLink>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  )}
-                </SidebarMenuItem>
-              </Collapsible>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+              
+              {/* Asset Logs Item - Only for Admin */}
+              {accessibleAssetsItems.filter(item => item.title === "Asset Logs").map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={active}>
+                      <NavLink 
+                        to={item.url} 
+                        className={`flex items-center gap-2 py-1.5 rounded-md transition-all duration-200 overflow-hidden hover:shadow-md ${
+                          state === "expanded" ? "px-2 mx-0.5" : "flex justify-center items-center px-0 mx-auto"
+                        }`}
+                      >
+                        <FileText className={`flex-shrink-0 ${active ? "text-primary" : "text-sidebar-foreground/70"} ${
+                          state === "expanded" ? "h-4 w-4" : "h-5 w-5"
+                        }`} />
+                        {state === "expanded" && (
+                          <span className="font-medium transition-shadow duration-200 truncate max-w-full">
+                            {item.title}
+                          </span>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
