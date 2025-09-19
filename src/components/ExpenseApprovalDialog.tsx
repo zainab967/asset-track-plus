@@ -51,7 +51,7 @@ export function ExpenseApprovalDialog({ open, onOpenChange, expenseId, onApprove
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="one-hub-etihad">One Hub Etihad</SelectItem>
-                  <SelectItem value="team-web">Team Web</SelectItem>
+                  <SelectItem value="team-one">Team One</SelectItem>
                   <SelectItem value="hasan-nasir">Hasan Nasir</SelectItem>
                   <SelectItem value="irfan-bashir">Irfan Bashir</SelectItem>
                   <SelectItem value="zeeshan">Zeeshan</SelectItem>

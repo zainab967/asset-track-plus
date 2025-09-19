@@ -6,7 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Clock, Eye, Download, Trash2 } from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Search, Plus, Clock, Eye, Download, Trash2, FileText, Table as TableIcon, FileType } from "lucide-react";
 import { ExpenseDetailsDialog } from "./ExpenseDetailsDialog";
 import { AddExpenseSheet } from "./AddExpenseSheet";
 import { useToast } from "@/hooks/use-toast";
@@ -215,6 +222,146 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       description: `Exported ${filteredExpenses.length} expenses to CSV`,
     });
   };
+  
+  const handleExportExcel = () => {
+    if (filteredExpenses.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No expenses to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create XML content for Excel
+    const headers = ['Name', 'User', 'Building', 'Amount', 'Category', 'Charged To', 'Date', 'Status', 'Type'];
+    
+    let excelContent = '<table><tr>';
+    headers.forEach(header => {
+      excelContent += `<th>${header}</th>`;
+    });
+    excelContent += '</tr>';
+    
+    filteredExpenses.forEach(expense => {
+      excelContent += '<tr>';
+      excelContent += `<td>${expense.name}</td>`;
+      excelContent += `<td>${expense.user}</td>`;
+      excelContent += `<td>${expense.building}</td>`;
+      excelContent += `<td>${expense.amount}</td>`;
+      excelContent += `<td>${expense.category}</td>`;
+      excelContent += `<td>${expense.chargedTo || ''}</td>`;
+      excelContent += `<td>${expense.date}</td>`;
+      excelContent += `<td>${expense.status}</td>`;
+      excelContent += `<td>${expense.type || ''}</td>`;
+      excelContent += '</tr>';
+    });
+    
+    excelContent += '</table>';
+    
+    // Create a data URI for the Excel file
+    const excelBlob = new Blob(['\ufeff', excelContent], { type: 'application/vnd.ms-excel' });
+    const excelUrl = URL.createObjectURL(excelBlob);
+    const link = document.createElement('a');
+    link.href = excelUrl;
+    link.download = `expenses_${new Date().toISOString().split('T')[0]}.xls`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(excelUrl);
+    
+    toast({
+      title: "Success",
+      description: `Exported ${filteredExpenses.length} expenses to Excel`,
+    });
+  };
+  
+  const handleExportPDF = async () => {
+    if (filteredExpenses.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No expenses to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Using a simple HTML to PDF approach
+    const headers = ['Name', 'User', 'Building', 'Amount', 'Category', 'Charged To', 'Date', 'Status', 'Type'];
+    
+    // Create a printable HTML document
+    let printContent = `
+      <html>
+      <head>
+        <title>Expenses Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+          th { background-color: #f2f2f2; font-weight: bold; }
+          h1 { text-align: center; }
+          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <h1>Expenses Report</h1>
+        <p>Generated on: ${new Date().toLocaleString()}</p>
+        <table>
+          <tr>
+    `;
+    
+    headers.forEach(header => {
+      printContent += `<th>${header}</th>`;
+    });
+    
+    printContent += '</tr>';
+    
+    filteredExpenses.forEach(expense => {
+      printContent += '<tr>';
+      printContent += `<td>${expense.name}</td>`;
+      printContent += `<td>${expense.user}</td>`;
+      printContent += `<td>${expense.building}</td>`;
+      printContent += `<td>${expense.amount}</td>`;
+      printContent += `<td>${expense.category}</td>`;
+      printContent += `<td>${expense.chargedTo || ''}</td>`;
+      printContent += `<td>${expense.date}</td>`;
+      printContent += `<td>${expense.status}</td>`;
+      printContent += `<td>${expense.type || ''}</td>`;
+      printContent += '</tr>';
+    });
+    
+    printContent += `
+        </table>
+        <div class="footer">
+          Asset Track Plus - Expense Report
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // Open a new window and print to PDF
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      
+      // Let the page render before triggering print
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+      
+      toast({
+        title: "Success",
+        description: `Prepared ${filteredExpenses.length} expenses for PDF export`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to open PDF preview. Please check your popup blocker settings.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
 
@@ -326,15 +473,35 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                     </PopoverContent>
                   </Popover>
 
-                  <Button 
-                    onClick={handleExportCSV} 
-                    size="icon"
-                    variant="outline"
-                    title="Export CSV"
-                    disabled={filteredExpenses.length === 0}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
+                  <div className="relative">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          disabled={filteredExpenses.length === 0}
+                          title="Export data"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={handleExportCSV}>
+                          <FileText className="h-4 w-4 mr-2" />
+                          <span>CSV</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleExportExcel}>
+                          <TableIcon className="h-4 w-4 mr-2" />
+                          <span>Excel</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleExportPDF}>
+                          <FileType className="h-4 w-4 mr-2" />
+                          <span>PDF</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                   
                   <Button 
                     onClick={handleAddNew} 

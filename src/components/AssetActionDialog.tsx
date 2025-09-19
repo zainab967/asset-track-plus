@@ -152,11 +152,13 @@ export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: 
                       <SelectValue placeholder="Select Category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="laptop">Laptop</SelectItem>
-                      <SelectItem value="desktop">Desktop</SelectItem>
-                      <SelectItem value="printer">Printer</SelectItem>
-                      <SelectItem value="furniture">Furniture</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="computer-equipment">Computer Equipment</SelectItem>
+                      <SelectItem value="electrical-appliances">Electrical Appliances</SelectItem>
+                      <SelectItem value="furniture-and-fixtures">Furniture and Fixtures</SelectItem>
+                      <SelectItem value="vehicles">Vehicles</SelectItem>
+                      <SelectItem value="sports">Sports</SelectItem>
+                      <SelectItem value="safety-security">Safety Security</SelectItem>
+                      <SelectItem value="networking-equipment">Networking Equipment</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

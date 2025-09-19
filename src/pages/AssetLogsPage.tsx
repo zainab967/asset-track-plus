@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eye, Search, Plus, Wrench, AlertTriangle, CheckCircle } from "lucide-react";
+import { Eye, Search, Plus, Wrench, AlertTriangle, CheckCircle, Download, FileText, FileType } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,7 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { formatCurrency } from "@/lib/currency";
+import { useToast } from "@/hooks/use-toast";
+import { Table as TableIcon } from "lucide-react";
 
 interface Asset {
   id: string;
@@ -63,6 +72,7 @@ export default function AssetLogsPage({ userRole = "admin", currentUser = "Curre
   const [buildingFilter, setBuildingFilter] = useState<string>("all");
   const [showResponseDialog, setShowResponseDialog] = useState(false);
   const [responseText, setResponseText] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchAssets();
@@ -77,7 +87,7 @@ export default function AssetLogsPage({ userRole = "admin", currentUser = "Curre
           id: "1",
           name: "MacBook Pro 16\"",
           assetid: "l-3232",
-          category: "Laptop",
+          category: "Computer Equipment",
           assignedTo: "John Doe",
           building: "Etihad Office",
           status: "assigned",
@@ -94,6 +104,45 @@ export default function AssetLogsPage({ userRole = "admin", currentUser = "Curre
               role: "Admin"
             }
           ]
+        },
+        {
+          id: "2",
+          name: "Dell XPS 15",
+          assetid: "l-3233",
+          category: "Computer Equipment",
+          assignedTo: "Jane Smith",
+          building: "Abdalian Office",
+          status: "assigned",
+          value: 1899,
+          purchaseDate: "2023-05-10",
+          condition: "good",
+          description: "Laptop for design team"
+        },
+        {
+          id: "3",
+          name: "HP LaserJet Pro",
+          assetid: "p-1001",
+          category: "Electrical Appliances",
+          assignedTo: null,
+          building: "Etihad Office",
+          status: "maintenance",
+          value: 399,
+          purchaseDate: "2022-11-22",
+          condition: "fair",
+          description: "Office printer - needs cartridge replacement"
+        },
+        {
+          id: "4",
+          name: "Conference Room Table",
+          assetid: "f-2201",
+          category: "Furniture and Fixtures",
+          assignedTo: null,
+          building: "Abdalian Office",
+          status: "unassigned",
+          value: 1200,
+          purchaseDate: "2023-01-15",
+          condition: "excellent",
+          description: "Large conference table for meeting room"
         }
       ];
       setAssets(mockAssets);
@@ -107,6 +156,192 @@ export default function AssetLogsPage({ userRole = "admin", currentUser = "Curre
   const handleViewDetails = (asset: Asset) => {
     setSelectedAsset(asset);
     setDetailsDialogOpen(true);
+  };
+  
+  const handleExportCSV = () => {
+    if (filteredAssets.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No assets to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Define CSV headers
+    const headers = ['Asset ID', 'Name', 'Category', 'Assigned To', 'Building', 'Status', 'Condition', 'Value', 'Purchase Date'];
+    
+    // Convert assets to CSV format
+    const csvContent = [
+      headers.join(','),
+      ...filteredAssets.map(asset => [
+        `"${asset.assetid}"`,
+        `"${asset.name}"`,
+        `"${asset.category}"`,
+        `"${asset.assignedTo || ''}"`,
+        `"${asset.building}"`,
+        asset.status,
+        asset.condition,
+        asset.value,
+        asset.purchaseDate
+      ].join(','))
+    ].join('\n');
+
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `assets_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Success",
+      description: `Exported ${filteredAssets.length} assets to CSV`,
+    });
+  };
+  
+  const handleExportExcel = () => {
+    if (filteredAssets.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No assets to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create XML content for Excel
+    const headers = ['Asset ID', 'Name', 'Category', 'Assigned To', 'Building', 'Status', 'Condition', 'Value', 'Purchase Date'];
+    
+    let excelContent = '<table><tr>';
+    headers.forEach(header => {
+      excelContent += `<th>${header}</th>`;
+    });
+    excelContent += '</tr>';
+    
+    filteredAssets.forEach(asset => {
+      excelContent += '<tr>';
+      excelContent += `<td>${asset.assetid}</td>`;
+      excelContent += `<td>${asset.name}</td>`;
+      excelContent += `<td>${asset.category}</td>`;
+      excelContent += `<td>${asset.assignedTo || ''}</td>`;
+      excelContent += `<td>${asset.building}</td>`;
+      excelContent += `<td>${asset.status}</td>`;
+      excelContent += `<td>${asset.condition}</td>`;
+      excelContent += `<td>${asset.value}</td>`;
+      excelContent += `<td>${asset.purchaseDate}</td>`;
+      excelContent += '</tr>';
+    });
+    
+    excelContent += '</table>';
+    
+    // Create a data URI for the Excel file
+    const excelBlob = new Blob(['\ufeff', excelContent], { type: 'application/vnd.ms-excel' });
+    const excelUrl = URL.createObjectURL(excelBlob);
+    const link = document.createElement('a');
+    link.href = excelUrl;
+    link.download = `assets_${new Date().toISOString().split('T')[0]}.xls`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(excelUrl);
+    
+    toast({
+      title: "Success",
+      description: `Exported ${filteredAssets.length} assets to Excel`,
+    });
+  };
+  
+  const handleExportPDF = async () => {
+    if (filteredAssets.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No assets to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Using a simple HTML to PDF approach
+    const headers = ['Asset ID', 'Name', 'Category', 'Assigned To', 'Building', 'Status', 'Condition', 'Value', 'Purchase Date'];
+    
+    // Create a printable HTML document
+    let printContent = `
+      <html>
+      <head>
+        <title>Asset Logs Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+          th { background-color: #f2f2f2; font-weight: bold; }
+          h1 { text-align: center; }
+          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <h1>Asset Logs Report</h1>
+        <p>Generated on: ${new Date().toLocaleString()}</p>
+        <table>
+          <tr>
+    `;
+    
+    headers.forEach(header => {
+      printContent += `<th>${header}</th>`;
+    });
+    
+    printContent += '</tr>';
+    
+    filteredAssets.forEach(asset => {
+      printContent += '<tr>';
+      printContent += `<td>${asset.assetid}</td>`;
+      printContent += `<td>${asset.name}</td>`;
+      printContent += `<td>${asset.category}</td>`;
+      printContent += `<td>${asset.assignedTo || ''}</td>`;
+      printContent += `<td>${asset.building}</td>`;
+      printContent += `<td>${asset.status}</td>`;
+      printContent += `<td>${asset.condition}</td>`;
+      printContent += `<td>${formatCurrency(asset.value)}</td>`;
+      printContent += `<td>${new Date(asset.purchaseDate).toLocaleDateString()}</td>`;
+      printContent += '</tr>';
+    });
+    
+    printContent += `
+        </table>
+        <div class="footer">
+          Asset Track Plus - Asset Logs Report
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // Open a new window and print to PDF
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      
+      // Let the page render before triggering print
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+      
+      toast({
+        title: "Success",
+        description: `Prepared ${filteredAssets.length} assets for PDF export`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to open PDF preview. Please check your popup blocker settings.",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredAssets = assets.filter((asset) => {
@@ -144,6 +379,36 @@ export default function AssetLogsPage({ userRole = "admin", currentUser = "Curre
                   <SelectItem value="Abdalian Office">Abdalian Office</SelectItem>
                 </SelectContent>
               </Select>
+              
+              <div className="relative">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      disabled={filteredAssets.length === 0}
+                      title="Export data"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={handleExportCSV}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      <span>CSV</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportExcel}>
+                      <TableIcon className="h-4 w-4 mr-2" />
+                      <span>Excel</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportPDF}>
+                      <FileType className="h-4 w-4 mr-2" />
+                      <span>PDF</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
             {loading ? (

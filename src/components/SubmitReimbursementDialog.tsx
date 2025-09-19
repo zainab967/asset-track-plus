@@ -13,7 +13,7 @@ interface SubmitReimbursementDialogProps {
     name: string;
     category: string;
     building: string;
-    type: "medical" | "travel" | "equipment" | "other";
+    type: "food" | "medical" | "travel" | "other";
     amount: number;
     description?: string;
     media?: File[];
@@ -28,7 +28,7 @@ export function SubmitReimbursementDialog({
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [building, setBuilding] = useState("");
-  const [type, setType] = useState<"medical" | "travel" | "equipment" | "other">("other");
+  const [type, setType] = useState<"food" | "medical" | "travel" | "other">("other");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
@@ -66,9 +66,9 @@ export function SubmitReimbursementDialog({
   };
 
   const recurringReimbursements = [
-    { name: "Monthly internet allowance", category: "Utilities", amount: 8000, building: "All", type: "other" },
-    { name: "Quarterly health checkup", category: "Healthcare", amount: 30000, building: "All", type: "medical" },
-    { name: "Work from home setup", category: "Equipment", amount: 50000, building: "Etihad Office", type: "equipment" }
+    { name: "Monthly internet allowance", category: "Other", amount: 8000, building: "All", type: "other" },
+    { name: "Quarterly health checkup", category: "Medical", amount: 30000, building: "All", type: "medical" },
+    { name: "Team lunch", category: "Food", amount: 15000, building: "Etihad Office", type: "food" }
   ];
 
   const handleSelectRecurring = (value: string) => {
@@ -79,7 +79,7 @@ export function SubmitReimbursementDialog({
       setCategory(recurring.category);
       setAmount(recurring.amount.toString());
       setBuilding(recurring.building === "All" ? "" : recurring.building);
-      setType(recurring.type as "medical" | "travel" | "equipment" | "other");
+      setType(recurring.type as "food" | "medical" | "travel" | "other");
     }
   };
 
@@ -120,11 +120,9 @@ export function SubmitReimbursementDialog({
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Healthcare">Healthcare</SelectItem>
+                  <SelectItem value="Food">Food</SelectItem>
+                  <SelectItem value="Medical">Medical</SelectItem>
                   <SelectItem value="Travel">Travel</SelectItem>
-                  <SelectItem value="Equipment">Equipment</SelectItem>
-                  <SelectItem value="Utilities">Utilities</SelectItem>
-                  <SelectItem value="Training">Training</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -132,14 +130,14 @@ export function SubmitReimbursementDialog({
 
             <div className="space-y-2">
               <Label htmlFor="type">Type</Label>
-              <Select value={type} onValueChange={(value: "medical" | "travel" | "equipment" | "other") => setType(value)}>
+              <Select value={type} onValueChange={(value: "food" | "medical" | "travel" | "other") => setType(value)}>
                 <SelectTrigger id="type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="food">Food</SelectItem>
                   <SelectItem value="medical">Medical</SelectItem>
                   <SelectItem value="travel">Travel</SelectItem>
-                  <SelectItem value="equipment">Equipment</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>

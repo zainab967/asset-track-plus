@@ -27,7 +27,7 @@ interface Reimbursement {
   category: string;
   date: string;
   status: "pending" | "approved" | "rejected";
-  type: "medical" | "travel" | "equipment" | "other";
+  type: "food" | "medical" | "travel" | "other";
   building: string;
   description?: string;
   media?: File[];
@@ -127,10 +127,10 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
       name: "Monthly Internet Expense",
       amount: 2500,
       user: "Zainab Ahmed",
-      category: "Utilities",
+      category: "Other",
       date: "2025-08-28",
       status: "approved",
-      type: "equipment",
+      type: "other",
       building: "Main Office",
       description: "Monthly internet bill reimbursement for work from home setup"
     },
@@ -139,7 +139,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
       name: "Medical Checkup",
       amount: 15000,
       user: "Ali Hassan",
-      category: "Healthcare",
+      category: "Medical",
       date: "2025-08-25",
       status: "pending",
       type: "medical",
@@ -160,25 +160,25 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
     },
     {
       id: "R1004",
-      name: "Office Chair",
+      name: "Office Supplies",
       amount: 35000,
       user: "Omar Malik",
-      category: "Equipment",
+      category: "Other",
       date: "2025-08-15",
       status: "rejected",
-      type: "equipment",
+      type: "other",
       building: "Tech Center",
-      description: "Ergonomic office chair for work from home setup"
+      description: "Office supplies for the department"
     },
     {
       id: "R1005",
       name: "Team Lunch",
       amount: 12000,
       user: "Sara Imran",
-      category: "Other",
+      category: "Food",
       date: "2025-08-30",
       status: "pending",
-      type: "other",
+      type: "food",
       building: "Main Office",
       description: "Team lunch for project completion celebration"
     }
@@ -500,7 +500,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
         category: recurring.category,
         amount: recurring.amount,
         building: recurring.building === "All" ? "" : recurring.building,
-        type: recurring.type as "medical" | "travel" | "equipment" | "other"
+        type: recurring.type as "food" | "medical" | "travel" | "other"
       }));
     }
   };
@@ -539,7 +539,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
     const colors = {
       medical: "bg-blue-100 text-blue-800",
       travel: "bg-green-100 text-green-800",
-      equipment: "bg-purple-100 text-purple-800",
+      food: "bg-purple-100 text-purple-800",
       other: "bg-gray-100 text-gray-800"
     };
     
@@ -676,9 +676,8 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                             <SelectContent>
                               <SelectItem value="Healthcare">Healthcare</SelectItem>
                               <SelectItem value="Travel">Travel</SelectItem>
+                              <SelectItem value="Food">Food</SelectItem>
                               <SelectItem value="Equipment">Equipment</SelectItem>
-                              <SelectItem value="Utilities">Utilities</SelectItem>
-                              <SelectItem value="Training">Training</SelectItem>
                               <SelectItem value="Other">Other</SelectItem>
                             </SelectContent>
                           </Select>
@@ -695,7 +694,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                         <TableCell>
                           <Select 
                             value={newReimbursement.type || "other"} 
-                            onValueChange={(value: "medical" | "travel" | "equipment" | "other") => 
+                            onValueChange={(value: "food" | "medical" | "travel" | "other") => 
                               setNewReimbursement(prev => ({ ...prev, type: value }))
                             }
                           >
@@ -703,9 +702,9 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
+                              <SelectItem value="food">Food</SelectItem>
                               <SelectItem value="medical">Medical</SelectItem>
                               <SelectItem value="travel">Travel</SelectItem>
-                              <SelectItem value="equipment">Equipment</SelectItem>
                               <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                           </Select>

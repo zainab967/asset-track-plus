@@ -114,12 +114,13 @@ export function AddAssetDialog() {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="laptop">Laptop</SelectItem>
-                    <SelectItem value="desktop">Desktop</SelectItem>
-                    <SelectItem value="phone">Phone</SelectItem>
-                    <SelectItem value="printer">Printer</SelectItem>
-                    <SelectItem value="monitor">Monitor</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="computer-equipment">Computer Equipment</SelectItem>
+                    <SelectItem value="electrical-appliances">Electrical Appliances</SelectItem>
+                    <SelectItem value="furniture-fixtures">Furniture and Fixtures</SelectItem>
+                    <SelectItem value="vehicles">Vehicles</SelectItem>
+                    <SelectItem value="sports">Sports</SelectItem>
+                    <SelectItem value="safety-security">Safety & Security</SelectItem>
+                    <SelectItem value="networking-equipment">Networking Equipment</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -187,6 +188,23 @@ export function AddAssetDialog() {
               <div className="space-y-2">
                 <Label htmlFor="assetName">Asset Name</Label>
                 <Input id="assetName" placeholder="Enter asset name" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="assetCategory">Asset Category</Label>
+                <Select required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="computer-equipment">Computer Equipment</SelectItem>
+                    <SelectItem value="electrical-appliances">Electrical Appliances</SelectItem>
+                    <SelectItem value="furniture-fixtures">Furniture and Fixtures</SelectItem>
+                    <SelectItem value="vehicles">Vehicles</SelectItem>
+                    <SelectItem value="sports">Sports</SelectItem>
+                    <SelectItem value="safety-security">Safety & Security</SelectItem>
+                    <SelectItem value="networking-equipment">Networking Equipment</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="assetCost">Asset Cost</Label>

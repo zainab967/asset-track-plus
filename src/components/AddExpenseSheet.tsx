@@ -175,7 +175,7 @@ export function AddExpenseSheet({ isOpen, onClose, onSubmit }: AddExpenseSheetPr
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="One Hub Etihad">One Hub Etihad</SelectItem>
-                  <SelectItem value="Team Web">Team Web</SelectItem>
+                  <SelectItem value="Team One">Team One</SelectItem>
                 </SelectContent>
               </Select>
             </div>
