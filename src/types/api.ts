@@ -1,7 +1,7 @@
 // Enums
 export enum UserRole {
     Employee = 0,
-    Manager = 1,
+    IT = 1,
     Admin = 2
 }
 
@@ -56,8 +56,8 @@ export interface DepartmentDto {
     id: string;
     name: string;
     description: string;
-    managerId?: string;
-    managerName?: string;
+    ITId?: string;
+    ITName?: string;
     budget: number;
     currentSpending: number;
     employeeCount: number;
@@ -67,7 +67,7 @@ export interface DepartmentDto {
 export interface CreateDepartmentDto {
     name: string;
     description: string;
-    managerId?: string;
+    ITId?: string;
     budget: number;
 }
 

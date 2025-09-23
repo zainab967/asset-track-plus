@@ -1,7 +1,7 @@
 import { AssetManager } from "@/components/AssetManager";
 
 interface AssetPageProps {
-  userRole?: "hr" | "admin" | "employee" | "manager";
+  userRole?: "hr" | "admin" | "employee" | "IT";
 }
 
 export default function AssetPage({ userRole = "admin" }: AssetPageProps) {

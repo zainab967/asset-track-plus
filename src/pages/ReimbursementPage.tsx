@@ -34,7 +34,7 @@ interface Reimbursement {
 }
 
 interface ReimbursementPageProps {
-  userRole?: "employee" | "hr" | "admin" | "manager";
+  userRole?: "employee" | "hr" | "admin" | "IT";
 }
 
 export default function ReimbursementPage({ userRole = "employee" }: ReimbursementPageProps) {
@@ -613,9 +613,11 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
                   </Select>
                 )}
 
-                <Button onClick={() => setShowSubmitDialog(true)} className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" /> Submit New
-                </Button>
+                {userRole !== "admin" && (
+                  <Button onClick={() => setShowSubmitDialog(true)} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" /> Submit New
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
@@ -865,7 +867,7 @@ export default function ReimbursementPage({ userRole = "employee" }: Reimburseme
         />
 
         <SubmitReimbursementDialog 
-          isOpen={showSubmitDialog}
+          isOpen={showSubmitDialog && userRole !== "admin"}
           onClose={() => setShowSubmitDialog(false)}
           onSubmit={async (data) => {
             try {

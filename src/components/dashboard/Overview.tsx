@@ -1,6 +1,5 @@
-import { RecentActivity } from "@/components/RecentActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, AlertCircle, Calendar, Package, FileText, Wrench, ArrowRight } from "lucide-react";
+import { Clock, AlertCircle, Calendar, Package, FileText, Wrench, ArrowRight, MessageSquare, Receipt, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { PKRIcon } from "@/components/ui/pkr-icon";
 import { useExpenses } from "@/contexts/ExpenseContext";
@@ -44,6 +43,64 @@ export function DashboardOverview() {
   const totalExpensesThisMonth = currentMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   const pendingReimbursements = expenses.filter(expense => expense.status === "pending").length;
   const urgentClaims = expenses.filter(expense => expense.status === "pending" && expense.amount > 1000).length;
+  
+  // Recent activity data
+  const activities = [
+    {
+      id: "1",
+      user: "Ali Hassan",
+      action: "lodged a complaint about office air conditioning",
+      type: "complaint",
+      timestamp: "2 minutes ago",
+      route: "/complaints"
+    },
+    {
+      id: "2", 
+      user: "Sara Ahmed",
+      action: "submitted expense claim for travel",
+      type: "expense",
+      timestamp: "15 minutes ago",
+      route: "/expenses"
+    },
+    {
+      id: "3",
+      user: "Omar Khan", 
+      action: "requested new laptop asset",
+      type: "asset",
+      timestamp: "1 hour ago",
+      route: "/assets"
+    }
+  ];
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "complaint":
+        return <MessageSquare className="h-4 w-4" />;
+      case "expense":
+        return <Receipt className="h-4 w-4" />;
+      case "asset":
+        return <Package className="h-4 w-4" />;
+      case "approval":
+        return <TrendingUp className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
+    }
+  };
+
+  const getActivityBadgeVariant = (type: string) => {
+    switch (type) {
+      case "complaint":
+        return "destructive";
+      case "expense":
+        return "default";
+      case "asset":
+        return "secondary";
+      case "approval":
+        return "outline";
+      default:
+        return "outline";
+    }
+  };
 
   // KPI card data
   const kpiCards = [
@@ -170,92 +227,137 @@ export function DashboardOverview() {
       </div>
 
       {/* Main Dashboard Content */}
-      <div className="grid grid-cols-12 gap-6 h-[calc(100vh-250px)]">
-        {/* Left column - Building Cards */}
-        <div className="col-span-12 lg:col-span-4">
-          <Card className="h-full hover:shadow-md hover:shadow-primary/20 transition-shadow fade-in">
-            <CardHeader className="pb-2 flex-shrink-0">
-              <CardTitle className="text-base font-medium">Building Expenses</CardTitle>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Building Expenses Card */}
+        <div className="col-span-1">
+          <Card className="hover:shadow-sm hover:shadow-primary/10 transition-shadow h-[260px] flex flex-col">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm font-medium flex items-center">
+                <Package className="h-4 w-4 mr-2 text-primary" />
+                <span className="truncate">Building Expenses</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 flex flex-col h-[calc(100%-60px)]">
-              {departments.map((building, index) => (
-                <div 
-                  key={building.name}
-                  className={`flex-1 p-3 rounded-md border border-border/50 cursor-pointer hover:bg-muted/30 transition-colors ${index === 0 ? 'mb-4' : ''} flex flex-col`}
-                  onClick={() => navigate(`/expenses?department=${building.name}`)}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="truncate text-sm font-medium">{building.name}</span>
-                    <span className="text-lg font-bold">
+            <CardContent className="p-4 pt-0 flex-1 flex flex-col">
+              <div className="flex-1 overflow-auto">
+                {departments.map((building, index) => (
+                  <div 
+                    key={building.name}
+                    className={`flex items-center justify-between py-2 ${index !== departments.length - 1 ? 'border-b border-border/30' : ''}`}
+                    onClick={() => navigate(`/expenses?department=${building.name}`)}
+                  >
+                    <span className="truncate text-xs font-medium">{building.name}</span>
+                    <span className="text-sm font-bold">
                       {formatCurrency(building.balance)}
                     </span>
                   </div>
-                  <div className="mt-auto pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/expenses?department=${building.name}`);
-                      }}
-                      className="w-full text-xs"
-                    >
-                      View Details <ArrowRight className="ml-2 h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/expenses')}
+                className="w-full text-xs mt-3"
+              >
+                View All Buildings <ArrowRight className="ml-2 h-3 w-3" />
+              </Button>
             </CardContent>
           </Card>
         </div>
         
-        {/* Middle column - Recent Activity */}
-        <div className="col-span-12 lg:col-span-5">
-          <RecentActivity className="h-full" />
+        {/* Recent Activity */}
+        <div className="col-span-1">
+          <Card className="hover:shadow-sm hover:shadow-primary/10 transition-shadow h-[260px] flex flex-col">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm font-medium flex items-center">
+                <Clock className="h-4 w-4 mr-2 text-primary" />
+                <span className="truncate">Recent Activity</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 flex-1 flex flex-col">
+              <div className="flex-1 overflow-auto">
+                {activities.slice(0, 3).map((activity) => (
+                  <div
+                    key={activity.id}
+                    className={`flex items-center gap-2 py-2 cursor-pointer ${activity.id !== '3' ? 'border-b border-border/30' : ''}`}
+                    onClick={() => navigate(activity.route)}
+                  >
+                    <div className="flex-shrink-0">
+                      <Badge variant={getActivityBadgeVariant(activity.type)} className="h-5 w-5 p-0 flex items-center justify-center">
+                        {getActivityIcon(activity.type)}
+                      </Badge>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs truncate">
+                        <span className="font-medium">{activity.user}</span>
+                        {" "}
+                        <span className="text-muted-foreground">{activity.action}</span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/complaints')}
+                className="w-full text-xs mt-3"
+              >
+                View All Activity <ArrowRight className="ml-2 h-3 w-3" />
+              </Button>
+            </CardContent>
+          </Card>
         </div>
         
-        {/* Right column - Calendar */}
-        <div className="col-span-12 lg:col-span-3">
-          {/* Upcoming Events Calendar */}
-          <Card className="fade-in h-full">
-            <CardHeader className="pb-2 flex-shrink-0">
-              <CardTitle className="text-base font-medium flex items-center">
+        {/* Calendar */}
+        <div className="col-span-1">
+          <Card className="hover:shadow-sm hover:shadow-primary/10 transition-shadow h-[260px] flex flex-col">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm font-medium flex items-center">
                 <Calendar className="h-4 w-4 mr-2 text-primary" />
                 <span className="truncate">Upcoming Events</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 flex-grow overflow-auto">
-              {upcomingEvents.slice(0, 5).map((event) => {
-                const IconComponent = event.icon;
-                const eventDate = new Date(event.date);
-                const today = new Date();
-                const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                
-                return (
-                  <div key={event.id} className="flex items-start space-x-2 p-2 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
-                    <div className="flex-shrink-0 mt-0.5">
-                      <IconComponent className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-medium text-foreground truncate pr-1">
+            <CardContent className="p-4 pt-0 flex-1 flex flex-col">
+              <div className="flex-1 overflow-auto">
+                {upcomingEvents.slice(0, 3).map((event, index) => {
+                  const IconComponent = event.icon;
+                  const eventDate = new Date(event.date);
+                  const today = new Date();
+                  const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  return (
+                    <div 
+                      key={event.id} 
+                      className={`flex items-center gap-2 py-2 ${index !== 2 ? 'border-b border-border/30' : ''}`}
+                    >
+                      <IconComponent className="h-4 w-4 text-primary flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">
                           {event.title}
                         </p>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">
-                          {eventDate.toLocaleDateString()}
-                        </span>
-                        <span className={`text-xs font-medium ${
-                          daysUntil <= 3 ? 'text-red-600' : daysUntil <= 7 ? 'text-orange-600' : 'text-green-600'
-                        }`}>
-                          {daysUntil <= 0 ? 'Today' : `${daysUntil} days`}
-                        </span>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs text-muted-foreground">
+                            {eventDate.toLocaleDateString()}
+                          </span>
+                          <span className={`text-xs ${
+                            daysUntil <= 3 ? 'text-red-600' : daysUntil <= 7 ? 'text-orange-600' : 'text-green-600'
+                          }`}>
+                            {daysUntil <= 0 ? 'Today' : `${daysUntil} days`}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/assets')}
+                className="w-full text-xs mt-3"
+              >
+                View All Events <ArrowRight className="ml-2 h-3 w-3" />
+              </Button>
             </CardContent>
           </Card>
         </div>

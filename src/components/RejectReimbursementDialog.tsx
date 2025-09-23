@@ -9,6 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Check } from "lucide-react";
 
 interface RejectReimbursementDialogProps {
   isOpen: boolean;
@@ -23,12 +25,32 @@ export function RejectReimbursementDialog({
   onConfirm,
   reimbursementName,
 }: RejectReimbursementDialogProps) {
-  const [reason, setReason] = useState("");
+  const [selectedReason, setSelectedReason] = useState("");
+  const [additionalComments, setAdditionalComments] = useState("");
+
+  const reasonOptions = [
+    "Not stamped", 
+    "Overwriting", 
+    "Original invoice not received",
+    "Other"
+  ];
 
   const handleSubmit = () => {
-    if (!reason.trim()) return;
-    onConfirm(reason);
-    setReason("");
+    let finalReason = selectedReason;
+    
+    if (selectedReason === "Other" && additionalComments.trim()) {
+      finalReason = `Other - ${additionalComments}`;
+    } else if (additionalComments.trim()) {
+      finalReason = `${selectedReason} - ${additionalComments}`;
+    }
+    
+    if (!finalReason || (selectedReason === "Other" && !additionalComments.trim())) {
+      return;
+    }
+    
+    onConfirm(finalReason);
+    setSelectedReason("");
+    setAdditionalComments("");
     onClose();
   };
 
@@ -38,16 +60,53 @@ export function RejectReimbursementDialog({
         <DialogHeader>
           <DialogTitle>Reject Reimbursement</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="reason">Reason for Rejection</Label>
-            <Textarea
-              id="reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Please provide a reason for rejecting this reimbursement..."
-              className="min-h-[100px]"
-            />
+        <div className="grid gap-3 py-3">
+          <div className="space-y-3">
+            <div>
+              <Label className="text-base font-medium">Reason for Rejection</Label>
+              <p className="text-sm text-muted-foreground mb-2">
+                Select the primary reason for rejecting this reimbursement request
+              </p>
+              <RadioGroup 
+                value={selectedReason} 
+                onValueChange={setSelectedReason} 
+                className="space-y-1"
+              >
+                {reasonOptions.map((option) => (
+                  <div 
+                    key={option} 
+                    className={`flex items-center space-x-2 py-1 px-2 rounded-md ${
+                      selectedReason === option ? "bg-muted/50" : ""
+                    }`}
+                  >
+                    <RadioGroupItem value={option} id={option.replace(/\s+/g, '-').toLowerCase()} />
+                    <Label 
+                      htmlFor={option.replace(/\s+/g, '-').toLowerCase()} 
+                      className="font-normal cursor-pointer w-full"
+                    >
+                      {option}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+            
+            <div className="space-y-1">
+              <Label htmlFor="additional-comments">
+                {selectedReason === "Other" ? "Specify Reason" : "Additional Comments"} 
+                {selectedReason === "Other" && <span className="text-destructive ml-1">*</span>}
+              </Label>
+              <Textarea
+                id="additional-comments"
+                value={additionalComments}
+                onChange={(e) => setAdditionalComments(e.target.value)}
+                placeholder={selectedReason === "Other" 
+                  ? "Please specify the reason for rejection..." 
+                  : "Add any additional details or context..."}
+                className="min-h-[80px]"
+                required={selectedReason === "Other"}
+              />
+            </div>
           </div>
         </div>
         <DialogFooter>
@@ -57,7 +116,7 @@ export function RejectReimbursementDialog({
           <Button
             variant="destructive"
             onClick={handleSubmit}
-            disabled={!reason.trim()}
+            disabled={!selectedReason || (selectedReason === "Other" && !additionalComments.trim())}
           >
             Reject
           </Button>

@@ -26,13 +26,12 @@ import { formatCurrency } from "@/lib/currency";
 
 interface ExpenseTrackerProps {
   selectedDepartment?: string;
-  userRole?: "employee" | "hr" | "admin" | "manager";
+  userRole?: "employee" | "hr" | "admin" | "IT";
 }
 
 export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: ExpenseTrackerProps) {
   const { expenses, addExpense, setExpenses } = useExpenses();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -92,8 +91,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       setIsLoading(false);
     }
   };
-
-  const pendingClaims = expenses.filter(e => e.status === "pending").length;
 
   const handleNextMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
@@ -188,7 +185,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     }
 
     // Define CSV headers
-    const headers = ['Name', 'User', 'Building', 'Amount', 'Category', 'Charged To', 'Date', 'Status', 'Type'];
+    const headers = ['Name', 'User', 'Building', 'Amount', 'Category', 'Charged To', 'Date', 'Type'];
     
     // Convert expenses to CSV format
     const csvContent = [
@@ -201,7 +198,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
         `"${expense.category}"`,
         `"${expense.chargedTo || ''}"`,
         expense.date,
-        expense.status,
         `"${expense.type || ''}"`
       ].join(','))
     ].join('\n');
@@ -234,7 +230,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     }
 
     // Create XML content for Excel
-    const headers = ['Name', 'User', 'Building', 'Amount', 'Category', 'Charged To', 'Date', 'Status', 'Type'];
+    const headers = ['Name', 'User', 'Building', 'Amount', 'Category', 'Charged To', 'Date', 'Type'];
     
     let excelContent = '<table><tr>';
     headers.forEach(header => {
@@ -251,7 +247,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       excelContent += `<td>${expense.category}</td>`;
       excelContent += `<td>${expense.chargedTo || ''}</td>`;
       excelContent += `<td>${expense.date}</td>`;
-      excelContent += `<td>${expense.status}</td>`;
       excelContent += `<td>${expense.type || ''}</td>`;
       excelContent += '</tr>';
     });
@@ -286,7 +281,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
     }
 
     // Using a simple HTML to PDF approach
-    const headers = ['Name', 'User', 'Building', 'Amount', 'Category', 'Charged To', 'Date', 'Status', 'Type'];
+    const headers = ['Name', 'User', 'Building', 'Amount', 'Category', 'Charged To', 'Date', 'Type'];
     
     // Create a printable HTML document
     let printContent = `
@@ -324,7 +319,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
       printContent += `<td>${expense.category}</td>`;
       printContent += `<td>${expense.chargedTo || ''}</td>`;
       printContent += `<td>${expense.date}</td>`;
-      printContent += `<td>${expense.status}</td>`;
       printContent += `<td>${expense.type || ''}</td>`;
       printContent += '</tr>';
     });
@@ -370,36 +364,14 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
   const filteredExpenses = (expenses || []).filter(expense => {
     const matchesSearch = expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       expense.user.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || expense.status === statusFilter;
     const matchesDate = !selectedDate || expense.date === selectedDate.toISOString().split('T')[0];
     const matchesBuilding = !selectedDepartment || expense.building === selectedDepartment;
-    return matchesSearch && matchesStatus && matchesDate && matchesBuilding;
+    return matchesSearch && matchesDate && matchesBuilding;
   });
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      pending: "secondary",
-      approved: "default",
-      rejected: "destructive"
-    } as const;
-    
-    return (
-      <Badge variant={variants[status as keyof typeof variants]} className="capitalize">
-        {status}
-      </Badge>
-    );
-  };
 
   return (
     <div className="flex-1">
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        {/* Header */}
-        {pendingClaims > 0 && (
-          <p className="text-yellow-600 font-medium">
-            {pendingClaims} pending claims require attention
-          </p>
-        )}
-
         {/* Filters */}
         <Card>
           <CardContent className="p-6">
@@ -415,18 +387,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-
                 <div className="flex items-center gap-2">
                   <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                     <PopoverTrigger asChild>
@@ -531,7 +491,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                     <TableHead className="w-[120px]">Category</TableHead>
                     <TableHead className="w-[150px]">Charged To</TableHead>
                     <TableHead className="w-[120px]">Date</TableHead>
-                    <TableHead className="w-[120px]">Status</TableHead>
                     <TableHead className="w-[100px] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -547,7 +506,6 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                       <TableCell>{expense.category}</TableCell>
                       <TableCell>{expense.chargedTo || '-'}</TableCell>
                       <TableCell>{expense.date}</TableCell>
-                      <TableCell>{getStatusBadge(expense.status)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 justify-end">
                           <Button
@@ -562,18 +520,7 @@ export function ExpenseTracker({ selectedDepartment, userRole = "admin" }: Expen
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          {userRole === "admin" && (
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => handleDeleteExpense(expense.id)}
-                              disabled={isProcessing}
-                              title="Delete"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
+
                         </div>
                       </TableCell>
                     </TableRow>

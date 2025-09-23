@@ -56,8 +56,8 @@ const Index = () => {
               name = "Current User";
             } else if (role === "HR") {
               name = "HR User";
-            } else if (role === "Manager") {
-              name = "Manager User";
+            } else if (role === "IT") {
+              name = "IT User";
             }
             setCurrentUser({ role, name });
           }}>
@@ -66,7 +66,7 @@ const Index = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Admin">Admin</SelectItem>
-              <SelectItem value="Manager">Manager</SelectItem>
+              <SelectItem value="IT">IT</SelectItem>
               <SelectItem value="HR">HR</SelectItem>
               <SelectItem value="Employee">Employee</SelectItem>
             </SelectContent>

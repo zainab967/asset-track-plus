@@ -31,19 +31,19 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
       title: "Dashboard",
       url: "/dashboard",
       icon: BarChart3,
-      allowedRoles: ["Admin", "Manager", "HR"]
+      allowedRoles: ["Admin", "IT", "HR"]
     },
     {
       title: "Reimbursements",
       url: "/reimbursements",
       icon: CreditCard,
-      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
+      allowedRoles: ["Admin", "IT", "HR", "Employee"]
     },
     {
       title: "Complaints & Suggestions",
       url: "/complaints",
       icon: MessageSquare,
-      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
+      allowedRoles: ["Admin", "IT", "HR", "Employee"]
     }
   ];
 
@@ -51,7 +51,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
     {
       title: "Asset Management",
       url: "/assets",
-      allowedRoles: ["Admin", "Manager", "HR", "Employee"]
+      allowedRoles: ["Admin", "IT", "HR", "Employee"]
     },
     {
       title: "Asset Logs",
@@ -95,7 +95,7 @@ export function AppSidebar({ userRole, onRoleChange }: AppSidebarProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Manager">Manager</SelectItem>
+                  <SelectItem value="IT">IT</SelectItem>
                   <SelectItem value="HR">HR</SelectItem>
                   <SelectItem value="Employee">Employee</SelectItem>
                 </SelectContent>

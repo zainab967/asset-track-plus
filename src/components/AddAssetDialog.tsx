@@ -26,6 +26,8 @@ export function AddAssetDialog() {
   const [assetStatus, setAssetStatus] = useState("Unassigned");
   const [assigneeName, setAssigneeName] = useState("");
   const [department, setDepartment] = useState("");
+  const [category, setCategory] = useState("");
+  const [computerSubcategory, setComputerSubcategory] = useState("");
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -109,7 +111,7 @@ export function AddAssetDialog() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="category">Asset Category</Label>
-                <Select required>
+                <Select value={category} onValueChange={setCategory} required>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -124,6 +126,26 @@ export function AddAssetDialog() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {category === "computer-equipment" && (
+                <div className="space-y-2">
+                  <Label htmlFor="computerSubcategory">Equipment Type</Label>
+                  <Select value={computerSubcategory} onValueChange={setComputerSubcategory} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Equipment Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="laptop">Laptop</SelectItem>
+                      <SelectItem value="lcd">LCD</SelectItem>
+                      <SelectItem value="mouse">Mouse</SelectItem>
+                      <SelectItem value="headphones">Headphones</SelectItem>
+                      <SelectItem value="laptop-bag">Laptop Bag</SelectItem>
+                      <SelectItem value="stand">Stand</SelectItem>
+                      <SelectItem value="keyboard">Keyboard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="requestDept">Building</Label>
                 <Select required>
@@ -191,7 +213,7 @@ export function AddAssetDialog() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="assetCategory">Asset Category</Label>
-                <Select required>
+                <Select value={category} onValueChange={setCategory} required>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -206,6 +228,26 @@ export function AddAssetDialog() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {category === "computer-equipment" && (
+                <div className="space-y-2">
+                  <Label htmlFor="computerSubcategory">Equipment Type</Label>
+                  <Select value={computerSubcategory} onValueChange={setComputerSubcategory} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Equipment Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="laptop">Laptop</SelectItem>
+                      <SelectItem value="lcd">LCD</SelectItem>
+                      <SelectItem value="mouse">Mouse</SelectItem>
+                      <SelectItem value="headphones">Headphones</SelectItem>
+                      <SelectItem value="laptop-bag">Laptop Bag</SelectItem>
+                      <SelectItem value="stand">Stand</SelectItem>
+                      <SelectItem value="keyboard">Keyboard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="assetCost">Asset Cost</Label>
                 <Input id="assetCost" placeholder="Enter asset cost" required />

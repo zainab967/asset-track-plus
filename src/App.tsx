@@ -52,22 +52,22 @@ const App = () => {
                 {/* Ledger page removed - functionality moved to dashboard */}
                 <Route path="/expenses" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
-                    <ExpensePage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
+                    <ExpensePage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "IT"} />
                   </AppLayout>
                 } />
                 <Route path="/assets" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
-                    <AssetPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
+                    <AssetPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "IT"} />
                   </AppLayout>
                 } />
                 <Route path="/assets/logs" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
-                    <AssetLogsPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
+                    <AssetLogsPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "IT"} />
                   </AppLayout>
                 } />
                 <Route path="/reimbursements" element={
                   <AppLayout currentUser={currentUser} pendingClaims={pendingClaims} onRoleChange={handleRoleChange}>
-                    <ReimbursementPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "manager"} />
+                    <ReimbursementPage userRole={currentUser.role.toLowerCase() as "employee" | "hr" | "admin" | "IT"} />
                   </AppLayout>
                 } />
                 <Route path="/complaints" element={

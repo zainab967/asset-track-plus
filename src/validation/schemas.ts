@@ -4,7 +4,7 @@ import { z } from "zod";
 export const addUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  role: z.enum(["Admin", "Manager", "HR", "Employee"]),
+  role: z.enum(["Admin", "IT", "HR", "Employee"]),
   department: z.string().min(1, "Department is required"),
 });
 

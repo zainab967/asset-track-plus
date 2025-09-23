@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +18,19 @@ interface AssetActionDialogProps {
 
 export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: AssetActionDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [actionType, setActionType] = useState("maintenance");
+  const [actionType, setActionType] = useState(mode === "admin" ? "log" : "maintenance");
   const [assetStatus, setAssetStatus] = useState("assigned");
   const [requestType, setRequestType] = useState("permanent");
+  const [category, setCategory] = useState("");
+  const [computerSubcategory, setComputerSubcategory] = useState("");
   const { toast } = useToast();
+  
+  // Update actionType when mode changes
+  useEffect(() => {
+    if (mode === "admin") {
+      setActionType("log");
+    }
+  }, [mode]);
 
   const dialogOpen = isOpen !== undefined ? isOpen : internalOpen;
   const setDialogOpen = onClose ? (open: boolean) => !open && onClose() : setInternalOpen;
@@ -35,7 +44,7 @@ export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: 
     setDialogOpen(false);
   };
 
-  const canSubmitRequest = userRole === "employee" || userRole === "hr" || userRole === "admin" || userRole === "manager";
+  const canSubmitRequest = userRole === "employee" || userRole === "hr" || userRole === "admin" || userRole === "IT";
 
   if (!canSubmitRequest) {
     return null;
@@ -53,9 +62,9 @@ export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: 
       )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Asset Management</DialogTitle>
+          <DialogTitle>{mode === "admin" ? "Asset Management" : "Asset Management"}</DialogTitle>
           <DialogDescription>
-            {"Manage assets and submit requests"}
+            {mode === "admin" ? "Log a new asset into the system" : "Manage assets and submit requests"}
           </DialogDescription>
         </DialogHeader>
         
@@ -64,20 +73,23 @@ export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: 
           <div className="space-y-3">
               <Label>Action Type</Label>
               <RadioGroup value={actionType} onValueChange={setActionType}>
-                {userRole !== "employee" && (
+                {mode === "admin" ? (
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="log" id="log" />
-                    <Label htmlFor="log">Log New Asset</Label>
+                    <Label htmlFor="log">Log Asset</Label>
                   </div>
+                ) : (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="maintenance" id="maintenance" />
+                      <Label htmlFor="maintenance">Asset Maintenance</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="request" id="request" />
+                      <Label htmlFor="request">Asset Request</Label>
+                    </div>
+                  </>
                 )}
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="maintenance" id="maintenance" />
-                  <Label htmlFor="maintenance">Asset Maintenance</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="request" id="request" />
-                  <Label htmlFor="request">Asset Request</Label>
-                </div>
               </RadioGroup>
             </div>
 
@@ -147,7 +159,7 @@ export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: 
               <>
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select required>
+                  <Select value={category} onValueChange={setCategory} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select Category" />
                     </SelectTrigger>
@@ -162,6 +174,26 @@ export function AssetActionDialog({ userRole, isOpen, onClose, mode = "user" }: 
                     </SelectContent>
                   </Select>
                 </div>
+                
+                {category === "computer-equipment" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="computerSubcategory">Equipment Type</Label>
+                    <Select value={computerSubcategory} onValueChange={setComputerSubcategory} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Equipment Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="laptop">Laptop</SelectItem>
+                        <SelectItem value="lcd">LCD</SelectItem>
+                        <SelectItem value="mouse">Mouse</SelectItem>
+                        <SelectItem value="headphones">Headphones</SelectItem>
+                        <SelectItem value="laptop-bag">Laptop Bag</SelectItem>
+                        <SelectItem value="stand">Stand</SelectItem>
+                        <SelectItem value="keyboard">Keyboard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>

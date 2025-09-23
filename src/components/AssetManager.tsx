@@ -36,7 +36,7 @@ interface Asset {
 }
 
 interface AssetManagerProps {
-  userRole?: "employee" | "hr" | "admin" | "manager";
+  userRole?: "employee" | "hr" | "admin" | "IT";
   currentUser?: string;
 }
 
@@ -265,10 +265,10 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
               </Select>
 
               <div className="flex items-center gap-2">
-                {userRole === "employee" ? (
-                  <AssetActionDialog userRole={userRole} mode="user" />
-                ) : (
+                {userRole === "admin" ? (
                   <AssetActionDialog userRole={userRole} mode="admin" />
+                ) : (
+                  <AssetActionDialog userRole={userRole} mode="user" />
                 )}
               </div>
             </div>
@@ -327,10 +327,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                         <TableCell>{asset.assignedTo || "—"}</TableCell>
                         <TableCell>{asset.building}</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(asset.status)}
-                            <span className="capitalize">{asset.status}</span>
-                          </div>
+                          <span className="capitalize">{asset.status}</span>
                         </TableCell>
                         <TableCell>
                           <span className={getConditionColor(asset.condition)}>
@@ -410,8 +407,7 @@ export function AssetManager({ userRole = "admin", currentUser = "Current User" 
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Status</label>
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(selectedAsset.status)}
+                  <div>
                     <span className="capitalize text-sm">{selectedAsset.status}</span>
                   </div>
                 </div>

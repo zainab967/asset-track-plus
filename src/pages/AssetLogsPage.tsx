@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eye, Search, Plus, Wrench, AlertTriangle, CheckCircle, Download, FileText, FileType } from "lucide-react";
+import { Eye, Search, Plus, Wrench, AlertTriangle, CheckCircle, Download, FileText, FileType, Calendar, ArrowRight, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -17,6 +17,7 @@ import {
 import { formatCurrency } from "@/lib/currency";
 import { useToast } from "@/hooks/use-toast";
 import { Table as TableIcon } from "lucide-react";
+import { RecentActivity } from "@/components/RecentActivity";
 
 interface Asset {
   id: string;
@@ -40,7 +41,7 @@ interface Asset {
 }
 
 interface AssetLogsPageProps {
-  userRole?: "hr" | "admin" | "employee" | "manager";
+  userRole?: "hr" | "admin" | "employee" | "IT";
   currentUser?: string;
 }
 
@@ -448,10 +449,7 @@ export default function AssetLogsPage({ userRole = "admin", currentUser = "Curre
                           <TableCell>{asset.assignedTo || "—"}</TableCell>
                           <TableCell>{asset.building}</TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              {getStatusIcon(asset.status)}
-                              <span className="capitalize">{asset.status}</span>
-                            </div>
+                            <span className="capitalize">{asset.status}</span>
                           </TableCell>
                           <TableCell>
                             <span className={getConditionColor(asset.condition)}>
@@ -509,8 +507,7 @@ export default function AssetLogsPage({ userRole = "admin", currentUser = "Curre
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Status</label>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(selectedAsset.status)}
+                    <div>
                       <span className="capitalize text-sm">{selectedAsset.status}</span>
                     </div>
                   </div>
