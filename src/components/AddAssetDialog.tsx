@@ -117,6 +117,7 @@ export function AddAssetDialog() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="computer-equipment">Computer Equipment</SelectItem>
+                    <SelectItem value="Laptop">Laptop</SelectItem>
                     <SelectItem value="electrical-appliances">Electrical Appliances</SelectItem>
                     <SelectItem value="furniture-fixtures">Furniture and Fixtures</SelectItem>
                     <SelectItem value="vehicles">Vehicles</SelectItem>
@@ -135,7 +136,6 @@ export function AddAssetDialog() {
                       <SelectValue placeholder="Select Equipment Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="laptop">Laptop</SelectItem>
                       <SelectItem value="lcd">LCD</SelectItem>
                       <SelectItem value="mouse">Mouse</SelectItem>
                       <SelectItem value="headphones">Headphones</SelectItem>
